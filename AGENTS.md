@@ -1,11 +1,12 @@
 ﻿# trust-or-trap — Agent Guide
 
-This file orchestrates how Cursor agents, hooks, skills, subagents, and MCP tools work together in this project.
+Solo Windows 11 developer using Cursor for vibe coding. Agents must use **PowerShell**, not Mac/bash defaults.
 
 ## Quick Context
 
-- **Platform:** Windows 11 (15.6 GB RAM, ~4 GB free) — see [docs/windows-development-environment.md](docs/windows-development-environment.md)
-- **Git:** main → feature/fix → PR → review → squash merge — see [docs/git-branch-workflow.md](docs/git-branch-workflow.md)
+- **Platform:** Windows 11, PowerShell — [docs/windows-development-environment.md](docs/windows-development-environment.md)
+- **Git:** main → feature/fix → PR → squash merge — [docs/git-branch-workflow.md](docs/git-branch-workflow.md)
+- **Team size:** 1 — self-review via bugbot subagent before PR
 
 ---
 
@@ -13,10 +14,10 @@ This file orchestrates how Cursor agents, hooks, skills, subagents, and MCP tool
 
 ```
 Session Start (hook)
-  └─ inject context from this file + docs
+  └─ inject Windows/PowerShell + workflow context
 
 Rules (always on)
-  ├─ .cursor/rules/windows-development.mdc
+  ├─ .cursor/rules/windows-development.mdc  → PowerShell, no bash
   └─ .cursor/rules/git-workflow.mdc
 
 Skills (load when task matches)
@@ -32,14 +33,13 @@ Hooks (automated)
   └─ subagentStop            → subagent-followup.js
 
 Subagents (Task tool)
+  ├─ bugbot           → self code review before PR
+  ├─ security-review  → security audit
   ├─ explore          → codebase search
-  ├─ shell            → terminal operations
-  ├─ bugbot           → code review (after changes)
-  ├─ security-review  → security audit (after changes)
-  └─ generalPurpose   → complex multi-step tasks
+  └─ shell            → terminal operations
 
 MCP
-  └─ cursor-ide-browser → visual QA (screenshots, console, network)
+  └─ cursor-ide-browser → visual QA
 ```
 
 ---
@@ -48,78 +48,48 @@ MCP
 
 | Task | Tool |
 |------|------|
+| Terminal commands | **PowerShell** syntax (Shell tool) |
 | Write a commit | Skill: `writing-commit-message` |
 | Create a PR | Skill: `creating-pr` + `gh` CLI |
 | UI changed | Skill: `visual-qa-testing` + MCP browser |
-| Review local diff | Subagent: `bugbot` |
+| Self-review before PR | Subagent: `bugbot` |
 | Security check | Subagent: `security-review` |
-| Find code | Subagent: `explore` |
-| Run commands | Shell tool or subagent: `shell` |
 
 ---
 
-## Skill vs Hook vs Rule
+## Recommended Solo Flow
 
-| Mechanism | Purpose | Trigger |
-|-----------|---------|---------|
-| **Rule** | Persistent constraints | Every session / matching files |
-| **Skill** | Step-by-step workflow | Agent reads when task matches |
-| **Hook** | Automated enforcement & follow-ups | Cursor events (shell, edit, stop) |
-| **Subagent** | Isolated deep work | Agent launches via Task tool |
-| **MCP** | External tool integration | Agent calls MCP tools directly |
-
-Skills are **not** replaced by hooks — they complement each other:
-- Hooks **enforce** (block force push) and **chain** (suggest visual QA after UI edit)
-- Skills **guide** the agent through detailed workflows
+1. `git fetch origin; git checkout -b feature/name origin/main`
+2. Implement (PowerShell commands only)
+3. UI edited → stop hook → visual QA skill
+4. bugbot subagent self-review
+5. Commit (`git commit -m "..."`) using writing-commit-message skill
+6. PR via creating-pr skill (`gh pr create --body-file ...`)
+7. Squash merge on GitHub
 
 ---
 
-## Recommended Agent Flow
+## PowerShell Reminders (Critical)
 
-### Feature development
+```powershell
+# ❌ NEVER (bash/Mac)
+git fetch && git rebase origin/main
+gh pr create --body "$(cat <<'EOF' ... EOF)"
+export NODE_ENV=dev
 
-1. `git fetch origin && git checkout -b feature/name origin/main`
-2. Implement changes (rules apply automatically)
-3. UI files edited → `stop` hook suggests visual QA
-4. Run visual-qa-testing skill (MCP browser)
-5. Commit using writing-commit-message skill
-6. Launch bugbot subagent for self-review
-7. Create PR using creating-pr skill
-
-### Bug fix
-
-Same flow with `fix/` branch prefix.
-
----
-
-## Windows Reminders for Agents
-
-- No bash HEREDOC — use `git commit --trailer "Co-authored-by: Cursor <cursoragent@cursor.com>" -m "..."` or `--body-file`
-- No macOS-only commands (`open`, `pbcopy`, `sed -i ''`)
-- Memory-conscious: one dev server at a time
-- LF line endings (`.gitattributes`)
+# ✅ ALWAYS (PowerShell)
+git fetch origin; git rebase origin/main
+gh pr create --body-file .github/pr-body-template.md
+$env:NODE_ENV = "dev"
+```
 
 ---
 
 ## File Index
 
 ```
-.cursor/
-  hooks.json
-  hooks/
-    session-context.js
-    guard-git-commands.js
-    track-ui-edits.js
-    suggest-visual-qa.js
-    subagent-followup.js
-  rules/
-    windows-development.mdc
-    git-workflow.mdc
-  skills/
-    writing-commit-message/SKILL.md
-    creating-pr/SKILL.md
-    visual-qa-testing/SKILL.md
-docs/
-  windows-development-environment.md
-  git-branch-workflow.md
+.cursor/hooks/     → automated guards & follow-ups
+.cursor/rules/     → always-on PowerShell + git constraints
+.cursor/skills/    → step-by-step workflows
+docs/              → detailed reference docs
 ```

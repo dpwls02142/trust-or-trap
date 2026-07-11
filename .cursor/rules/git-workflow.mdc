@@ -1,29 +1,18 @@
 ﻿---
-description: Git 브랜치 전략 및 PR 워크플로우
+description: Git 브랜치 전략 — 1인 개발, PR + squash merge
 alwaysApply: true
 ---
 
-# Git Workflow
-
-## Branch Strategy
+# Git Workflow (Solo)
 
 ```
-main -> feature/* or fix/* -> PR -> code review -> squash merge -> delete branch
+main → feature/* or fix/* → self-review (bugbot) → PR → squash merge
 ```
 
-- **Never commit directly to `main`** — always use a branch and PR.
-- **Never force-push to `main`** — enforced by `.cursor/hooks/guard-git-commands.js`.
-- Branch naming: `feature/short-description`, `fix/short-description`
-- Merge method: **squash merge only** — one clean commit on main per PR.
+- Never commit or force-push directly to `main`
+- Branch naming: `feature/short-name`, `fix/short-name`
+- Commits: `git commit -m "type: message"` (PowerShell — no HEREDOC)
+- PR: `gh pr create --body-file .github/pr-body-template.md`
+- Merge: **squash merge only**
 
-## Agent Workflow
-
-1. Branch from latest `main`: `git fetch origin && git checkout -b feature/my-change origin/main`
-2. Commit on branch using `.cursor/skills/writing-commit-message/SKILL.md`
-3. Before PR: self-review diff, run tests/lint
-4. Create PR via `.cursor/skills/creating-pr/SKILL.md` using `gh pr create`
-5. After review approval: squash merge on GitHub
-
-## Full Reference
-
-See `docs/git-branch-workflow.md` for naming conventions, PR templates, and review checklist.
+See `docs/git-branch-workflow.md`.
