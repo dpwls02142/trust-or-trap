@@ -55,7 +55,7 @@ MCP
 | 시나리오 그래프 노드 추가/수정 | `scenario-graph`, `content-safety-teen`(teen) | `add-scenario-node` | teen이면 `security-review` |
 | 온보딩 페르소나 매칭 로직 | `trust-or-trap-core`, `nextjs-react` | `persona-matching` | — |
 | "폰 속의 폰" UI 컴포넌트 | `phone-ui`, `nextjs-react` | `phone-ui-component` | `cursor-ide-browser`(visual QA) |
-| Claude/Typecast 스트리밍 API | `api-routes`, `trust-or-trap-core` | `streaming-api-route` | `security-review`(키 노출 점검) |
+| Gemini/Typecast 스트리밍 API | `api-routes`, `trust-or-trap-core` | `streaming-api-route` | `security-review`(키 노출 점검) |
 | 10대 시나리오 관련 무엇이든 | `content-safety-teen` | `add-scenario-node` | **`security-review` 필수** |
 | 커밋 작성 | `git-workflow` | `writing-commit-message` | — |
 | PR 생성 | `git-workflow` | `creating-pr` | `bugbot`(사전 리뷰) |
@@ -77,7 +77,7 @@ MCP
 3. 시나리오 그래프 스키마 + 샘플 1종 (`twenties-female-romance`) → `add-scenario-node`
 4. 온보딩 화면 + 페르소나 매칭 (`persona-matching`)
 5. "폰 속의 폰" 프레임 + 앱 렌더러 (`phone-ui-component`) → visual QA
-6. 스트리밍 API (Claude SSE, Typecast TTS, judge) (`streaming-api-route`) → security-review
+6. 스트리밍 API (Gemini SSE, Typecast TTS, judge) (`streaming-api-route`) → security-review
 7. 나머지 시나리오 6종 확장 (teen 2종은 security-review 필수)
 8. 엔딩/리포트 화면 + "놓친 위험 신호" 리플레이
 

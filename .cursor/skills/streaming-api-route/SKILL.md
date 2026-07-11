@@ -1,6 +1,6 @@
 ---
 name: streaming-api-route
-description: Claude SSE 대사 생성 / risk_flag 판정 / Typecast 스트리밍 TTS를 처리하는 서버리스 API Route를 구현한다. 키 보안과 스트리밍 패턴이 필요할 때 사용.
+description: Gemini SSE 대사 생성 / risk_flag 판정 / Typecast 스트리밍 TTS를 처리하는 서버리스 API Route를 구현한다. 키 보안과 스트리밍 패턴이 필요할 때 사용.
 user-invocable: true
 ---
 
@@ -12,17 +12,17 @@ user-invocable: true
 
 | Route | 역할 |
 | --- | --- |
-| `src/app/api/scenario/advance/route.ts` | 노드 스펙 + 히스토리 + 프로필 → Claude 대사 생성(SSE) |
+| `src/app/api/scenario/advance/route.ts` | 노드 스펙 + 히스토리 + 프로필 → Gemini 대사 생성(SSE) |
 | `src/app/api/scenario/judge/route.ts` | 사용자 응답 → risk_flag 판정 → 다음 node_id |
 | `src/app/api/tts/stream/route.ts` | 문장 텍스트 → Typecast 스트리밍 TTS 프록시 |
 
 ## 공통 절차
 
 1. **입력 검증**: 요청 body를 Zod로 파싱. 실패 시 400.
-2. **키 접근**: `process.env.ANTHROPIC_API_KEY` / `process.env.TYPECAST_API_KEY`. 키를 응답/로그/클라이언트로 절대 내보내지 않는다.
+2. **키 접근**: `process.env.GEMINI_API_KEY` / `process.env.TYPECAST_API_KEY`. 키를 응답/로그/클라이언트로 절대 내보내지 않는다.
 3. **스트리밍 응답**: `ReadableStream` + SSE(`text/event-stream`)로 토큰/청크를 흘려보낸다.
 
-## advance (Claude 대사 생성)
+## advance (Gemini 대사 생성)
 
 - 시스템 프롬프트에 고정 주입: 현재 노드 `required_risk_signal`, `forbidden_content`, "노드 범위를 벗어난 사건 전개 금지".
 - 입력: 노드 스펙 + 대화 히스토리 + 사용자 프로필(이름/관심사).

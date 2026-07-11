@@ -3,9 +3,10 @@ import { findScenarioNode } from "@/lib/scenario/graph-loader";
 import { judgeRequestSchema, judgeVerdictSchema } from "@/lib/scenario/schemas";
 import {
   buildJudgeSystemPrompt,
-  getAnthropicClient,
-  resolveClaudeModel,
-} from "@/lib/server/claude-client";
+  getGeminiClient,
+  resolveGeminiModel,
+  resolveThinkingConfig,
+} from "@/lib/server/gemini-client";
 import { toPublicNodeView } from "@/lib/scenario/public-node";
 import { isRateLimited, resolveClientKey } from "@/lib/server/rate-limiter";
 import type { ScenarioNode } from "@/lib/scenario/types";
@@ -19,7 +20,7 @@ export const maxDuration = 30;
  * 그래프 next_node_map으로 다음 노드를 결정해 반환한다.
  *
  * 선택지 클릭(risk_flag가 그래프에 이미 정의됨)도 자유 입력도 모두 이 엔드포인트를 쓰되,
- * 자유 입력만 Claude 판정을 거친다 — 불필요한 LLM 호출을 줄여 지연/비용 최소화.
+ * 자유 입력만 Gemini 판정을 거친다 — 불필요한 LLM 호출을 줄여 지연/비용 최소화.
  */
 export async function POST(request: NextRequest) {
   if (isRateLimited(`judge:${resolveClientKey(request)}`, 30)) {
@@ -59,20 +60,22 @@ export async function POST(request: NextRequest) {
     riskFlag = matchedOption.risk_flag;
     judgeReason = "노드에 정의된 선택지";
   } else {
-    // 2) 자유 입력(텍스트/STT) → Claude 판정
+    // 2) 자유 입력(텍스트/STT) → Gemini 판정
     try {
-      const anthropicClient = getAnthropicClient();
-      const judgeResponse = await anthropicClient.messages.create({
-        model: resolveClaudeModel(),
-        max_tokens: 256,
-        system: buildJudgeSystemPrompt(currentNode),
-        messages: [{ role: "user", content: `사용자 응답: "${userResponseText}"` }],
+      const geminiClient = getGeminiClient();
+      const geminiModel = resolveGeminiModel();
+      const judgeResponse = await geminiClient.models.generateContent({
+        model: geminiModel,
+        contents: `사용자 응답: "${userResponseText}"`,
+        config: {
+          systemInstruction: buildJudgeSystemPrompt(currentNode),
+          maxOutputTokens: 256,
+          responseMimeType: "application/json",
+          thinkingConfig: resolveThinkingConfig(geminiModel),
+        },
       });
 
-      const responseText = judgeResponse.content
-        .filter((blockItem) => blockItem.type === "text")
-        .map((blockItem) => blockItem.text)
-        .join("")
+      const responseText = (judgeResponse.text ?? "")
         .replace(/^```(?:json)?\s*/i, "")
         .replace(/\s*```\s*$/, "")
         .trim();

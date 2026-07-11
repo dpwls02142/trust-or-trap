@@ -1,28 +1,40 @@
 import "server-only";
 
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI, ThinkingLevel, type ThinkingConfig } from "@google/genai";
 import type { ChatHistoryEntry, ScenarioNode, UserProfile } from "@/lib/scenario/types";
 
 /**
- * Claude API 클라이언트 (서버 전용).
- * 키는 process.env.ANTHROPIC_API_KEY 로만 접근하며 절대 클라이언트로 내보내지 않는다.
+ * Gemini API 클라이언트 (서버 전용).
+ * 키는 process.env.GEMINI_API_KEY 로만 접근하며 절대 클라이언트로 내보내지 않는다.
  */
 
-let cachedAnthropicClient: Anthropic | null = null;
+let cachedGeminiClient: GoogleGenAI | null = null;
 
-export function getAnthropicClient(): Anthropic {
-  if (!cachedAnthropicClient) {
-    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-    if (!anthropicApiKey) {
-      throw new Error("ANTHROPIC_API_KEY 환경변수가 설정되지 않음");
+export function getGeminiClient(): GoogleGenAI {
+  if (!cachedGeminiClient) {
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (!geminiApiKey) {
+      throw new Error("GEMINI_API_KEY 환경변수가 설정되지 않음");
     }
-    cachedAnthropicClient = new Anthropic({ apiKey: anthropicApiKey });
+    cachedGeminiClient = new GoogleGenAI({ apiKey: geminiApiKey });
   }
-  return cachedAnthropicClient;
+  return cachedGeminiClient;
 }
 
-export function resolveClaudeModel(): string {
-  return process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5";
+export function resolveGeminiModel(): string {
+  return process.env.GEMINI_MODEL ?? "gemini-3.5-flash";
+}
+
+/**
+ * 대사 생성/판정은 저지연이 중요하므로 thinking을 최소화한다.
+ * - Gemini 3.x 계열: thinkingLevel만 지원 (thinkingBudget과 동시 사용 시 400).
+ *   LOW는 전 모델 공통 지원이며 지연/비용 최소화 목적.
+ * - Gemini 2.5 계열(구형 오버라이드 대비): thinkingBudget: 0으로 thinking 비활성화.
+ */
+export function resolveThinkingConfig(modelName: string): ThinkingConfig {
+  return modelName.includes("2.5")
+    ? { thinkingBudget: 0 }
+    : { thinkingLevel: ThinkingLevel.LOW };
 }
 
 /**

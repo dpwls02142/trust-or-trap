@@ -1,16 +1,16 @@
 ---
-description: 서버리스 API Route 규칙 — Claude/Typecast 스트리밍, 키 보안
+description: 서버리스 API Route 규칙 — Gemini/Typecast 스트리밍, 키 보안
 globs: src/app/api/**
 alwaysApply: false
 ---
 
 # API Route 규칙 (서버 전용)
 
-외부 API(Claude, Typecast) 호출은 **오직 이 레이어에서만** 일어난다. 클라이언트 직접 호출은 절대 금지.
+외부 API(Gemini, Typecast) 호출은 **오직 이 레이어에서만** 일어난다. 클라이언트 직접 호출은 절대 금지.
 
 ## 보안 (필수)
 
-- API 키는 `process.env.ANTHROPIC_API_KEY` / `process.env.TYPECAST_API_KEY`로만 접근. 키를 응답 body나 클라이언트로 절대 전달하지 않는다.
+- API 키는 `process.env.GEMINI_API_KEY` / `process.env.TYPECAST_API_KEY`로만 접근. 키를 응답 body나 클라이언트로 절대 전달하지 않는다.
 - 요청 body는 **Zod로 검증** 후 사용.
 - STT 원본 음성은 처리 후 즉시 폐기. 서버 저장 금지.
 
@@ -18,11 +18,11 @@ alwaysApply: false
 
 | Route | 역할 |
 | --- | --- |
-| `api/scenario/advance` | 현재 노드 스펙 + 히스토리 + 프로필 → Claude로 대사 생성(SSE 스트리밍) |
+| `api/scenario/advance` | 현재 노드 스펙 + 히스토리 + 프로필 → Gemini로 대사 생성(SSE 스트리밍) |
 | `api/scenario/judge` | 사용자 선택/STT 텍스트 → risk_flag 판정 → 다음 node_id 반환 |
 | `api/tts/stream` | 문장 단위 텍스트 → Typecast 스트리밍 TTS 프록시(오디오 청크) |
 
-## Claude 호출
+## Gemini 호출
 
 - 입력: 현재 노드의 `required_risk_signal`, `forbidden_content` + 대화 히스토리 + 사용자 프로필.
 - 시스템 프롬프트에 `forbidden_content`와 "노드 범위를 벗어난 사건 전개 금지"를 **고정 주입**.
