@@ -54,6 +54,18 @@
 | `is_ending` | boolean | 엔딩 노드 여부 |
 | `ending_type` | enum? | 엔딩 노드일 때 `safe`/`warning`/`harm` |
 
+## 3.5 그래프 메타 필드 (시나리오 그래프 JSON 최상위)
+
+| 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| `scenario_id` | string | 시나리오 ID (§2, 파일명과 일치) |
+| `crime_category` | enum | 범죄 카테고리 (§8) |
+| `title` | string | 사용자에게 노출되는 시나리오 제목 |
+| `synopsis` | string | 온보딩 추천 화면에 표시할 한 줄 시놉시스 |
+| `voice_enabled` | boolean | 시나리오 전체 음성 사용 여부 (teen은 false) |
+| `entry_node_id` | string | 스토리 시작 노드 ID |
+| `nodes` | Node[] | 노드 목록 (§3) |
+
 ## 4. 사건 단계 (`stage`)
 
 모든 시나리오가 공유하는 공통 골격.
@@ -119,6 +131,7 @@
 | `ANTHROPIC_API_KEY` | Claude API 키 (서버 전용) |
 | `TYPECAST_API_KEY` | Typecast TTS 키 (서버 전용) |
 | `TYPECAST_DEFAULT_VOICE_ID` | 기본 보이스 ID |
+| `ANTHROPIC_MODEL` | (선택) Claude 모델 ID 오버라이드. 미설정 시 코드 기본값 사용 |
 
 > 실제 키 값은 `.env`(gitignore)에만. `.env.example`에는 **키 이름만** 둔다.
 

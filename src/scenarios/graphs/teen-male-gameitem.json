@@ -1,0 +1,201 @@
+{
+  "scenario_id": "teen-male-gameitem",
+  "crime_category": "gameitem_scam",
+  "title": "반값 아이템의 함정",
+  "synopsis": "게임 커뮤니티에서 만난 판매자가 시세 반값에 희귀 아이템을 넘기겠다고 한다.",
+  "voice_enabled": false,
+  "entry_node_id": "approach-item-offer",
+  "nodes": [
+    {
+      "node_id": "approach-item-offer",
+      "stage": "approach",
+      "app_type": "chat",
+      "required_risk_signal": "처음 보는 상대가 시세보다 훨씬 싼 가격을 제시하며 개인 거래(선입금)를 유도한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "실존 게임사·거래 플랫폼 실명 사칭",
+        "실제 개인정보 패턴(계좌번호·전화번호)"
+      ],
+      "options": [
+        { "label": "공식 거래소(에스크로)로만 거래하자고 한다", "risk_flag": "safe" },
+        { "label": "일단 가격과 아이템 정보를 더 물어본다", "risk_flag": "caution" },
+        { "label": "싸니까 바로 사겠다고 한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "trust-fake-proof",
+        "caution": "trust-fake-proof",
+        "risky": "trust-fake-proof"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "아이템창고",
+      "timer_seconds": 60
+    },
+    {
+      "node_id": "trust-fake-proof",
+      "stage": "trust_building",
+      "app_type": "chat",
+      "required_risk_signal": "가짜 거래 후기 캡처와 인증샷을 연달아 보내며 '다들 이렇게 거래한다'고 신뢰를 조작한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "실존 게임사·거래 플랫폼 실명 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "캡처는 조작 가능하니 안전거래 링크를 요구한다", "risk_flag": "safe" },
+        { "label": "후기가 많으니 조금 안심하지만 더 확인한다", "risk_flag": "caution" },
+        { "label": "인증샷을 믿고 거래를 진행한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "risk-prepay-push",
+        "caution": "risk-prepay-push",
+        "risky": "risk-prepay-push"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "아이템창고"
+    },
+    {
+      "node_id": "risk-prepay-push",
+      "stage": "risk_signal",
+      "app_type": "chat",
+      "required_risk_signal": "'지금 다른 구매자도 대기 중'이라며 시간 압박을 걸고, 에스크로 없이 선입금해야만 아이템을 준다고 한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "실존 게임사·거래 플랫폼 실명 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "선입금 구조 자체가 위험 신호이므로 거래를 중단한다", "risk_flag": "safe" },
+        { "label": "금액을 낮춰 일부만 먼저 보내겠다고 한다", "risk_flag": "caution" },
+        { "label": "다른 사람에게 뺏길까 봐 전액을 입금한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-escrow",
+        "caution": "demand-video-call",
+        "risky": "demand-video-call"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "아이템창고",
+      "timer_seconds": 30
+    },
+    {
+      "node_id": "demand-video-call",
+      "stage": "demand",
+      "app_type": "chat",
+      "required_risk_signal": "입금 확인을 핑계로 영상통화를 걸어오고, 대화가 거래와 무관한 사적인 방향으로 흐른다 (구체적 묘사 없이 경계 신호만 제시)",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "영상통화 중 요구의 구체적 내용 묘사",
+        "신체 관련 구체적 언급",
+        "실존 게임사·플랫폼 실명 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "거래와 무관한 요구라 즉시 통화를 끊고 차단한다", "risk_flag": "safe" },
+        { "label": "이상하지만 아이템 때문에 통화를 유지한다", "risk_flag": "caution" },
+        { "label": "시키는 대로 카메라를 켠다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-escrow",
+        "caution": "branch-blackmail",
+        "risky": "branch-blackmail"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "아이템창고"
+    },
+    {
+      "node_id": "branch-blackmail",
+      "stage": "branch",
+      "app_type": "chat",
+      "required_risk_signal": "녹화된 화면을 지인에게 유포하겠다며 협박으로 전환한다. 송금할수록 요구가 반복·확대되는 구조를 드러낸다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "협박 내용의 구체적·자극적 묘사",
+        "실존 게임사·플랫폼 실명 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "송금하지 않고 증거를 보존한 뒤 부모님·경찰(112)에 신고한다", "risk_flag": "safe" },
+        { "label": "무서워서 계정을 삭제하고 혼자 숨긴다", "risk_flag": "caution" },
+        { "label": "유포될까 봐 요구한 돈을 보낸다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-escrow",
+        "caution": "ending-warning-hide",
+        "risky": "ending-harm-repeat"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "아이템창고",
+      "timer_seconds": 30
+    },
+    {
+      "node_id": "ending-safe-escrow",
+      "stage": "ending",
+      "app_type": "chat",
+      "required_risk_signal": "선입금 요구·사적 영상통화라는 위험 신호를 식별하고 안전거래 원칙과 신고로 회피했다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "실존 게임사·플랫폼 실명 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": false,
+      "is_ending": true,
+      "ending_type": "safe",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-warning-hide",
+      "stage": "ending",
+      "app_type": "chat",
+      "required_risk_signal": "혼자 숨기면 협박이 반복될 수 있다. 증거 보존 + 부모님·경찰 신고 + 계정 신고 절차를 안내한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "실존 게임사·플랫폼 실명 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": false,
+      "is_ending": true,
+      "ending_type": "warning",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-harm-repeat",
+      "stage": "ending",
+      "app_type": "chat",
+      "required_risk_signal": "송금하자 요구가 더 커졌다. 피해자는 잘못이 없으며 즉시 송금 중단 + 증거 보존 + 신고(112, 학교전담경찰관)가 필요함을 안내한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "피해 장면의 구체적 묘사",
+        "실존 게임사·플랫폼 실명 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": false,
+      "is_ending": true,
+      "ending_type": "harm",
+      "sender_name": "시스템"
+    }
+  ]
+}

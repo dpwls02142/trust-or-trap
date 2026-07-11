@@ -1,0 +1,186 @@
+{
+  "scenario_id": "middle-invest-scam",
+  "crime_category": "invest_scam",
+  "title": "수익 인증이 넘치는 리딩방",
+  "synopsis": "지인 추천으로 들어간 오픈채팅방에서 '전문가'가 종목을 찍어주고, 다들 수익 인증을 올린다.",
+  "voice_enabled": true,
+  "entry_node_id": "approach-openchat-invite",
+  "nodes": [
+    {
+      "node_id": "approach-openchat-invite",
+      "stage": "approach",
+      "app_type": "chat",
+      "required_risk_signal": "모르는 번호가 '수익률 300% 무료 리딩방' 초대 링크를 보낸다. 원금·고수익 보장 문구 자체가 위험 신호다",
+      "forbidden_content": [
+        "실존 증권사·투자자문사 실명 사칭",
+        "실존 애널리스트 실명",
+        "실제 종목 매수 추천",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "금감원 제도권 등록 여부부터 조회한다", "risk_flag": "safe" },
+        { "label": "구경만 하려고 입장한다", "risk_flag": "caution" },
+        { "label": "무료라니 기대하며 바로 입장한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "trust-profit-proof",
+        "caution": "trust-profit-proof",
+        "risky": "trust-profit-proof"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "VIP투자연구소"
+    },
+    {
+      "node_id": "trust-profit-proof",
+      "stage": "trust_building",
+      "app_type": "chat",
+      "required_risk_signal": "방 안에 허위 수익 인증(캡처)이 도배되고, '전문가'와 바람잡이 회원들이 신뢰를 연출한다",
+      "forbidden_content": [
+        "실존 증권사·기관 실명 사칭",
+        "실제 종목 매수 추천",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "인증 캡처는 조작 가능하니 등록 자문업체인지 재확인한다", "risk_flag": "safe" },
+        { "label": "반신반의하며 지켜본다", "risk_flag": "caution" },
+        { "label": "다들 버는 것 같아 조급해진다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "risk-fake-hts",
+        "caution": "risk-fake-hts",
+        "risky": "risk-fake-hts"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "VIP투자연구소"
+    },
+    {
+      "node_id": "risk-fake-hts",
+      "stage": "risk_signal",
+      "app_type": "browser",
+      "required_risk_signal": "정식 앱스토어가 아닌 링크로 전용 HTS 앱 설치를 유도한다. 소액 입금 시 수익이 난 것처럼 보이는 가짜 화면으로 성공 체험을 심는다",
+      "forbidden_content": [
+        "실존 HTS·증권사 앱 실명",
+        "실제 설치 파일 배포 방법",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "공식 스토어에 없는 앱은 설치하지 않고 나온다", "risk_flag": "safe" },
+        { "label": "잃어도 되는 소액만 넣어본다", "risk_flag": "caution" },
+        { "label": "수익 화면을 보고 더 큰 금액을 준비한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-exit",
+        "caution": "demand-big-deposit",
+        "risky": "demand-big-deposit"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "VIP투자연구소"
+    },
+    {
+      "node_id": "demand-big-deposit",
+      "stage": "demand",
+      "app_type": "bank",
+      "required_risk_signal": "'오늘까지만 들어올 수 있는 코인 상장 정보'라며 고액 입금을 압박한다. 마감 시한 압박은 전형적 수법이다",
+      "forbidden_content": [
+        "실존 코인·종목 실명 추천",
+        "실존 거래소 실명 사칭",
+        "실제 계좌번호 패턴",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "시한 압박 자체가 사기 신호이므로 전액 출금을 시도한다", "risk_flag": "safe" },
+        { "label": "고민 끝에 추가로 일부만 입금한다", "risk_flag": "caution" },
+        { "label": "대출까지 받아 고액을 입금한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "branch-withdraw-fee",
+        "caution": "branch-withdraw-fee",
+        "risky": "branch-withdraw-fee"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "VIP투자연구소",
+      "timer_seconds": 45
+    },
+    {
+      "node_id": "branch-withdraw-fee",
+      "stage": "branch",
+      "app_type": "bank",
+      "required_risk_signal": "출금을 신청하자 '세금·수수료·보증금' 명목의 추가 입금을 요구한다. 인출 시점마다 새 명목이 생기는 것이 결정적 신호다",
+      "forbidden_content": [
+        "실존 세무기관 실명 사칭",
+        "실제 계좌번호 패턴",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "추가 입금을 거부하고 증거 보존 후 경찰·금감원에 신고한다", "risk_flag": "safe" },
+        { "label": "출금을 위해 수수료 명목만 한 번 더 입금한다", "risk_flag": "caution" },
+        { "label": "전액 회수를 위해 요구액을 계속 입금한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-exit",
+        "caution": "ending-warning-fee-loss",
+        "risky": "ending-harm-total-loss"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "VIP투자연구소",
+      "timer_seconds": 30
+    },
+    {
+      "node_id": "ending-safe-exit",
+      "stage": "ending",
+      "app_type": "chat",
+      "required_risk_signal": "원금 보장 문구·비공식 앱·인출 수수료 요구라는 위험 신호를 식별하고 조기 이탈·신고로 회피했다",
+      "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": true,
+      "is_ending": true,
+      "ending_type": "safe",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-warning-fee-loss",
+      "stage": "ending",
+      "app_type": "bank",
+      "required_risk_signal": "수수료 명목 입금 후 또 다른 명목이 등장했다. 추가 입금 중단 + 지급정지 신청 + 경찰(112)·금감원(1332) 신고 절차를 안내한다",
+      "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": true,
+      "is_ending": true,
+      "ending_type": "warning",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-harm-total-loss",
+      "stage": "ending",
+      "app_type": "bank",
+      "required_risk_signal": "반복 입금 후 방이 폭파되고 운영진이 잠적했다. 대출 피해 상담·지급정지·집단 고소 등 사후 대응과 회복 절차를 안내한다",
+      "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": true,
+      "is_ending": true,
+      "ending_type": "harm",
+      "sender_name": "시스템"
+    }
+  ]
+}

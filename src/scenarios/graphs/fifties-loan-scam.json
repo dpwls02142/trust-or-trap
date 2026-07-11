@@ -1,0 +1,185 @@
+{
+  "scenario_id": "fifties-loan-scam",
+  "crime_category": "loan_voicephishing",
+  "title": "정책자금 대환대출 안내 전화",
+  "synopsis": "정부 정책자금으로 이자를 낮춰준다는 친절한 안내 전화가 걸려온다.",
+  "voice_enabled": true,
+  "entry_node_id": "approach-policy-sms",
+  "nodes": [
+    {
+      "node_id": "approach-policy-sms",
+      "stage": "approach",
+      "app_type": "sms",
+      "required_risk_signal": "'정부 정책자금 특별 대환대출 대상자로 선정되었다'는 문자가 온다. 정부·금융기관은 문자로 대출 대상자를 통보하지 않는다",
+      "forbidden_content": [
+        "실존 정부기관·은행 실명 사칭",
+        "실제 전화번호·URL 패턴",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "해당 기관 대표번호로 직접 확인한다", "risk_flag": "safe" },
+        { "label": "궁금해서 안내 번호로 전화해 본다", "risk_flag": "caution" },
+        { "label": "선정됐다니 서둘러 신청한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "trust-kind-agent",
+        "caution": "trust-kind-agent",
+        "risky": "trust-kind-agent"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "서민금융지원"
+    },
+    {
+      "node_id": "trust-kind-agent",
+      "stage": "trust_building",
+      "app_type": "call",
+      "required_risk_signal": "친절한 상담원이 기존 대출 내역을 이미 아는 것처럼 말하며 신뢰를 쌓는다. 개인 금융정보를 먼저 언급하는 것 자체가 이상 신호다",
+      "forbidden_content": [
+        "실존 정부기관·은행 실명 사칭",
+        "실제 대출 상품명",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "내 정보를 어떻게 알았는지 따져 묻고 통화를 끊는다", "risk_flag": "safe" },
+        { "label": "일단 조건 설명만 들어본다", "risk_flag": "caution" },
+        { "label": "나를 잘 아는 것 같아 안심하고 상담한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "risk-prepay-logic",
+        "caution": "risk-prepay-logic",
+        "risky": "risk-prepay-logic"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "박주임"
+    },
+    {
+      "node_id": "risk-prepay-logic",
+      "stage": "risk_signal",
+      "app_type": "call",
+      "required_risk_signal": "'기존 대출을 먼저 상환해야 신용점수가 올라 정책자금이 승인된다'는 선상환 논리를 꺼낸다. 이 구조 자체가 비정상이다",
+      "forbidden_content": [
+        "실존 정부기관·은행 실명 사칭",
+        "실제 계좌번호 패턴",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "선상환 요구는 사기임을 알고 금감원(1332)에 실시간 확인한다", "risk_flag": "safe" },
+        { "label": "반신반의하며 상환 여력을 계산해 본다", "risk_flag": "caution" },
+        { "label": "신용점수를 올려야 하니 준비하겠다고 한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-hotline",
+        "caution": "demand-transfer-account",
+        "risky": "demand-transfer-account"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "박주임",
+      "timer_seconds": 45
+    },
+    {
+      "node_id": "demand-transfer-account",
+      "stage": "demand",
+      "app_type": "bank",
+      "required_risk_signal": "은행 창구가 아닌 '지정 계좌'로 상환금 입금을 요구하고, 보증보험료 명목의 추가 비용까지 청구한다",
+      "forbidden_content": [
+        "실존 은행·보험사 실명 사칭",
+        "실제 계좌번호 패턴",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "상환은 반드시 원래 은행 창구·앱으로만 한다며 거절한다", "risk_flag": "safe" },
+        { "label": "보증보험료 소액만 먼저 입금한다", "risk_flag": "caution" },
+        { "label": "지정 계좌로 상환금 전액을 이체한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-hotline",
+        "caution": "branch-more-fees",
+        "risky": "branch-more-fees"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "박주임",
+      "timer_seconds": 30
+    },
+    {
+      "node_id": "branch-more-fees",
+      "stage": "branch",
+      "app_type": "call",
+      "required_risk_signal": "입금하자 '전산 오류·추가 보증료' 명목이 계속 생긴다. 명목이 늘어날수록 사기 확신 신호이며, 지금이 지급정지 골든타임이다",
+      "forbidden_content": [
+        "실존 기관 실명 사칭",
+        "실제 계좌번호 패턴",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "즉시 은행·경찰(112)에 지급정지를 신청한다", "risk_flag": "safe" },
+        { "label": "마지막이라는 말을 믿고 한 번 더 입금한다", "risk_flag": "caution" },
+        { "label": "여기서 멈추면 다 잃는다는 생각에 계속 입금한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-warning-stopped",
+        "caution": "ending-warning-stopped",
+        "risky": "ending-harm-deep-loss"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "박주임",
+      "timer_seconds": 30
+    },
+    {
+      "node_id": "ending-safe-hotline",
+      "stage": "ending",
+      "app_type": "call",
+      "required_risk_signal": "선상환 논리·지정 계좌 입금이라는 위험 신호를 식별하고 금감원(1332) 확인 습관으로 안전하게 회피했다",
+      "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": true,
+      "is_ending": true,
+      "ending_type": "safe",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-warning-stopped",
+      "stage": "ending",
+      "app_type": "bank",
+      "required_risk_signal": "일부 피해 후 인지하고 멈췄다. 지급정지 신청(은행·1332)·피해금 환급 신청·경찰 신고 절차를 순서대로 안내한다",
+      "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": true,
+      "is_ending": true,
+      "ending_type": "warning",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-harm-deep-loss",
+      "stage": "ending",
+      "app_type": "bank",
+      "required_risk_signal": "반복 입금으로 피해가 커진 뒤 연락이 끊겼다. 지급정지·채무 상담(서민금융통합지원센터)·회복 지원 절차를 안내한다",
+      "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": true,
+      "is_ending": true,
+      "ending_type": "harm",
+      "sender_name": "시스템"
+    }
+  ]
+}

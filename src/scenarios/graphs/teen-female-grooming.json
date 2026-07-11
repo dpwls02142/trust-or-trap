@@ -1,0 +1,208 @@
+{
+  "scenario_id": "teen-female-grooming",
+  "crime_category": "grooming",
+  "title": "낯선 DM에서 시작된 대화",
+  "synopsis": "SNS DM으로 다가와 고민을 들어주던 사람이 조금씩 이상한 요구를 하기 시작한다.",
+  "voice_enabled": false,
+  "entry_node_id": "approach-dm",
+  "nodes": [
+    {
+      "node_id": "approach-dm",
+      "stage": "approach",
+      "app_type": "insta",
+      "required_risk_signal": "모르는 사람이 SNS DM으로 과도한 관심과 칭찬을 보내며 접근한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "신체 관련 구체적 언급",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴(전화번호·주소·학교 실명)"
+      ],
+      "options": [
+        { "label": "답장하지 않고 프로필을 먼저 확인한다", "risk_flag": "safe" },
+        { "label": "누군지 물어보며 짧게 답한다", "risk_flag": "caution" },
+        { "label": "칭찬해줘서 고맙다고 바로 대화를 이어간다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "trust-daily-chat",
+        "caution": "trust-daily-chat",
+        "risky": "trust-daily-chat"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "hyun_98",
+      "elapsed_days": 1
+    },
+    {
+      "node_id": "trust-daily-chat",
+      "stage": "trust_building",
+      "app_type": "insta",
+      "required_risk_signal": "며칠 만에 '너를 제일 잘 이해하는 건 나'라며 급격한 친밀감을 만들고, 고민 상담을 빌미로 매일 연락을 유도한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "신체 관련 구체적 언급",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "너무 빨리 가까워지려는 것 같아 거리를 둔다", "risk_flag": "safe" },
+        { "label": "고민을 조금만 이야기한다", "risk_flag": "caution" },
+        { "label": "속마음과 가족 이야기까지 다 털어놓는다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "risk-secret-request",
+        "caution": "risk-secret-request",
+        "risky": "risk-secret-request"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "hyun_98",
+      "elapsed_days": 12
+    },
+    {
+      "node_id": "risk-secret-request",
+      "stage": "risk_signal",
+      "app_type": "chat",
+      "required_risk_signal": "'우리 대화는 부모님이나 선생님한테 비밀로 하자'며 관계를 고립시키고 다른 메신저로 옮기자고 한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "신체 관련 구체적 언급",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "비밀로 하자는 요구가 이상하다고 느끼고 어른에게 알린다", "risk_flag": "safe" },
+        { "label": "찜찜하지만 일단 비밀로 한다", "risk_flag": "caution" },
+        { "label": "당연히 비밀로 하겠다고 약속한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "demand-photo",
+        "caution": "demand-photo",
+        "risky": "demand-photo"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "현오빠",
+      "elapsed_days": 34
+    },
+    {
+      "node_id": "demand-photo",
+      "stage": "demand",
+      "app_type": "chat",
+      "required_risk_signal": "'친하니까 괜찮다'며 사진 요구가 단계적으로 확대된다 — 일상 사진에서 시작해 점점 사적인 요구로 (구체적 묘사 없이 구조만 제시)",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "요구하는 사진의 구체적 내용 묘사",
+        "신체 관련 구체적 언급",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "단호히 거절하고 대화를 캡처한 뒤 어른·경찰에 알린다", "risk_flag": "safe" },
+        { "label": "거절하지만 관계는 유지하고 싶어 사과한다", "risk_flag": "caution" },
+        { "label": "친하니까 괜찮을 것 같아 사진을 보낸다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-report",
+        "caution": "branch-threat",
+        "risky": "branch-threat"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "현오빠",
+      "elapsed_days": 58
+    },
+    {
+      "node_id": "branch-threat",
+      "stage": "branch",
+      "app_type": "chat",
+      "required_risk_signal": "태도가 돌변해 '지금까지 대화를 유포하겠다'며 협박으로 전환한다. 협박에 응할수록 요구가 커진다는 구조를 드러낸다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "협박 내용의 구체적·자극적 묘사",
+        "신체 관련 구체적 언급",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "응하지 않고 즉시 부모님·경찰(112)·디지털성범죄피해자지원센터에 알린다", "risk_flag": "safe" },
+        { "label": "무서워서 일단 대화를 지우고 혼자 고민한다", "risk_flag": "caution" },
+        { "label": "유포될까 봐 요구에 응한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-report",
+        "caution": "ending-warning-alone",
+        "risky": "ending-harm-escalate"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "현오빠",
+      "elapsed_days": 60,
+      "timer_seconds": 30
+    },
+    {
+      "node_id": "ending-safe-report",
+      "stage": "ending",
+      "app_type": "chat",
+      "required_risk_signal": "위험 신호(급격한 친밀감, 비밀 요구, 단계적 사진 요구)를 식별하고 신고·차단으로 안전하게 종료했다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": false,
+      "is_ending": true,
+      "ending_type": "safe",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-warning-alone",
+      "stage": "ending",
+      "app_type": "chat",
+      "required_risk_signal": "혼자 감추면 협박이 반복된다. 증거 보존 후 어른·전문기관(디지털성범죄피해자지원센터 상담)에 알리는 것이 회복의 시작임을 안내한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": false,
+      "is_ending": true,
+      "ending_type": "warning",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-harm-escalate",
+      "stage": "ending",
+      "app_type": "chat",
+      "required_risk_signal": "요구에 응하자 협박이 더 커졌다. 피해자는 잘못이 없으며, 지금이라도 증거 보존 + 신고 + 삭제지원 절차로 도움받을 수 있음을 안내한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "피해 장면의 구체적 묘사",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": false,
+      "is_ending": true,
+      "ending_type": "harm",
+      "sender_name": "시스템"
+    }
+  ]
+}
