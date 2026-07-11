@@ -1,9 +1,1 @@
 # trust-or-trap
-
-Mac 위주 팀 환경에서 Windows 11로 개발하는 프로젝트입니다.
-
-## 문서
-
-- [Windows 개발 환경 가이드](docs/windows-development-environment.md)
-- [Git 브랜치 전략 및 워크플로우](docs/git-branch-workflow.md)
-- [에이전트 오케스트레이션 (AGENTS.md)](AGENTS.md)
