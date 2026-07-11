@@ -1,1 +1,30 @@
-﻿
+﻿# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Debug
+npm-debug.log*
+
+# TypeScript
+next-env.d.ts
+
+# Cursor hook runtime
+.cursor/hooks/.ui-edits-marker
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/

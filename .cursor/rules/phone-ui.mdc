@@ -1,0 +1,38 @@
+---
+description: 폰 속의 폰 UI 컴포넌트 패턴
+globs: "src/components/phone/**"
+alwaysApply: false
+---
+
+# Phone UI ("폰 속의 폰")
+
+Component hierarchy:
+
+```
+PhoneFrame
+└── HomeScreen (app icons, notifications)
+    ├── ChatApp
+    ├── SMSApp
+    ├── CallScreen
+    ├── BankApp
+    ├── InstagramDM
+    └── DatingApp
+```
+
+## Design
+
+- Outer: desktop browser canvas; inner: ~390×844px phone bezel
+- Apps are **generic renderers** — same component serves all 7 scenarios
+- Props: `messages`, `options`, `onSelect`, `timerSeconds`, `isStreaming`
+- Realistic app chrome (status bar, nav) — not "game UI" aesthetic
+
+## Streaming UX
+
+- Show typing indicator while LLM streams
+- Messages append with Framer Motion `AnimatePresence`
+- Timer overlay when `timer_seconds` set on node
+
+## Accessibility
+
+- Text input fallback always visible (mic optional)
+- Sufficient contrast for warning/danger states

@@ -1,0 +1,36 @@
+---
+description: Trust or Trap 프로젝트 핵심 — 기획·아키텍처·도메인 용어
+alwaysApply: true
+---
+
+# Trust or Trap — Project Core
+
+Phishing/scam prevention **simulation game**. Solo Windows dev, PowerShell terminal.
+
+## Must Read Before Coding
+
+- `docs/product-planning.md` — flow, 7 scenarios, endings
+- `docs/technical-architecture.md` — stack, LLM/TTS rules, folders
+- `docs/domain-glossary.md` — persona/scenario IDs, risk flags
+
+## Non-Negotiables
+
+1. **Scenario graph is source of truth** — LLM generates dialogue only, never new plot
+2. **API keys server-only** — Claude/Typecast in `app/api/` only
+3. **Teen scenarios: no voice** — text/image chat only
+4. **Phone UI** — `PhoneFrame` → `HomeScreen` → app components (reuse across 7 scenarios)
+5. **Structured LLM output** — JSON `{ message, sender, options[], risk_flags[] }`, no free text
+6. **3 endings** — `safe` / `warn` / `danger` per scenario graph
+
+## Default Stack
+
+Next.js App Router · TypeScript · Tailwind · Zustand · Framer Motion · Zod
+
+## When Implementing
+
+| Task | Read |
+|------|------|
+| New scenario node | Skill: `add-scenario-node` |
+| Phone UI | Skill: `phone-ui-component` + rule: `phone-ui.mdc` |
+| API/streaming | Skill: `streaming-api-route` + rule: `api-routes.mdc` |
+| UI changes | Skill: `visual-qa-testing` |

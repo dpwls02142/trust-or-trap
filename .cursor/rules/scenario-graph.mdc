@@ -1,0 +1,34 @@
+---
+description: 시나리오 그래프 JSON 구조 및 노드 작성 규칙
+globs: "src/scenarios/**"
+alwaysApply: false
+---
+
+# Scenario Graph
+
+Each persona = one finite state machine in `src/scenarios/graphs/{scenario-id}.json`.
+
+## Node Fields (required)
+
+```json
+{
+  "node_id": "approach-dm",
+  "app_type": "instagram",
+  "required_risk_signal": "급격한 친밀감, 비밀 요구",
+  "forbidden_content": ["실제 성적 묘사", "실존 인물 사칭"],
+  "next_node_map": { "safe": "report", "warn": "threaten", "danger": "exploit" },
+  "timer_seconds": 30,
+  "voice_enabled": false
+}
+```
+
+## Rules
+
+- `next_node_map` keys must be: `safe` | `warn` | `danger` | `neutral`
+- Teen scenarios (`teen-*`): always `"voice_enabled": false`
+- Graph changes = JSON edit + deploy; LLM prompts reference `node_id`
+- Never let LLM invent nodes — only traverse `next_node_map`
+
+## Persona Matching
+
+Logic in `src/lib/scenario/persona-matching.ts` — see `docs/product-planning.md` table.

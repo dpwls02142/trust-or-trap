@@ -1,0 +1,35 @@
+---
+description: API Routes — Claude/Typecast 서버 전용, SSE 스트리밍
+globs: "src/app/api/**"
+alwaysApply: false
+---
+
+# API Routes
+
+All external AI/TTS calls **only** in `src/app/api/`.
+
+## Pattern
+
+```
+POST /api/scenario/advance  → load node spec → Claude SSE → structured JSON chunks
+POST /api/scenario/judge    → user input → risk_flag → next node_id
+POST /api/tts/stream        → sentence → Typecast stream → audio chunks
+```
+
+## Security
+
+- Read keys from `process.env` — never expose to client
+- Validate input with Zod before LLM call
+- Inject `forbidden_content` into system prompt per node
+- Post-filter response for blocked patterns
+
+## Response
+
+- Use SSE (`ReadableStream`) for LLM text streaming
+- Return structured JSON — never raw LLM free text to client
+- STT: accept text from client (Web Speech API); do not store audio
+
+## Error Handling
+
+- Graceful fallback: text-only if TTS fails
+- Teen routes: reject TTS requests entirely

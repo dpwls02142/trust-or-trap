@@ -1,95 +1,77 @@
 ﻿# trust-or-trap — Agent Guide
 
-Solo Windows 11 developer using Cursor for vibe coding. Agents must use **PowerShell**, not Mac/bash defaults.
+Solo Windows 11 developer · **Trust or Trap** phishing/scam simulation game · PowerShell terminal.
 
-## Quick Context
+## Project Docs (read first)
 
-- **Platform:** Windows 11, PowerShell — [docs/windows-development-environment.md](docs/windows-development-environment.md)
-- **Git:** main → feature/fix → PR → squash merge — [docs/git-branch-workflow.md](docs/git-branch-workflow.md)
-- **Team size:** 1 — self-review via bugbot subagent before PR
+| Doc | When |
+|-----|------|
+| [docs/product-planning.md](docs/product-planning.md) | Story, personas, flow, endings |
+| [docs/technical-architecture.md](docs/technical-architecture.md) | Stack, LLM/TTS, API patterns |
+| [docs/domain-glossary.md](docs/domain-glossary.md) | Scenario IDs, risk flags |
 
----
-
-## Architecture
+## Architecture Summary
 
 ```
-Session Start (hook)
-  └─ inject Windows/PowerShell + workflow context
+User → Next.js (phone UI) → API Routes → Scenario JSON + Claude (SSE) + Typecast TTS
+```
 
+- **Graph = truth** · **LLM = dialogue only** · **Teen = no voice**
+
+## Cursor Setup
+
+```
 Rules (always on)
-  ├─ .cursor/rules/windows-development.mdc  → PowerShell, no bash
-  └─ .cursor/rules/git-workflow.mdc
+  ├─ trust-or-trap-core.mdc     → project non-negotiables
+  ├─ windows-development.mdc    → PowerShell, not bash
+  └─ git-workflow.mdc
 
-Skills (load when task matches)
-  ├─ writing-commit-message  → commits
-  ├─ creating-pr             → pull requests
-  └─ visual-qa-testing       → UI verification via MCP browser
+Rules (file-scoped)
+  ├─ nextjs-react.mdc           → **/*.{ts,tsx}
+  ├─ scenario-graph.mdc         → src/scenarios/**
+  ├─ api-routes.mdc             → src/app/api/**
+  ├─ phone-ui.mdc               → src/components/phone/**
+  └─ content-safety-teen.mdc    → teen-*.json
 
-Hooks (automated)
-  ├─ sessionStart            → session-context.js
-  ├─ beforeShellExecution    → guard-git-commands.js
-  ├─ afterFileEdit           → track-ui-edits.js
-  ├─ stop                    → suggest-visual-qa.js
-  └─ subagentStop            → subagent-followup.js
+Skills
+  ├─ add-scenario-node          → new graph nodes
+  ├─ phone-ui-component         → PhoneFrame, apps
+  ├─ streaming-api-route        → Claude SSE, Typecast
+  ├─ visual-qa-testing          → browser QA
+  ├─ writing-commit-message
+  └─ creating-pr
 
-Subagents (Task tool)
-  ├─ bugbot           → self code review before PR
-  ├─ security-review  → security audit
-  ├─ explore          → codebase search
-  └─ shell            → terminal operations
-
-MCP
-  └─ cursor-ide-browser → visual QA
+Hooks → git guard, visual QA chain, session context
+Subagents → bugbot (self-review), security-review (teen content)
+MCP → cursor-ide-browser
 ```
 
----
+## Implementation Order (suggested)
 
-## When to Use What
+1. Onboarding form (name/age/gender) + persona matching
+2. PhoneFrame + HomeScreen + one app (ChatApp)
+3. Scenario graph loader + sample graph
+4. `/api/scenario/advance` SSE route
+5. `/api/scenario/judge` risk routing
+6. Report screen (missed signals replay)
+7. TTS streaming (non-teen scenarios)
+8. Remaining 6 scenario graphs
 
-| Task | Tool |
-|------|------|
-| Terminal commands | **PowerShell** syntax (Shell tool) |
-| Write a commit | Skill: `writing-commit-message` |
-| Create a PR | Skill: `creating-pr` + `gh` CLI |
-| UI changed | Skill: `visual-qa-testing` + MCP browser |
-| Self-review before PR | Subagent: `bugbot` |
-| Security check | Subagent: `security-review` |
-
----
-
-## Recommended Solo Flow
-
-1. `git fetch origin; git checkout -b feature/name origin/main`
-2. Implement (PowerShell commands only)
-3. UI edited → stop hook → visual QA skill
-4. bugbot subagent self-review
-5. Commit (`git commit -m "..."`) using writing-commit-message skill
-6. PR via creating-pr skill (`gh pr create --body-file ...`)
-7. Squash merge on GitHub
-
----
-
-## PowerShell Reminders (Critical)
+## PowerShell
 
 ```powershell
-# ❌ NEVER (bash/Mac)
-git fetch && git rebase origin/main
-gh pr create --body "$(cat <<'EOF' ... EOF)"
-export NODE_ENV=dev
-
-# ✅ ALWAYS (PowerShell)
-git fetch origin; git rebase origin/main
+npm run dev          # one dev server only (low RAM)
+npm run typecheck
+git commit -m "feat: ..."
 gh pr create --body-file .github/pr-body-template.md
-$env:NODE_ENV = "dev"
 ```
 
----
-
-## File Index
+## Key Paths
 
 ```
-.cursor/hooks/     → automated guards & follow-ups
-.cursor/rules/     → always-on PowerShell + git constraints
-.cursor/skills/    → step-by-step workflows
-docs/              → detailed reference docs
+src/scenarios/graphs/     → *.json state machines
+src/components/phone/     → phone-in-phone UI
+src/lib/scenario/         → types, persona matching
+src/app/api/              → server-only AI routes
+src/lib/stores/           → Zustand game state
 ```

@@ -1,0 +1,12 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  --phone-bezel: #1a1a1a;
+  --phone-screen: #000000;
+}
+
+body {
+  @apply bg-neutral-900 text-white antialiased;
+}

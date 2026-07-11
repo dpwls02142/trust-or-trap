@@ -1,0 +1,69 @@
+{
+  "scenario_id": "twenties-female-romance",
+  "title": "운명 같은 사람",
+  "persona": "twenties-female",
+  "crime_category": "romance-scam",
+  "start_node_id": "dating-match",
+  "nodes": [
+    {
+      "node_id": "dating-match",
+      "app_type": "dating",
+      "required_risk_signal": "비현실적으로 완벽한 프로필, 해외 거주 사칭",
+      "forbidden_content": ["실존 인물 사칭", "혐오 표현"],
+      "next_node_map": { "neutral": "daily-chat" },
+      "voice_enabled": true
+    },
+    {
+      "node_id": "daily-chat",
+      "app_type": "chat",
+      "required_risk_signal": "화상통화 지속 회피, 만남 약속 반복 지연",
+      "forbidden_content": ["실존 인물 사칭"],
+      "next_node_map": { "neutral": "crisis-request" },
+      "timer_seconds": 45,
+      "voice_enabled": true
+    },
+    {
+      "node_id": "crisis-request",
+      "app_type": "chat",
+      "required_risk_signal": "감정 프레이밍 금전 요청 (환전사기)",
+      "forbidden_content": ["실존 인물 사칭"],
+      "next_node_map": {
+        "safe": "ending-safe",
+        "warn": "ending-warn",
+        "danger": "ending-danger"
+      },
+      "timer_seconds": 60,
+      "voice_enabled": true
+    },
+    {
+      "node_id": "ending-safe",
+      "app_type": "chat",
+      "required_risk_signal": "프로필 역검색·통화 요청으로 검증",
+      "forbidden_content": [],
+      "next_node_map": {},
+      "ending_type": "safe",
+      "report_signals": ["화상통화 회피", "급한 송금 요청", "감정적 압박"],
+      "voice_enabled": false
+    },
+    {
+      "node_id": "ending-warn",
+      "app_type": "chat",
+      "required_risk_signal": "소액 송금 후 의심",
+      "forbidden_content": [],
+      "next_node_map": {},
+      "ending_type": "warn",
+      "report_signals": ["화상통화 회피", "급한 송금 요청"],
+      "voice_enabled": false
+    },
+    {
+      "node_id": "ending-danger",
+      "app_type": "chat",
+      "required_risk_signal": "전액 송금 — 신고 절차 필요",
+      "forbidden_content": [],
+      "next_node_map": {},
+      "ending_type": "danger",
+      "report_signals": ["화상통화 회피", "급한 송금 요청", "감정적 압박", "해외 계좌 송금"],
+      "voice_enabled": false
+    }
+  ]
+}

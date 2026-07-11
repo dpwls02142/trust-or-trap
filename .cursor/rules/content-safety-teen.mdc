@@ -1,0 +1,26 @@
+---
+description: 미성년·민감 시나리오 콘텐츠 안전 규칙
+globs: "src/scenarios/graphs/teen-*.json"
+alwaysApply: false
+---
+
+# Content Safety (Teen Scenarios)
+
+Applies to `teen-female-grooming`, `teen-male-game-scam`.
+
+## Hard Rules
+
+- **No TTS/STT** — `voice_enabled: false` on every node
+- **No sexual content generation** — `forbidden_content` must include explicit blocks
+- **No real person impersonation**
+- Chat-only UI — no video call simulation with explicit content
+- Grooming arc: show trust-building **without** generating exploitative dialogue
+
+## Learning Goals
+
+- Risk signals: rapid intimacy, secrecy from parents, escalating photo requests
+- Endings must link to support resources (지원기관) on warn/danger paths
+
+## Review
+
+Run **security-review** subagent after any teen scenario graph or prompt change.
