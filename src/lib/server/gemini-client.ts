@@ -1,6 +1,6 @@
 import "server-only";
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel, type ThinkingConfig } from "@google/genai";
 import type { ChatHistoryEntry, ScenarioNode, UserProfile } from "@/lib/scenario/types";
 
 /**
@@ -22,15 +22,19 @@ export function getGeminiClient(): GoogleGenAI {
 }
 
 export function resolveGeminiModel(): string {
-  return process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  return process.env.GEMINI_MODEL ?? "gemini-3.5-flash";
 }
 
 /**
- * 대사 생성/판정은 저지연이 중요하므로 2.5 계열 모델에서는 thinking을 끈다.
- * (thinkingBudget은 Gemini 2.5 계열에서만 지원 — 다른 모델에서는 옵션 자체를 생략)
+ * 대사 생성/판정은 저지연이 중요하므로 thinking을 최소화한다.
+ * - Gemini 3.x 계열: thinkingLevel만 지원 (thinkingBudget과 동시 사용 시 400).
+ *   LOW는 전 모델 공통 지원이며 지연/비용 최소화 목적.
+ * - Gemini 2.5 계열(구형 오버라이드 대비): thinkingBudget: 0으로 thinking 비활성화.
  */
-export function resolveThinkingConfig(modelName: string): { thinkingBudget: number } | undefined {
-  return modelName.includes("2.5") ? { thinkingBudget: 0 } : undefined;
+export function resolveThinkingConfig(modelName: string): ThinkingConfig {
+  return modelName.includes("2.5")
+    ? { thinkingBudget: 0 }
+    : { thinkingLevel: ThinkingLevel.LOW };
 }
 
 /**
