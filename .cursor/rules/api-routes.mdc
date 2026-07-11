@@ -1,0 +1,42 @@
+---
+description: 서버리스 API Route 규칙 — Claude/Typecast 스트리밍, 키 보안
+globs: src/app/api/**
+alwaysApply: false
+---
+
+# API Route 규칙 (서버 전용)
+
+외부 API(Claude, Typecast) 호출은 **오직 이 레이어에서만** 일어난다. 클라이언트 직접 호출은 절대 금지.
+
+## 보안 (필수)
+
+- API 키는 `process.env.ANTHROPIC_API_KEY` / `process.env.TYPECAST_API_KEY`로만 접근. 키를 응답 body나 클라이언트로 절대 전달하지 않는다.
+- 요청 body는 **Zod로 검증** 후 사용.
+- STT 원본 음성은 처리 후 즉시 폐기. 서버 저장 금지.
+
+## 예상 엔드포인트
+
+| Route | 역할 |
+| --- | --- |
+| `api/scenario/advance` | 현재 노드 스펙 + 히스토리 + 프로필 → Claude로 대사 생성(SSE 스트리밍) |
+| `api/scenario/judge` | 사용자 선택/STT 텍스트 → risk_flag 판정 → 다음 node_id 반환 |
+| `api/tts/stream` | 문장 단위 텍스트 → Typecast 스트리밍 TTS 프록시(오디오 청크) |
+
+## Claude 호출
+
+- 입력: 현재 노드의 `required_risk_signal`, `forbidden_content` + 대화 히스토리 + 사용자 프로필.
+- 시스템 프롬프트에 `forbidden_content`와 "노드 범위를 벗어난 사건 전개 금지"를 **고정 주입**.
+- 응답은 **구조화 JSON 강제**: `{ message, sender, options[], risk_flags[] }`. 자유 텍스트 금지.
+- 토큰 단위 **SSE 스트리밍**으로 프론트에 전달(타이핑 효과).
+- 응답 후처리 필터(금칙어, 개인정보 패턴)를 별도 레이어로 적용.
+
+## Typecast TTS 호출
+
+- 엔드포인트 `POST https://api.typecast.ai/v1/text-to-speech/stream`, 인증 `X-API-KEY` 헤더.
+- LLM 문장이 완성되는 즉시 전달해 청크를 순차 재생. 통 재생 금지.
+- `prompt.emotion_type: "smart"` 기본값. 페르소나별 `voice_id`는 사전 매핑(`docs/technical-architecture.md` §6).
+- **teen 시나리오 요청은 TTS를 호출하지 않는다.**
+
+## 작업 절차
+
+스트리밍 라우트 구현은 `streaming-api-route` 스킬을 따른다. 완료 후 `security-review` 서브에이전트로 키 노출을 점검한다.

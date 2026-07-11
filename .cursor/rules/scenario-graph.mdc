@@ -1,0 +1,44 @@
+---
+description: 시나리오 그래프(JSON) 작성 규칙 — 상태 머신, 노드 스펙
+globs: src/scenarios/**
+alwaysApply: false
+---
+
+# 시나리오 그래프 규칙
+
+각 시나리오(7종)는 하나의 **유한 상태 그래프**다. 이 그래프가 사건 전개의 진실이며, LLM은 대사만 채운다.
+
+## 파일
+
+- 위치: `src/scenarios/graphs/{scenarioId}.json`
+- 파일명은 `scenarioId`와 **정확히 일치**. 유효한 ID 목록은 [domain-glossary.md](../../docs/domain-glossary.md) §2.
+
+## 노드 필수 필드
+
+```jsonc
+{
+  "node_id": "string",              // 시나리오 내 유일
+  "stage": "approach|trust_building|risk_signal|demand|branch|ending",
+  "app_type": "chat|sms|call|insta|bank|browser|home",
+  "required_risk_signal": "이 노드에서 반드시 드러나야 하는 위험 신호",
+  "forbidden_content": ["생성 금지 표현 ..."],
+  "options": [ { "label": "...", "risk_flag": "safe|caution|risky" } ],
+  "next_node_map": { "safe": "node_x", "caution": "node_y", "risky": "node_z" },
+  "voice_enabled": true,            // teen-* 시나리오는 반드시 false
+  "is_ending": false,
+  "ending_type": null               // is_ending일 때 safe|warning|harm
+}
+```
+
+## 규칙
+
+- 모든 시나리오는 `approach → trust_building → risk_signal → demand → branch → ending` 골격을 따른다.
+- 분기 노드는 `next_node_map`으로 `safe`/`caution`/`risky` 세 결과를 모두 매핑한다.
+- 각 시나리오는 **엔딩 3종(safe/warning/harm)에 도달 가능**해야 한다.
+- `required_risk_signal`은 기획안의 "위험 신호 학습 포인트"에서 가져온다(`docs/product-planning.md` §7).
+- `forbidden_content`에는 실존 인물·실제 기관 사칭, 실제 개인정보 패턴, (teen의 경우) 성적 콘텐츠를 명시한다.
+- `teen-*` 파일은 항상 `voice_enabled: false`. 편집 시 `content-safety-teen` 규칙과 `security-review` 서브에이전트 대상.
+
+## 작업 절차
+
+노드 추가/수정은 `add-scenario-node` 스킬을 따른다.

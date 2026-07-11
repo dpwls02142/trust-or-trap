@@ -5,7 +5,7 @@ const markerPath = path.join(
   process.cwd(),
   ".cursor",
   "hooks",
-  ".ui-edits-marker"
+  ".content-safety-marker"
 );
 
 async function readStdin() {
@@ -35,11 +35,11 @@ async function main() {
 
   fs.unlinkSync(markerPath);
 
-  const editedFile = markerData.lastEdit || "UI file";
+  const editedFile = markerData.lastEdit || "teen 시나리오 파일";
   const followupMessage =
-    "UI 파일(" +
+    "미성년자(teen) 시나리오 파일(" +
     editedFile +
-    ")이 수정되었습니다. .cursor/skills/visual-qa-testing/SKILL.md 스킬을 따라 cursor-ide-browser MCP로 시각적 QA를 수행해 주세요.";
+    ")이 수정되었습니다. .cursor/rules/content-safety-teen.mdc 기준으로 (1) 모든 노드 voice_enabled=false, (2) forbidden_content에 성적 콘텐츠/노골적 묘사 금지 명시를 재확인하고, security-review 서브에이전트로 콘텐츠 안전을 감사해 주세요.";
 
   process.stdout.write(JSON.stringify({ followup_message: followupMessage }));
 }
