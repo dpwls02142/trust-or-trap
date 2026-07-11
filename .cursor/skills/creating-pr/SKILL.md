@@ -83,18 +83,21 @@ Before requesting review:
 
 ```bash
 git push -u origin HEAD
-gh pr create --title "<title>" --body "$(cat <<'EOF'
-## Summary
-...
-
-## Changes
-...
-
-## Test Plan
-...
-EOF
-)"
 ```
+
+**Windows (PowerShell):** use `--body-file` instead of bash HEREDOC:
+
+```powershell
+gh pr create --title "<title>" --body-file .github/pr-body-template.md
+```
+
+**macOS/Linux:**
+
+```bash
+gh pr create --title "<title>" --body-file .github/pr-body-template.md
+```
+
+See `docs/git-branch-workflow.md` for the full workflow (squash merge, branch naming).
 
 ### 6. Request Review
 

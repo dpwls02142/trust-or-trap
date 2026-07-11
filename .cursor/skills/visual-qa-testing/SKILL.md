@@ -7,6 +7,8 @@ description: Visually QA a web application by launching it in Cursor's built-in 
 
 Use this skill after making UI changes to visually verify the result, catch console errors, and audit network requests — all without leaving Cursor.
 
+> **Auto-trigger:** The `stop` hook (`.cursor/hooks/suggest-visual-qa.js`) suggests this skill when UI files (`.tsx`, `.css`, etc.) were edited during a session.
+
 ## How It Works
 
 Cursor has a built-in browser (`cursor-ide-browser` MCP) that can navigate to URLs, take screenshots, read console messages, inspect network requests, and interact with page elements. This skill uses those tools to do a quick visual QA pass.
