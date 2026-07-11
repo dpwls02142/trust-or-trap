@@ -1,28 +1,36 @@
 import "server-only";
 
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import type { ChatHistoryEntry, ScenarioNode, UserProfile } from "@/lib/scenario/types";
 
 /**
- * Claude API 클라이언트 (서버 전용).
- * 키는 process.env.ANTHROPIC_API_KEY 로만 접근하며 절대 클라이언트로 내보내지 않는다.
+ * Gemini API 클라이언트 (서버 전용).
+ * 키는 process.env.GEMINI_API_KEY 로만 접근하며 절대 클라이언트로 내보내지 않는다.
  */
 
-let cachedAnthropicClient: Anthropic | null = null;
+let cachedGeminiClient: GoogleGenAI | null = null;
 
-export function getAnthropicClient(): Anthropic {
-  if (!cachedAnthropicClient) {
-    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-    if (!anthropicApiKey) {
-      throw new Error("ANTHROPIC_API_KEY 환경변수가 설정되지 않음");
+export function getGeminiClient(): GoogleGenAI {
+  if (!cachedGeminiClient) {
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (!geminiApiKey) {
+      throw new Error("GEMINI_API_KEY 환경변수가 설정되지 않음");
     }
-    cachedAnthropicClient = new Anthropic({ apiKey: anthropicApiKey });
+    cachedGeminiClient = new GoogleGenAI({ apiKey: geminiApiKey });
   }
-  return cachedAnthropicClient;
+  return cachedGeminiClient;
 }
 
-export function resolveClaudeModel(): string {
-  return process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5";
+export function resolveGeminiModel(): string {
+  return process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+}
+
+/**
+ * 대사 생성/판정은 저지연이 중요하므로 2.5 계열 모델에서는 thinking을 끈다.
+ * (thinkingBudget은 Gemini 2.5 계열에서만 지원 — 다른 모델에서는 옵션 자체를 생략)
+ */
+export function resolveThinkingConfig(modelName: string): { thinkingBudget: number } | undefined {
+  return modelName.includes("2.5") ? { thinkingBudget: 0 } : undefined;
 }
 
 /**

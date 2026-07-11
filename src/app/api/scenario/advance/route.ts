@@ -5,9 +5,10 @@ import { applySafetyFilter, detectTeenUnsafeContent } from "@/lib/scenario/safet
 import {
   buildAdvanceSystemPrompt,
   buildAdvanceUserPrompt,
-  getAnthropicClient,
-  resolveClaudeModel,
-} from "@/lib/server/claude-client";
+  getGeminiClient,
+  resolveGeminiModel,
+  resolveThinkingConfig,
+} from "@/lib/server/gemini-client";
 import { isRateLimited, resolveClientKey } from "@/lib/server/rate-limiter";
 
 export const runtime = "nodejs";
@@ -16,15 +17,16 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * POST /api/scenario/advance — 현재 노드의 대사를 Claude로 생성해 SSE로 스트리밍.
+ * POST /api/scenario/advance — 현재 노드의 대사를 Gemini로 생성해 SSE로 스트리밍.
  *
  * SSE 이벤트 프로토콜:
  *  - event: delta   → data: {"text": "..."}  (message의 증분 텍스트, 문장 단위 안전필터 통과분)
  *  - event: payload → data: AdvancePayload    (검증·안전필터 통과한 최종 구조화 JSON)
  *  - event: error   → data: {"errorMessage": "..."}
  *
- * 성능: Claude 토큰 스트림에서 "message" 문자열 값만 증분 추출하고,
+ * 성능: Gemini 토큰 스트림에서 "message" 문자열 값만 증분 추출하고,
  * 문장이 완성되는 즉시 안전 필터를 거쳐 전달한다(첫 문장 지연 최소화 + 필터 우회 방지).
+ * responseMimeType: "application/json" + thinking 비활성화로 첫 토큰 지연을 줄이고,
  * 최종 payload는 전체 JSON 누적 후 Zod 검증 + 안전 필터를 거쳐 1회 전송한다.
  */
 export async function POST(request: NextRequest) {
@@ -49,7 +51,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ errorMessage: "존재하지 않는 시나리오/노드" }, { status: 404 });
   }
 
-  const anthropicClient = getAnthropicClient();
+  const geminiClient = getGeminiClient();
   const textEncoder = new TextEncoder();
   const isTeenScenario = scenarioId.startsWith("teen-");
   const sentenceBoundaryRegex = /[.!?。…]["')\]]?(\s|$)|\n/;
@@ -63,13 +65,16 @@ export async function POST(request: NextRequest) {
       };
 
       try {
-        const messageStream = anthropicClient.messages.stream({
-          model: resolveClaudeModel(),
-          max_tokens: 1024,
-          system: buildAdvanceSystemPrompt(currentNode, userProfile),
-          messages: [
-            { role: "user", content: buildAdvanceUserPrompt(chatHistory, userProfile) },
-          ],
+        const geminiModel = resolveGeminiModel();
+        const responseStream = await geminiClient.models.generateContentStream({
+          model: geminiModel,
+          contents: buildAdvanceUserPrompt(chatHistory, userProfile),
+          config: {
+            systemInstruction: buildAdvanceSystemPrompt(currentNode, userProfile),
+            maxOutputTokens: 1024,
+            responseMimeType: "application/json",
+            thinkingConfig: resolveThinkingConfig(geminiModel),
+          },
         });
 
         // "message" 문자열 값만 증분 추출하는 경량 상태 추적기.
@@ -101,7 +106,7 @@ export async function POST(request: NextRequest) {
           }
         };
 
-        messageStream.on("text", (textDelta) => {
+        const consumeTextDelta = (textDelta: string) => {
           accumulatedRawText += textDelta;
 
           if (messageValueDone) return;
@@ -111,10 +116,9 @@ export async function POST(request: NextRequest) {
             if (!messageKeyMatch) return;
             insideMessageValue = true;
             // 키 이후에 이미 도착해 있는 값 부분부터 처리
-            const alreadyArrivedValue = accumulatedRawText.slice(
+            textDelta = accumulatedRawText.slice(
               (messageKeyMatch.index ?? 0) + messageKeyMatch[0].length,
             );
-            textDelta = alreadyArrivedValue;
           }
 
           for (const currentChar of textDelta) {
@@ -135,13 +139,16 @@ export async function POST(request: NextRequest) {
             pendingSentenceBuffer += currentChar;
           }
           flushCompleteSentences();
-        });
+        };
 
-        await messageStream.finalMessage();
+        for await (const streamChunk of responseStream) {
+          const chunkText = streamChunk.text;
+          if (chunkText) consumeTextDelta(chunkText);
+        }
         emitFilteredSentence(pendingSentenceBuffer);
         pendingSentenceBuffer = "";
 
-        // 최종 구조화 JSON 검증 (코드펜스 제거 후 파싱)
+        // 최종 구조화 JSON 검증 (혹시 모를 코드펜스 제거 후 파싱)
         const cleanedJsonText = accumulatedRawText
           .replace(/^```(?:json)?\s*/i, "")
           .replace(/\s*```\s*$/, "")

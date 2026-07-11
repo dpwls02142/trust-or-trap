@@ -6,7 +6,7 @@
 
 - **페르소나 매칭**: 나이·성별로 발생 확률이 가장 높은 범죄 스토리(7종)를 추천.
 - **시나리오 그래프**: 사건 전개는 정적 상태 그래프가 결정. LLM은 노드 범위 내 대사만 생성.
-- **스트리밍 몰입**: Claude 대사(SSE) + Typecast 음성(TTS)을 실시간 스트리밍.
+- **스트리밍 몰입**: Gemini 대사(SSE) + Typecast 음성(TTS)을 실시간 스트리밍.
 - **엔딩 3갈래**: 안전 회피 / 소액 피해 후 대응 / 피해 심화 + "놓친 위험 신호" 리플레이 리포트.
 
 ## 문서 (먼저 읽기)
@@ -33,7 +33,7 @@ pnpm dev
 
 | 변수 | 용도 |
 | --- | --- |
-| `ANTHROPIC_API_KEY` | Claude 대사 생성/판정 |
+| `GEMINI_API_KEY` | Gemini 대사 생성/판정 |
 | `TYPECAST_API_KEY` | Typecast 스트리밍 TTS |
 | `TYPECAST_DEFAULT_VOICE_ID` | 기본 보이스 ID |
 
@@ -50,7 +50,7 @@ src/
 ├── app/                      # App Router (온보딩/게임 단일 페이지)
 │   └── api/                  # 서버리스 함수 (키는 여기서만 사용)
 │       ├── scenario/entry/   # 시작 노드 조회
-│       ├── scenario/advance/ # Claude 대사 생성 (SSE 스트리밍)
+│       ├── scenario/advance/ # Gemini 대사 생성 (SSE 스트리밍)
 │       ├── scenario/judge/   # 사용자 응답 risk_flag 판정 → 분기
 │       └── tts/stream/       # Typecast TTS 프록시 (teen 차단)
 ├── components/
@@ -61,10 +61,10 @@ src/
 │   ├── scenario/             # 타입·Zod 스키마·그래프 로더·페르소나 매칭
 │   ├── stores/               # Zustand 게임 스토어 (localStorage persist)
 │   ├── client/               # SSE 소비 유틸, 문장 단위 TTS 재생 큐
-│   └── server/               # Claude 클라이언트·프롬프트 빌더 (서버 전용)
+│   └── server/               # Gemini 클라이언트·프롬프트 빌더 (서버 전용)
 └── scenarios/graphs/         # 시나리오 그래프 JSON 7종 (진실의 원천)
 ```
 
 ## 기술 스택
 
-Next.js (App Router) · Tailwind CSS · Zustand · Framer Motion · Zod + React Hook Form · Claude API · Typecast TTS · Web Speech API (STT)
+Next.js (App Router) · Tailwind CSS · Zustand · Framer Motion · Zod + React Hook Form · Gemini API · Typecast TTS · Web Speech API (STT)

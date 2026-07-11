@@ -73,7 +73,7 @@ MCP
 | Terminal commands | **PowerShell** syntax (Shell tool) |
 | 시나리오 그래프 노드 추가/수정 | Skill: `add-scenario-node` (+rule `scenario-graph`) |
 | "폰 속의 폰" UI 컴포넌트 | Skill: `phone-ui-component` (+rule `phone-ui`) |
-| Claude/Typecast 스트리밍 API | Skill: `streaming-api-route` (+rule `api-routes`) |
+| Gemini/Typecast 스트리밍 API | Skill: `streaming-api-route` (+rule `api-routes`) |
 | 온보딩 페르소나 매칭 | Skill: `persona-matching` |
 | 10대(teen) 시나리오 작업 | Rule `content-safety-teen` + Subagent `security-review` (필수) |
 | Write a commit | Skill: `writing-commit-message` |

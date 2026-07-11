@@ -11,7 +11,7 @@
 
 1. **시나리오 그래프 = 진실의 원천(Source of Truth).** 사건 전개는 서버에 미리 정의된 정적 상태 그래프(State Machine)로만 결정된다. LLM이 사건을 새로 지어내지 않는다.
 2. **LLM = 표현(대사) 생성기.** LLM은 "이번 노드에서 일어나야 하는 사건"을 받아 사용자 이름·이전 답변에 맞춰 자연스러운 대사로만 바꾼다. **노드 범위를 벗어나는 전개 생성 금지.**
-3. **API 키는 서버 전용.** Claude / Typecast 키는 서버리스 함수(API Route) 환경변수에만 둔다. **클라이언트에서 외부 API 직접 호출 절대 금지.**
+3. **API 키는 서버 전용.** Gemini / Typecast 키는 서버리스 함수(API Route) 환경변수에만 둔다. **클라이언트에서 외부 API 직접 호출 절대 금지.**
 4. **텍스트·음성 모두 스트리밍.** 지연 최소화를 위해 SSE 토큰 스트리밍 + 문장 단위 TTS 스트리밍.
 5. **10대 시나리오는 음성 미적용.** 미성년자 음성 데이터 수집 리스크 회피. 텍스트/이미지 채팅형만.
 6. **엔딩은 3갈래.** safe / warning / harm. 모든 시나리오 공통.
@@ -23,7 +23,7 @@
   └─ 프론트엔드 (Next.js / React)
        ├─(현재 노드 + 사용자 응답)→ API Route (서버리스 함수)
        │     ├─ 시나리오 그래프 조회 (정적 JSON)
-       │     ├─(노드 컨텍스트, 스트리밍 요청)→ Claude API  ──토큰 스트림──┐
+       │     ├─(노드 컨텍스트, 스트리밍 요청)→ Gemini API  ──토큰 스트림──┐
        │     └────────────────────────────────────────────────────────┘
        │           └─(텍스트 스트림)→ 프론트
        ├─ 문장 완성 시마다 → Typecast TTS(streaming) → 오디오 청크 → 순차 재생
@@ -72,7 +72,7 @@
        └─ <BankApp>    ┘
 ```
 
-## 5. LLM (Claude API) — 노드 기반 표현 생성
+## 5. LLM (Gemini API) — 노드 기반 표현 생성
 
 | 항목 | 내용 |
 | --- | --- |
@@ -145,8 +145,8 @@ const ttsRes = await fetch("https://api.typecast.ai/v1/text-to-speech/stream", {
 src/
 ├── app/
 │   ├── (온보딩/시나리오/리포트 라우트)
-│   └── api/                # 서버리스 함수 (Claude/Typecast 호출)
-│       ├── scenario/advance/   # 노드 대사 생성 (Claude SSE)
+│   └── api/                # 서버리스 함수 (Gemini/Typecast 호출)
+│       ├── scenario/advance/   # 노드 대사 생성 (Gemini SSE)
 │       ├── scenario/judge/     # 사용자 응답 risk_flag 판정
 │       └── tts/stream/         # Typecast 스트리밍 프록시
 ├── components/phone/       # PhoneFrame, HomeScreen, ChatApp, ...

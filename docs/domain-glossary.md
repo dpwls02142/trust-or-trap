@@ -128,10 +128,10 @@
 
 | 변수명 | 용도 |
 | --- | --- |
-| `ANTHROPIC_API_KEY` | Claude API 키 (서버 전용) |
+| `GEMINI_API_KEY` | Gemini API 키 (서버 전용) |
 | `TYPECAST_API_KEY` | Typecast TTS 키 (서버 전용) |
 | `TYPECAST_DEFAULT_VOICE_ID` | 기본 보이스 ID |
-| `ANTHROPIC_MODEL` | (선택) Claude 모델 ID 오버라이드. 미설정 시 코드 기본값 사용 |
+| `GEMINI_MODEL` | (선택) Gemini 모델 ID 오버라이드. 미설정 시 코드 기본값 사용 |
 
 > 실제 키 값은 `.env`(gitignore)에만. `.env.example`에는 **키 이름만** 둔다.
 
