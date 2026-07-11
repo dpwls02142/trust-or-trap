@@ -21,8 +21,50 @@
 
 Windows 11 / PowerShell 1인 개발. [AGENTS.md](AGENTS.md), [docs/windows-development-environment.md](docs/windows-development-environment.md), [docs/git-branch-workflow.md](docs/git-branch-workflow.md) 참조.
 
-> 현재 저장소는 **문서 · Cursor 설정(rules/skills/hooks) 중심**이며 앱 코드(`src/`)는 아직 없다. 구현 시 위 문서와 `.cursor/rules/`의 경로·명명·원칙을 기준으로 삼는다.
+## 시작하기
 
-## 기술 스택 (예정)
+```powershell
+pnpm install
+Copy-Item .env.example .env.local   # 키 값 채우기
+pnpm dev
+```
+
+`.env.local` 필수 값 (모두 **서버 전용** — 클라이언트 노출 금지):
+
+| 변수 | 용도 |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | Claude 대사 생성/판정 |
+| `TYPECAST_API_KEY` | Typecast 스트리밍 TTS |
+| `TYPECAST_DEFAULT_VOICE_ID` | 기본 보이스 ID |
+
+## Vercel 배포
+
+1. GitHub 저장소를 Vercel에 연결 (Next.js 자동 감지, 별도 설정 불필요).
+2. Vercel → Project Settings → Environment Variables에 위 3개 키 등록.
+3. `main` 브랜치 머지 시 자동 배포.
+
+## 구조
+
+```
+src/
+├── app/                      # App Router (온보딩/게임 단일 페이지)
+│   └── api/                  # 서버리스 함수 (키는 여기서만 사용)
+│       ├── scenario/entry/   # 시작 노드 조회
+│       ├── scenario/advance/ # Claude 대사 생성 (SSE 스트리밍)
+│       ├── scenario/judge/   # 사용자 응답 risk_flag 판정 → 분기
+│       └── tts/stream/       # Typecast TTS 프록시 (teen 차단)
+├── components/
+│   ├── onboarding/           # 이름/나이/성별 입력 + 시나리오 추천
+│   ├── phone/                # "폰 속의 폰" — PhoneFrame, HomeScreen, 앱 6종
+│   └── game/                 # GameController(오케스트레이터), EndingReport
+├── lib/
+│   ├── scenario/             # 타입·Zod 스키마·그래프 로더·페르소나 매칭
+│   ├── stores/               # Zustand 게임 스토어 (localStorage persist)
+│   ├── client/               # SSE 소비 유틸, 문장 단위 TTS 재생 큐
+│   └── server/               # Claude 클라이언트·프롬프트 빌더 (서버 전용)
+└── scenarios/graphs/         # 시나리오 그래프 JSON 7종 (진실의 원천)
+```
+
+## 기술 스택
 
 Next.js (App Router) · Tailwind CSS · Zustand · Framer Motion · Zod + React Hook Form · Claude API · Typecast TTS · Web Speech API (STT)

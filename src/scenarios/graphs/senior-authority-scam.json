@@ -1,0 +1,185 @@
+{
+  "scenario_id": "senior-authority-scam",
+  "crime_category": "authority_voicephishing",
+  "title": "검찰청에서 온 전화",
+  "synopsis": "수사관을 자칭하는 사람이 '당신 계좌가 범죄에 연루됐다'며 다급하게 전화를 걸어온다.",
+  "voice_enabled": true,
+  "entry_node_id": "approach-authority-call",
+  "nodes": [
+    {
+      "node_id": "approach-authority-call",
+      "stage": "approach",
+      "app_type": "call",
+      "required_risk_signal": "수사기관을 사칭한 전화가 '계좌 범죄 연루'라는 공포를 조성한다. 수사기관은 전화로 사건을 통보하거나 이체를 요구하지 않는다",
+      "forbidden_content": [
+        "실존 검찰청·경찰서·금감원 부서명·실명 사칭",
+        "실제 사건번호 형식",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "전화를 끊고 검찰(1301)·경찰(112) 대표번호로 직접 확인한다", "risk_flag": "safe" },
+        { "label": "불안해서 일단 이야기를 들어본다", "risk_flag": "caution" },
+        { "label": "죄가 없음을 증명하려고 적극 협조한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "trust-fear-buildup",
+        "caution": "trust-fear-buildup",
+        "risky": "trust-fear-buildup"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "김수사관"
+    },
+    {
+      "node_id": "trust-fear-buildup",
+      "stage": "trust_building",
+      "app_type": "call",
+      "required_risk_signal": "'수사 기밀이니 가족에게도 말하지 말라'며 고립시키고, 권위적 말투와 전문 용어로 심리를 지배한다",
+      "forbidden_content": [
+        "실존 수사기관 부서·실명 사칭",
+        "실제 개인정보 패턴",
+        "과도한 공포 조성 표현(심장마비 등 건강 위협 묘사)"
+      ],
+      "options": [
+        { "label": "가족·지인에게 즉시 알리고 함께 확인한다", "risk_flag": "safe" },
+        { "label": "기밀이라니 혼자 판단하기로 한다", "risk_flag": "caution" },
+        { "label": "시키는 대로 조용한 곳으로 이동한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "risk-fake-site",
+        "caution": "risk-fake-site",
+        "risky": "risk-fake-site"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "김수사관"
+    },
+    {
+      "node_id": "risk-fake-site",
+      "stage": "risk_signal",
+      "app_type": "browser",
+      "required_risk_signal": "문자로 온 링크가 정부 사이트를 흉내 낸 가짜 사이트다. 주소가 공식 도메인(go.kr)이 아니고, 사건 조회를 미끼로 개인정보 입력을 요구한다",
+      "forbidden_content": [
+        "실존 정부 도메인·사이트 실명",
+        "실제 개인정보 패턴",
+        "피싱 사이트 제작 방법"
+      ],
+      "options": [
+        { "label": "주소가 공식 도메인이 아님을 확인하고 입력하지 않는다", "risk_flag": "safe" },
+        { "label": "이름 정도만 입력해 본다", "risk_flag": "caution" },
+        { "label": "사건 확인이 급해 요구 정보를 모두 입력한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-family-check",
+        "caution": "demand-safe-account",
+        "risky": "demand-safe-account"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "김수사관",
+      "timer_seconds": 45
+    },
+    {
+      "node_id": "demand-safe-account",
+      "stage": "demand",
+      "app_type": "bank",
+      "required_risk_signal": "'자산 보호를 위해 국가 안전계좌로 이체하라'고 요구한다. 안전계좌라는 것은 존재하지 않으며, 이체 요구는 100% 사기다",
+      "forbidden_content": [
+        "실존 수사기관·은행 실명 사칭",
+        "실제 계좌번호 패턴",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "안전계좌는 없다는 것을 알고 즉시 끊고 신고한다", "risk_flag": "safe" },
+        { "label": "일부 금액만 이체해 본다", "risk_flag": "caution" },
+        { "label": "전 재산을 안전계좌로 이체한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-family-check",
+        "caution": "branch-child-impersonation",
+        "risky": "branch-child-impersonation"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "김수사관",
+      "timer_seconds": 30
+    },
+    {
+      "node_id": "branch-child-impersonation",
+      "stage": "branch",
+      "app_type": "sms",
+      "required_risk_signal": "이번엔 자녀를 사칭한 문자가 '폰이 고장 나서 그런데 급히 돈이 필요하다'며 온다. 본인만 아는 질문으로 재확인하고 원래 번호로 전화하는 것이 대응 원칙이다",
+      "forbidden_content": [
+        "실존 인물 실명",
+        "실제 전화번호 패턴",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "자녀 원래 번호로 직접 전화해 사실을 확인한다", "risk_flag": "safe" },
+        { "label": "미심쩍지만 소액을 먼저 보낸다", "risk_flag": "caution" },
+        { "label": "자식 일이라 급히 요구 금액을 보낸다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-family-check",
+        "caution": "ending-warning-partial-loss",
+        "risky": "ending-harm-full-transfer"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "딸",
+      "timer_seconds": 30
+    },
+    {
+      "node_id": "ending-safe-family-check",
+      "stage": "ending",
+      "app_type": "call",
+      "required_risk_signal": "기관 사칭·안전계좌·자녀 사칭이라는 위험 신호를 식별하고 '끊고, 직접 확인'하는 원칙으로 안전하게 회피했다",
+      "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": true,
+      "is_ending": true,
+      "ending_type": "safe",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-warning-partial-loss",
+      "stage": "ending",
+      "app_type": "bank",
+      "required_risk_signal": "일부 이체 후 사기임을 인지했다. 즉시 112 신고와 은행 지급정지(골든타임 30분)·피해금 환급 신청 절차를 안내한다",
+      "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": true,
+      "is_ending": true,
+      "ending_type": "warning",
+      "sender_name": "시스템"
+    },
+    {
+      "node_id": "ending-harm-full-transfer",
+      "stage": "ending",
+      "app_type": "bank",
+      "required_risk_signal": "전액 이체 후 연락이 끊겼다. 지급정지·명의도용 확인(엠세이퍼)·회복 지원 및 가족 동반 사후 대응 절차를 안내한다",
+      "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
+      "options": [],
+      "allow_free_input": false,
+      "next_node_map": null,
+      "voice_enabled": true,
+      "is_ending": true,
+      "ending_type": "harm",
+      "sender_name": "시스템"
+    }
+  ]
+}

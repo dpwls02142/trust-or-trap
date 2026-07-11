@@ -1,3 +1,30 @@
 ﻿# Cursor hook runtime markers (generated, not source)
 .cursor/hooks/.ui-edits-marker
 .cursor/hooks/.content-safety-marker
+
+# dependencies
+node_modules/
+.pnpm-store/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# production
+build/
+
+# env — 실제 키 값은 절대 커밋 금지
+.env
+.env.local
+.env.*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# misc
+.DS_Store
+*.pem
