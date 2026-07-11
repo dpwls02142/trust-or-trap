@@ -1,21 +1,21 @@
 ﻿---
-description: Windows 11 개발 환경 제약 및 Mac 팀원과의 호환성 가이드
+description: Windows 11 1인 개발 — Cursor 에이전트가 PowerShell 기준으로 동작하도록 강제
 alwaysApply: true
 ---
 
-# Windows Development
+# Windows Development (Solo / Vibe Coding)
 
-This project is developed on **Windows 11** (Intel Core Ultra 5 125H, 15.6 GB RAM, often ~4 GB free).
+**Windows 11** solo developer (Intel Core Ultra 5 125H, 15.6 GB RAM, ~4 GB free). Shell is **PowerShell**, not bash.
 
 ## Agent Must Do
 
-- Prefer **cross-platform** commands (`npm run`, Node APIs) over macOS-only tools (`pbcopy`, `open`, `sed -i ''`).
-- Use **PowerShell-compatible** or Node.js scripts in hooks and tooling.
-- Keep **LF line endings** — never commit CRLF-only churn (see `.gitattributes`).
-- Be **memory-conscious**: avoid parallel heavy processes (multiple dev servers, full test + build simultaneously).
-- Use **forward slashes** in code paths; Windows accepts them in Node/JS tooling.
-- Remember Windows filesystem is **case-insensitive** — match import casing exactly.
+- Run terminal commands in **PowerShell 5.1+** syntax — never bash/macOS (`&&`, HEREDOC, `export`, `open`, `pbcopy`, `sed -i ''`).
+- Chain commands with `;` not `&&`. Example: `git fetch origin; git rebase origin/main`
+- Use `git commit -m "message"` and `gh pr create --body-file path` — no HEREDOC.
+- Prefer **Node.js** or `npm run` scripts over shell-specific tooling.
+- Be **memory-conscious**: one dev server at a time, no parallel heavy builds.
+- Keep **LF line endings** (see `.gitattributes`).
 
 ## Full Reference
 
-See `docs/windows-development-environment.md` for detailed setup, WSL, Docker, and performance tips.
+See `docs/windows-development-environment.md`.

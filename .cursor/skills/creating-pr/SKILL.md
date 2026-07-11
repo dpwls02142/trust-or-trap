@@ -12,14 +12,11 @@ Package work into a pull request that's easy to review and merge.
 
 ### 1. Prepare the Branch
 
-Before creating the PR:
+Before creating the PR (PowerShell):
 
-```bash
-# Ensure branch is up to date with base
+```powershell
 git fetch origin
-git rebase origin/main  # or merge, depending on project convention
-
-# Check what will be in the PR
+git rebase origin/main
 git log origin/main..HEAD --oneline
 git diff origin/main --stat
 ```
@@ -81,30 +78,20 @@ Before requesting review:
 
 ### 5. Create the PR
 
-```bash
-git push -u origin HEAD
-```
-
-**Windows (PowerShell):** use `--body-file` instead of bash HEREDOC:
-
 ```powershell
-gh pr create --title "<title>" --body-file .github/pr-body-template.md
-```
-
-**macOS/Linux:**
-
-```bash
+git push -u origin HEAD
 gh pr create --title "<title>" --body-file .github/pr-body-template.md
 ```
 
 See `docs/git-branch-workflow.md` for the full workflow (squash merge, branch naming).
 
-### 6. Request Review
+### 6. Self-Review Checklist (Solo Dev)
 
-- Tag the appropriate reviewers (code owners, domain experts)
-- If the PR is large (>400 lines), add a comment explaining the best order to review files
-- If the PR depends on another PR, note it in the description
-- Label the PR appropriately (feature, bug, breaking change, etc.)
+This is a **1-person project**. PR serves as a work log and merge checkpoint.
+
+- Run **bugbot** subagent on the diff before creating PR
+- UI changes: run **visual-qa-testing** skill
+- Squash merge after PR is created (no external reviewer needed)
 
 ## Tips
 

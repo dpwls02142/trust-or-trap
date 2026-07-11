@@ -95,7 +95,7 @@ asdf
 - Don't commit half-working code (use `git stash` instead)
 - Commit early and often on feature branches — **squash merge on PR** consolidates into one commit on `main`
 - Never commit directly to `main`; use `feature/*` or `fix/*` branches (see `docs/git-branch-workflow.md`)
-- On Windows, use `git commit -m "message"` (interactive commit is blocked by project hooks)
+- Use `git commit -m "message"` in PowerShell (interactive commit and bash HEREDOC are blocked)
 
 ## Breaking Changes
 
