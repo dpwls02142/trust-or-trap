@@ -1,1 +1,3 @@
-﻿
+﻿# Cursor hook runtime markers (generated, not source)
+.cursor/hooks/.ui-edits-marker
+.cursor/hooks/.content-safety-marker

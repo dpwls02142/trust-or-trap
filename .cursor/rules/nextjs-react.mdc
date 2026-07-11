@@ -1,0 +1,37 @@
+---
+description: Next.js/React/TypeScript 코드 컨벤션 (Trust or Trap)
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Next.js / React 컨벤션
+
+## 프레임워크
+
+- **Next.js App Router** 사용(`src/app/`). 페이지 라우팅은 폴더 기반.
+- 서버 로직(외부 API 호출)은 **Route Handler**(`src/app/api/**/route.ts`)에서만. `api-routes` 규칙 참조.
+- 클라이언트 상호작용이 필요한 컴포넌트만 `"use client"`. 기본은 서버 컴포넌트.
+- import alias는 `@/` (= `src/`).
+
+## 상태 · 폼 · 애니메이션
+
+- 전역/게임 상태는 **Zustand** 스토어(`src/lib/stores/`). 현재 노드, 대화 히스토리, 누적 risk_flag, 사용자 프로필 관리.
+- 온보딩 등 폼은 **React Hook Form + Zod**. 스키마로 입력값 검증.
+- 연출(메시지 수신, 타이머 압박)은 **Framer Motion**.
+- 스타일은 **Tailwind CSS** 유틸리티. "폰 속의 폰" 픽셀 재현에 사용.
+
+## TypeScript
+
+- `strict` 기준. `any` 지양, 불가피하면 이유를 주석으로.
+- 도메인 타입은 `src/lib/scenario/types.ts`에 모으고 glossary 명칭과 일치시킨다.
+- 외부에서 들어오는 데이터(LLM 응답, 요청 body)는 **Zod로 파싱 후** 사용.
+
+## 명명
+
+- 컴포넌트 파일 `PascalCase.tsx`, 그 외 `kebab-case.ts`.
+- 식별자는 두 단어 이상(예: `personaCode`, `scenarioGraph`, `currentNode`).
+
+## 성능/메모리 (Windows 1인 개발)
+
+- dev 서버는 한 번에 하나만(`npm run dev`). 무거운 병렬 빌드 지양.
+- 불필요한 리렌더 방지(선택자 기반 Zustand 구독, 메모이제이션은 필요할 때만).
