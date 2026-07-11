@@ -1,0 +1,21 @@
+﻿---
+description: Windows 11 개발 환경 제약 및 Mac 팀원과의 호환성 가이드
+alwaysApply: true
+---
+
+# Windows Development
+
+This project is developed on **Windows 11** (Intel Core Ultra 5 125H, 15.6 GB RAM, often ~4 GB free).
+
+## Agent Must Do
+
+- Prefer **cross-platform** commands (`npm run`, Node APIs) over macOS-only tools (`pbcopy`, `open`, `sed -i ''`).
+- Use **PowerShell-compatible** or Node.js scripts in hooks and tooling.
+- Keep **LF line endings** — never commit CRLF-only churn (see `.gitattributes`).
+- Be **memory-conscious**: avoid parallel heavy processes (multiple dev servers, full test + build simultaneously).
+- Use **forward slashes** in code paths; Windows accepts them in Node/JS tooling.
+- Remember Windows filesystem is **case-insensitive** — match import casing exactly.
+
+## Full Reference
+
+See `docs/windows-development-environment.md` for detailed setup, WSL, Docker, and performance tips.

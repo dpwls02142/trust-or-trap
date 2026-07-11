@@ -93,7 +93,9 @@ asdf
 - Each commit should represent one logical change
 - Don't mix refactoring with feature work in the same commit
 - Don't commit half-working code (use `git stash` instead)
-- Commit early and often on feature branches, squash before merge if needed
+- Commit early and often on feature branches — **squash merge on PR** consolidates into one commit on `main`
+- Never commit directly to `main`; use `feature/*` or `fix/*` branches (see `docs/git-branch-workflow.md`)
+- On Windows, use `git commit -m "message"` (interactive commit is blocked by project hooks)
 
 ## Breaking Changes
 
