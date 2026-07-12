@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           contents: `사용자 응답: "${userResponseText}"`,
           config: {
             systemInstruction: buildJudgeSystemPrompt(currentNode),
-            maxOutputTokens: 512,
+            maxOutputTokens: 256,
             responseMimeType: "application/json",
             thinkingConfig: resolveThinkingConfig(modelName),
           },
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       } catch (primaryModelError) {
         // 무료 티어 쿼터(429)/일시 과부하(503) → 쿼터가 모델별로 분리된 대체 모델로 재시도
         if (!isQuotaOrOverloadError(primaryModelError)) throw primaryModelError;
-        console.warn(`[judge] 기본 모델 쿼터/과부하 — ${resolveGeminiFallbackModel()}로 폴백`);
+        console.warn(`[judge] 기본 모델 오류(404/429/503) — ${resolveGeminiFallbackModel()}로 폴백`);
         judgeResponse = await requestJudgeWithModel(resolveGeminiFallbackModel());
       }
 

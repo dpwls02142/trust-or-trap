@@ -50,3 +50,19 @@ const teenUnsafePatternList: RegExp[] = [
 export function detectTeenUnsafeContent(messageText: string): boolean {
   return teenUnsafePatternList.some((unsafePattern) => unsafePattern.test(messageText));
 }
+
+/** 카톡 단답형 상한 — LLM이 장문을 내도 화면에는 짧게 잘라 표시 */
+const dialogueMaxChars = 60;
+const optionLabelMaxChars = 28;
+
+export function capDialogueLength(rawMessageText: string): string {
+  const trimmedText = rawMessageText.trim();
+  if (trimmedText.length <= dialogueMaxChars) return trimmedText;
+  return `${trimmedText.slice(0, dialogueMaxChars - 1)}…`;
+}
+
+export function capOptionLabelLength(rawLabelText: string): string {
+  const trimmedLabel = rawLabelText.trim();
+  if (trimmedLabel.length <= optionLabelMaxChars) return trimmedLabel;
+  return `${trimmedLabel.slice(0, optionLabelMaxChars - 1)}…`;
+}

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { findScenarioNode } from "@/lib/scenario/graph-loader";
 import { advancePayloadSchema, advanceRequestSchema } from "@/lib/scenario/schemas";
-import { applySafetyFilter, detectTeenUnsafeContent } from "@/lib/scenario/safety-filter";
+import { applySafetyFilter, capDialogueLength, capOptionLabelLength, detectTeenUnsafeContent } from "@/lib/scenario/safety-filter";
 import {
   buildAdvanceSystemPrompt,
   buildAdvanceUserPrompt,
@@ -71,10 +71,10 @@ export async function POST(request: NextRequest) {
         const requestStreamWithModel = (modelName: string) =>
           geminiClient.models.generateContentStream({
             model: modelName,
-            contents: buildAdvanceUserPrompt(chatHistory, userProfile),
+            contents: buildAdvanceUserPrompt(currentNode, chatHistory, userProfile),
             config: {
               systemInstruction: buildAdvanceSystemPrompt(currentNode, userProfile),
-              maxOutputTokens: 2048,
+              maxOutputTokens: 512,
               responseMimeType: "application/json",
               thinkingConfig: resolveThinkingConfig(modelName),
             },
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
           // 무료 티어 쿼터(429)/일시 과부하(503) → 쿼터가 모델별로 분리된 대체 모델로 재시도
           if (!isQuotaOrOverloadError(primaryModelError)) throw primaryModelError;
           console.warn(
-            `[advance] 기본 모델 쿼터/과부하 — ${resolveGeminiFallbackModel()}로 폴백`,
+            `[advance] 기본 모델 오류(404/429/503) — ${resolveGeminiFallbackModel()}로 폴백`,
           );
           responseStream = await requestStreamWithModel(resolveGeminiFallbackModel());
         }
@@ -182,7 +182,11 @@ export async function POST(request: NextRequest) {
 
         emitEvent("payload", {
           ...parsedPayload,
-          message: applySafetyFilter(parsedPayload.message),
+          message: capDialogueLength(applySafetyFilter(parsedPayload.message)),
+          options: parsedPayload.options.map((optionItem) => ({
+            ...optionItem,
+            label: capOptionLabelLength(applySafetyFilter(optionItem.label)),
+          })),
           sender: currentNode.sender_name,
         });
       } catch (streamError) {
