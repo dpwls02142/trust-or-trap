@@ -6,17 +6,17 @@ import type { ScenarioId } from "./types";
  */
 const senderAvatarByScenario: Record<ScenarioId, Record<string, string>> = {
   "teen-female-grooming": {
-    hyun_98: "/teen_female.jpg",
+    hyun_98: "/teen_male.jpg",
     현오빠: "/teen_male.jpg",
   },
   "teen-male-gameitem": {
     아이템창고: "/teen_game_male.jpg",
   },
   "twenties-female-romance": {
-    "제임스 리": "/twenties_male.jpg",
+    도현: "/twenties_male.jpg",
   },
   "twenties-male-voicephishing": {
-    "김상담 대리": "/twenties_male.jpg",
+    "김상담 대리": "/leading.jpg",
     한빛캐피탈: "/leading.jpg",
   },
   "middle-invest-scam": {
