@@ -23,23 +23,24 @@ export function getGeminiClient(): GoogleGenAI {
 }
 
 export function resolveGeminiModel(): string {
-  return process.env.GEMINI_MODEL ?? "gemini-2.5-flash-lite";
+  // 2.5-flash-lite는 신규 사용자에게 404 — 3.1-flash-lite가 현재 최저가·가용 모델
+  return process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite";
 }
 
 /**
- * 기본 모델이 쿼터 초과(429)/과부하(503)일 때 재시도할 대체 모델.
+ * 기본 모델이 쿼터 초과(429)/과부하(503)/미제공(404)일 때 재시도할 대체 모델.
  * 무료 티어 쿼터는 모델별로 따로 집계되므로 별도 모델로 폴백하면 계속 플레이할 수 있다.
  */
 export function resolveGeminiFallbackModel(): string {
-  return process.env.GEMINI_FALLBACK_MODEL ?? "gemini-3.1-flash-lite";
+  return process.env.GEMINI_FALLBACK_MODEL ?? "gemini-3.5-flash";
 }
 
 /**
- * 429(쿼터 초과)/503(일시 과부하) — 대체 모델로 즉시 재시도할 가치가 있는 오류.
+ * 404(모델 미제공)/429(쿼터 초과)/503(일시 과부하) — 대체 모델로 즉시 재시도할 가치가 있는 오류.
  */
 export function isQuotaOrOverloadError(unknownError: unknown): boolean {
   const errorStatus = (unknownError as { status?: number } | null)?.status;
-  return errorStatus === 429 || errorStatus === 503;
+  return errorStatus === 404 || errorStatus === 429 || errorStatus === 503;
 }
 
 /**
