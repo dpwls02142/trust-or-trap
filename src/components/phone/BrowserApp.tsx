@@ -27,6 +27,7 @@ export function BrowserApp(sharedProps: PhoneAppSharedProps) {
         chatHistory={chatHistory}
         streamingMessage={streamingMessage}
         senderName={currentNode.sender_name}
+        isAwaitingResponse={sharedProps.isAwaitingResponse}
         elapsedDaysLabel={currentNode.elapsed_days}
         bubbleTheme={{
           threadBackgroundClass: "bg-white",

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ResponseComposer } from "./shared/ResponseComposer";
+import { TypingIndicator } from "./shared/TypingIndicator";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /**
@@ -9,7 +10,10 @@ import type { PhoneAppSharedProps } from "./shared/phone-app-props";
  * 상대 대사는 자막처럼 표시되고 (TTS가 음성 재생), 사용자는 말하거나(STT) 선택지로 답한다.
  */
 export function CallScreen(sharedProps: PhoneAppSharedProps) {
-  const { currentNode, chatHistory, streamingMessage } = sharedProps;
+  const { currentNode, chatHistory, streamingMessage, isAwaitingResponse } = sharedProps;
+
+  // 첫 자막 토큰 도착 전 — 상대가 말을 고르는 중임을 표시
+  const showSpeechPending = isAwaitingResponse && !streamingMessage;
 
   const latestScammerLine =
     streamingMessage ||
@@ -33,6 +37,18 @@ export function CallScreen(sharedProps: PhoneAppSharedProps) {
         <h2 className="text-xl font-semibold">{currentNode.sender_name}</h2>
         <p className="text-xs text-white/50">통화 중...</p>
       </div>
+
+      {showSpeechPending && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-3 flex items-center justify-center gap-2 text-xs text-white/60"
+          role="status"
+        >
+          <TypingIndicator dotColorClass="bg-white/60" />
+          상대방이 말하려고 합니다
+        </motion.div>
+      )}
 
       {/* 자막 영역 */}
       <div className="phone-scroll mt-4 flex-1 space-y-3 overflow-y-auto px-6 py-2">
