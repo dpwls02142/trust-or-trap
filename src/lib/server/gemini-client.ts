@@ -26,15 +26,33 @@ export function resolveGeminiModel(): string {
 }
 
 /**
+ * 기본 모델이 쿼터 초과(429)/과부하(503)일 때 재시도할 대체 모델.
+ * 무료 티어 쿼터는 모델별로 따로 집계되므로 별도 모델로 폴백하면 계속 플레이할 수 있다.
+ */
+export function resolveGeminiFallbackModel(): string {
+  return process.env.GEMINI_FALLBACK_MODEL ?? "gemini-3.1-flash-lite";
+}
+
+/**
+ * 429(쿼터 초과)/503(일시 과부하) — 대체 모델로 즉시 재시도할 가치가 있는 오류.
+ */
+export function isQuotaOrOverloadError(unknownError: unknown): boolean {
+  const errorStatus = (unknownError as { status?: number } | null)?.status;
+  return errorStatus === 429 || errorStatus === 503;
+}
+
+/**
  * 대사 생성/판정은 저지연이 중요하므로 thinking을 최소화한다.
- * - Gemini 3.x 계열: thinkingLevel만 지원 (thinkingBudget과 동시 사용 시 400).
- *   LOW는 전 모델 공통 지원이며 지연/비용 최소화 목적.
- * - Gemini 2.5 계열(구형 오버라이드 대비): thinkingBudget: 0으로 thinking 비활성화.
+ * Gemini 3.x는 thinking 토큰이 maxOutputTokens에 포함되므로,
+ * thinking이 길어지면 정작 JSON 응답이 잘려 파싱 실패가 난다 → MINIMAL로 억제.
+ * - flash 계열: MINIMAL (사실상 no thinking, 첫 토큰 지연 최소화)
+ * - pro 계열: MINIMAL 미지원 → LOW
+ * - 2.5 계열(구형 오버라이드 대비): thinkingBudget: 0 (thinkingLevel과 동시 사용 시 400)
  */
 export function resolveThinkingConfig(modelName: string): ThinkingConfig {
-  return modelName.includes("2.5")
-    ? { thinkingBudget: 0 }
-    : { thinkingLevel: ThinkingLevel.LOW };
+  if (modelName.includes("2.5")) return { thinkingBudget: 0 };
+  if (modelName.includes("pro")) return { thinkingLevel: ThinkingLevel.LOW };
+  return { thinkingLevel: ThinkingLevel.MINIMAL };
 }
 
 /**

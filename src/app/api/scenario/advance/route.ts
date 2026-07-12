@@ -6,6 +6,8 @@ import {
   buildAdvanceSystemPrompt,
   buildAdvanceUserPrompt,
   getGeminiClient,
+  isQuotaOrOverloadError,
+  resolveGeminiFallbackModel,
   resolveGeminiModel,
   resolveThinkingConfig,
 } from "@/lib/server/gemini-client";
@@ -65,17 +67,30 @@ export async function POST(request: NextRequest) {
       };
 
       try {
-        const geminiModel = resolveGeminiModel();
-        const responseStream = await geminiClient.models.generateContentStream({
-          model: geminiModel,
-          contents: buildAdvanceUserPrompt(chatHistory, userProfile),
-          config: {
-            systemInstruction: buildAdvanceSystemPrompt(currentNode, userProfile),
-            maxOutputTokens: 1024,
-            responseMimeType: "application/json",
-            thinkingConfig: resolveThinkingConfig(geminiModel),
-          },
-        });
+        // thinking 토큰이 maxOutputTokens에 포함되므로 여유 있게 확보 (부족 시 JSON이 잘림)
+        const requestStreamWithModel = (modelName: string) =>
+          geminiClient.models.generateContentStream({
+            model: modelName,
+            contents: buildAdvanceUserPrompt(chatHistory, userProfile),
+            config: {
+              systemInstruction: buildAdvanceSystemPrompt(currentNode, userProfile),
+              maxOutputTokens: 2048,
+              responseMimeType: "application/json",
+              thinkingConfig: resolveThinkingConfig(modelName),
+            },
+          });
+
+        let responseStream;
+        try {
+          responseStream = await requestStreamWithModel(resolveGeminiModel());
+        } catch (primaryModelError) {
+          // 무료 티어 쿼터(429)/일시 과부하(503) → 쿼터가 모델별로 분리된 대체 모델로 재시도
+          if (!isQuotaOrOverloadError(primaryModelError)) throw primaryModelError;
+          console.warn(
+            `[advance] 기본 모델 쿼터/과부하 — ${resolveGeminiFallbackModel()}로 폴백`,
+          );
+          responseStream = await requestStreamWithModel(resolveGeminiFallbackModel());
+        }
 
         // "message" 문자열 값만 증분 추출하는 경량 상태 추적기.
         // 전체 JSON 파싱을 매 토큰마다 하지 않으므로 토큰당 O(토큰 길이).
