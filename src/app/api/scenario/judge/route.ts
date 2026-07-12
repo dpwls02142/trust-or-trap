@@ -4,6 +4,8 @@ import { judgeRequestSchema, judgeVerdictSchema } from "@/lib/scenario/schemas";
 import {
   buildJudgeSystemPrompt,
   getGeminiClient,
+  isQuotaOrOverloadError,
+  resolveGeminiFallbackModel,
   resolveGeminiModel,
   resolveThinkingConfig,
 } from "@/lib/server/gemini-client";
@@ -63,17 +65,28 @@ export async function POST(request: NextRequest) {
     // 2) 자유 입력(텍스트/STT) → Gemini 판정
     try {
       const geminiClient = getGeminiClient();
-      const geminiModel = resolveGeminiModel();
-      const judgeResponse = await geminiClient.models.generateContent({
-        model: geminiModel,
-        contents: `사용자 응답: "${userResponseText}"`,
-        config: {
-          systemInstruction: buildJudgeSystemPrompt(currentNode),
-          maxOutputTokens: 256,
-          responseMimeType: "application/json",
-          thinkingConfig: resolveThinkingConfig(geminiModel),
-        },
-      });
+      // thinking 토큰이 maxOutputTokens에 포함되므로 여유 있게 확보 (부족 시 JSON이 잘림)
+      const requestJudgeWithModel = (modelName: string) =>
+        geminiClient.models.generateContent({
+          model: modelName,
+          contents: `사용자 응답: "${userResponseText}"`,
+          config: {
+            systemInstruction: buildJudgeSystemPrompt(currentNode),
+            maxOutputTokens: 512,
+            responseMimeType: "application/json",
+            thinkingConfig: resolveThinkingConfig(modelName),
+          },
+        });
+
+      let judgeResponse;
+      try {
+        judgeResponse = await requestJudgeWithModel(resolveGeminiModel());
+      } catch (primaryModelError) {
+        // 무료 티어 쿼터(429)/일시 과부하(503) → 쿼터가 모델별로 분리된 대체 모델로 재시도
+        if (!isQuotaOrOverloadError(primaryModelError)) throw primaryModelError;
+        console.warn(`[judge] 기본 모델 쿼터/과부하 — ${resolveGeminiFallbackModel()}로 폴백`);
+        judgeResponse = await requestJudgeWithModel(resolveGeminiFallbackModel());
+      }
 
       const responseText = (judgeResponse.text ?? "")
         .replace(/^```(?:json)?\s*/i, "")
