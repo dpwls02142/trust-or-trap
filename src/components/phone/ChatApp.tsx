@@ -3,6 +3,7 @@
 import { MessageThread } from "./shared/MessageThread";
 import { ResponseComposer } from "./shared/ResponseComposer";
 import { SenderAvatar } from "./shared/SenderAvatar";
+import { AppBackButton } from "./shared/AppBackButton";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: chat — 카카오톡류 메신저 (범용 렌더러, 페르소나 7종 공유) */
@@ -11,7 +12,8 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
 
   return (
     <div className="flex h-full flex-col bg-[#bacee0] pt-10">
-      <header className="flex items-center gap-3 border-b border-black/10 bg-[#bacee0] px-4 py-2.5">
+      <header className="flex items-center gap-2 border-b border-black/10 bg-[#bacee0] px-3 py-2.5">
+        <AppBackButton onBack={sharedProps.onExitToHome} />
         <SenderAvatar
           scenarioId={activeScenarioId}
           senderName={currentNode.sender_name}

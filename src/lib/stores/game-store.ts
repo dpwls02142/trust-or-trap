@@ -39,6 +39,7 @@ interface GameStoreState {
     entryNode: PublicNodeView;
   }) => void;
   enterCurrentApp: () => void;
+  exitToHome: () => void;
   appendChatEntry: (entryValue: ChatHistoryEntry) => void;
   advanceToNode: (nextNode: PublicNodeView, judgedFlag: RiskFlag) => void;
   resetGame: () => void;
@@ -72,6 +73,8 @@ export const useGameStore = create<GameStoreState>()(
         }),
 
       enterCurrentApp: () => setState({ gamePhase: "playing" }),
+
+      exitToHome: () => setState({ gamePhase: "home" }),
 
       appendChatEntry: (entryValue) =>
         setState({ chatHistory: [...getState().chatHistory, entryValue] }),

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ResponseComposer } from "./shared/ResponseComposer";
 import { SenderAvatar } from "./shared/SenderAvatar";
+import { AppBackButton } from "./shared/AppBackButton";
 import { TypingIndicator } from "./shared/TypingIndicator";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
@@ -27,7 +28,10 @@ export function CallScreen(sharedProps: PhoneAppSharedProps) {
       ?.messageText ?? "";
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-slate-800 to-slate-950 pt-14 text-white">
+    <div className="relative flex h-full flex-col bg-gradient-to-b from-slate-800 to-slate-950 pt-14 text-white">
+      <div className="absolute left-2 top-12 z-10">
+        <AppBackButton onBack={sharedProps.onExitToHome} tone="dark" />
+      </div>
       <div className="flex flex-col items-center gap-2 px-6">
         <motion.div
           animate={{ scale: [1, 1.05, 1] }}

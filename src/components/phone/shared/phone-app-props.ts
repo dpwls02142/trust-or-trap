@@ -21,4 +21,6 @@ export interface PhoneAppSharedProps {
   isAwaitingResponse: boolean;
   onSelectOption: (optionLabel: string) => void;
   onSubmitFreeInput: (inputText: string) => void;
+  /** 홈 화면으로 복귀 (뒤로가기) */
+  onExitToHome: () => void;
 }

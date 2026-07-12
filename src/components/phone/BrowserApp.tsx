@@ -2,6 +2,7 @@
 
 import { MessageThread } from "./shared/MessageThread";
 import { ResponseComposer } from "./shared/ResponseComposer";
+import { AppBackButton } from "./shared/AppBackButton";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /**
@@ -13,7 +14,8 @@ export function BrowserApp(sharedProps: PhoneAppSharedProps) {
 
   return (
     <div className="flex h-full flex-col bg-white pt-10">
-      <div className="flex items-center gap-2 border-b border-black/10 bg-neutral-50 px-3 py-2">
+      <div className="flex items-center gap-1 border-b border-black/10 bg-neutral-50 px-2 py-2">
+        <AppBackButton onBack={sharedProps.onExitToHome} />
         <span aria-hidden>🔓</span>
         <span className="min-w-0 flex-1 truncate rounded-full bg-neutral-200 px-3 py-1.5 text-xs text-black/70">
           http://secure-check.info-portal.xyz
