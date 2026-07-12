@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 /**
- * Zod ??? ? ???? ???? ?? ???? ?? ???.
- * ??? JSON / API ?? body / LLM ??? ?? ???? ??? ? ????.
+ * Zod 스키마 — 외부에서 들어오는 모든 데이터의 검증 레이어.
+ * 그래프 JSON / API 요청 body / LLM 응답을 여기 스키마로 파싱한 뒤 사용한다.
  */
 
 export const riskFlagSchema = z.enum(["safe", "caution", "risky"]);
@@ -86,21 +86,26 @@ export const scenarioGraphSchema = z
     nodes: z.array(scenarioNodeSchema).min(1),
   })
   .superRefine((graphValue, refineContext) => {
-    const nodeIdSet = new Set(graphValue.nodes.map((nodeItem) => nodeItem.node_id));
+    const nodeIdSet = new Set(
+      graphValue.nodes.map((nodeItem) => nodeItem.node_id),
+    );
 
     if (!nodeIdSet.has(graphValue.entry_node_id)) {
       refineContext.addIssue({
         code: "custom",
-        message: `entry_node_id "${graphValue.entry_node_id}" ??? ???? ??`,
+        message: `entry_node_id "${graphValue.entry_node_id}" 노드가 존재하지 않음`,
       });
     }
 
     for (const nodeItem of graphValue.nodes) {
-      // teen ???? ?? ??: ?? ?? ???
-      if (graphValue.scenario_id.startsWith("teen-") && nodeItem.voice_enabled) {
+      // teen 시나리오 안전 불변: 음성 절대 미적용
+      if (
+        graphValue.scenario_id.startsWith("teen-") &&
+        nodeItem.voice_enabled
+      ) {
         refineContext.addIssue({
           code: "custom",
-          message: `teen ???? ?? "${nodeItem.node_id}"? voice_enabled=false?? ?`,
+          message: `teen 시나리오 노드 "${nodeItem.node_id}"는 voice_enabled=false여야 함`,
         });
       }
 
@@ -108,21 +113,21 @@ export const scenarioGraphSchema = z
         if (!nodeItem.ending_type) {
           refineContext.addIssue({
             code: "custom",
-            message: `?? ?? "${nodeItem.node_id}"? ending_type ??`,
+            message: `엔딩 노드 "${nodeItem.node_id}"에 ending_type 누락`,
           });
         }
       } else {
         if (!nodeItem.next_node_map) {
           refineContext.addIssue({
             code: "custom",
-            message: `??? ?? "${nodeItem.node_id}"? next_node_map ?? (??? ??)`,
+            message: `비엔딩 노드 "${nodeItem.node_id}"에 next_node_map 누락 (막다른 노드)`,
           });
         } else {
           for (const nextNodeId of Object.values(nodeItem.next_node_map)) {
             if (!nodeIdSet.has(nextNodeId)) {
               refineContext.addIssue({
                 code: "custom",
-                message: `?? "${nodeItem.node_id}"? next_node_map? ???? ?? "${nextNodeId}" ??`,
+                message: `노드 "${nodeItem.node_id}"의 next_node_map이 존재하지 않는 "${nextNodeId}" 참조`,
               });
             }
           }
@@ -131,7 +136,7 @@ export const scenarioGraphSchema = z
     }
   });
 
-/** LLM ?? ?? ?? ? ??? JSON ?? */
+/** LLM 대사 생성 응답 — 구조화 JSON 강제 */
 export const advancePayloadSchema = z.object({
   message: z.string().min(1),
   sender: z.string().min(1),
@@ -139,13 +144,13 @@ export const advancePayloadSchema = z.object({
   risk_flags: z.array(z.string()),
 });
 
-/** LLM risk_flag ?? ?? */
+/** LLM risk_flag 판정 응답 */
 export const judgeVerdictSchema = z.object({
   risk_flag: riskFlagSchema,
   reason: z.string(),
 });
 
-// ?? API ?? body ??? ??????????????????????????????
+// ── API 요청 body 스키마 ──────────────────────────────
 
 export const chatHistoryEntrySchema = z.object({
   speaker: z.enum(["scammer", "player", "system"]),
