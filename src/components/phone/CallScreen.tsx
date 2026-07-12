@@ -85,12 +85,15 @@ export function CallScreen(sharedProps: PhoneAppSharedProps) {
 
       <div className="bg-black/40 pb-4 backdrop-blur">
         <ResponseComposer
-          activeOptions={sharedProps.activeOptions}
+          availableOptions={sharedProps.availableOptions}
           allowFreeInput={currentNode.allow_free_input}
           voiceEnabled={currentNode.voice_enabled}
           isAwaitingResponse={sharedProps.isAwaitingResponse}
           onSelectOption={sharedProps.onSelectOption}
           onSubmitFreeInput={sharedProps.onSubmitFreeInput}
+          inputTutorialMode={sharedProps.inputTutorialMode}
+          isInputTutorialVisible={sharedProps.isInputTutorialVisible}
+          onDismissInputTutorial={sharedProps.onDismissInputTutorial}
           composerTheme="dark"
         />
         <p className="text-center text-[11px] text-white/40">

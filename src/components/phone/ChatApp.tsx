@@ -37,12 +37,15 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
 
       <div className="bg-white">
         <ResponseComposer
-          activeOptions={sharedProps.activeOptions}
+          availableOptions={sharedProps.availableOptions}
           allowFreeInput={currentNode.allow_free_input}
           voiceEnabled={false}
           isAwaitingResponse={sharedProps.isAwaitingResponse}
           onSelectOption={sharedProps.onSelectOption}
           onSubmitFreeInput={sharedProps.onSubmitFreeInput}
+          inputTutorialMode={sharedProps.inputTutorialMode}
+          isInputTutorialVisible={sharedProps.isInputTutorialVisible}
+          onDismissInputTutorial={sharedProps.onDismissInputTutorial}
           composerTheme="light"
         />
       </div>
