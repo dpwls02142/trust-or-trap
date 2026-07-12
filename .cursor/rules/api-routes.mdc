@@ -33,7 +33,7 @@ alwaysApply: false
 ## Typecast TTS 호출
 
 - 엔드포인트 `POST https://api.typecast.ai/v1/text-to-speech/stream`, 인증 `X-API-KEY` 헤더.
-- LLM 문장이 완성되는 즉시 전달해 청크를 순차 재생. 통 재생 금지.
+- **통화(call) 앱 전용.** 대사 생성 완료 후 문장 단위로 순차 요청·재생(동시 요청 최대 1개 — 병렬 버스트는 Typecast 429 유발).
 - `prompt.emotion_type: "smart"` 기본값. 페르소나별 `voice_id`는 사전 매핑(`docs/technical-architecture.md` §6).
 - **teen 시나리오 요청은 TTS를 호출하지 않는다.**
 

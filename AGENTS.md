@@ -15,7 +15,7 @@ Solo Windows 11 developer using Cursor for vibe coding. Agents must use **PowerS
 
 1. 시나리오 그래프 = 진실의 원천. LLM은 노드 범위 내 대사만 생성.
 2. API 키는 서버(API Route) 전용. 클라이언트 직접 호출 금지.
-3. 텍스트·음성 스트리밍(SSE + 문장 단위 TTS).
+3. 텍스트는 SSE 스트리밍, TTS는 생성 완료 후 문장 단위 순차 재생(통화 앱 전용).
 4. 10대(teen) 시나리오는 음성 미적용 + 강화 콘텐츠 안전.
 5. 엔딩 3갈래(safe/warning/harm).
 

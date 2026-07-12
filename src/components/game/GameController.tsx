@@ -66,7 +66,12 @@ export function GameController() {
       setPayloadOptionsEntry(null);
       setIsAwaitingResponse(true);
 
-      const useTtsForNode = scenarioVoiceEnabled && targetNode.voice_enabled;
+      // TTS는 통화(call) 앱에서만 사용 — 메시지형 앱은 텍스트만으로 충분
+      const useTtsForNode =
+        scenarioVoiceEnabled && targetNode.voice_enabled && targetNode.app_type === "call";
+      // 생성 중에는 대기 인디케이터가 떠 있으므로 Typecast를 호출하지 않고,
+      // 문장을 모아뒀다가 생성 완료(payload) 후 한 번에 큐로 넘긴다 (429 버스트 방지)
+      const collectedSentences: { sentenceText: string; previousSentence: string }[] = [];
 
       await consumeAdvanceStream(
         {
@@ -80,10 +85,16 @@ export function GameController() {
             setStreamingMessage((previousText) => previousText + deltaText),
           onSentenceComplete: (sentenceText, previousSentence) => {
             if (useTtsForNode) {
-              ttsQueueRef.current?.enqueueSentence(sentenceText, previousSentence);
+              collectedSentences.push({ sentenceText, previousSentence });
             }
           },
           onFinalPayload: (finalPayload) => {
+            for (const sentenceItem of collectedSentences) {
+              ttsQueueRef.current?.enqueueSentence(
+                sentenceItem.sentenceText,
+                sentenceItem.previousSentence,
+              );
+            }
             appendChatEntry({
               speaker: "scammer",
               messageText: finalPayload.message,
