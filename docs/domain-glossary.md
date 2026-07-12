@@ -131,8 +131,8 @@
 | `GEMINI_API_KEY` | Gemini API 키 (서버 전용) |
 | `TYPECAST_API_KEY` | Typecast TTS 키 (서버 전용) |
 | `TYPECAST_DEFAULT_VOICE_ID` | 기본 보이스 ID |
-| `GEMINI_MODEL` | (선택) Gemini 모델 ID 오버라이드. 미설정 시 코드 기본값 사용 |
-| `GEMINI_FALLBACK_MODEL` | (선택) 쿼터 초과(429)/과부하(503) 시 재시도할 대체 모델. 미설정 시 코드 기본값 사용 |
+| `GEMINI_MODEL` | (선택) Gemini 모델 ID. 미설정 시 `gemini-2.5-flash-lite`(기본, 최저가) |
+| `GEMINI_FALLBACK_MODEL` | (선택) 429/503 시 대체 모델. 미설정 시 `gemini-3.1-flash-lite` |
 
 > 실제 키 값은 `.env`(gitignore)에만. `.env.example`에는 **키 이름만** 둔다.
 

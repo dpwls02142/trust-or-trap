@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
           contents: `사용자 응답: "${userResponseText}"`,
           config: {
             systemInstruction: buildJudgeSystemPrompt(currentNode),
-            maxOutputTokens: 512,
+            maxOutputTokens: 256,
             responseMimeType: "application/json",
             thinkingConfig: resolveThinkingConfig(modelName),
           },
