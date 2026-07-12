@@ -1,11 +1,16 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { NodeOption } from "@/lib/scenario/types";
+import {
+  InputTutorialBanner,
+  type InputTutorialMode,
+} from "@/components/phone/shared/InputTutorialBanner";
 
 interface ResponseComposerProps {
-  activeOptions: NodeOption[];
+  /** 현재 노드에서 선택 가능한 답안 (UI는 기본 숨김, 토글로 공개) */
+  availableOptions: NodeOption[];
   allowFreeInput: boolean;
   /** 음성 입력(Web Speech API) 노출 여부 — teen 시나리오는 항상 false */
   voiceEnabled: boolean;
@@ -13,6 +18,9 @@ interface ResponseComposerProps {
   onSelectOption: (optionLabel: string) => void;
   onSubmitFreeInput: (inputText: string) => void;
   composerTheme?: "dark" | "light";
+  inputTutorialMode?: InputTutorialMode | null;
+  isInputTutorialVisible?: boolean;
+  onDismissInputTutorial?: () => void;
 }
 
 /** 브라우저 SpeechRecognition 최소 타입 (표준 타입 미제공 브라우저 대응) */
@@ -37,30 +45,67 @@ function createSpeechRecognition(): MinimalSpeechRecognition | null {
   return RecognitionConstructor ? new RecognitionConstructor() : null;
 }
 
+async function requestMicrophoneAccess(): Promise<void> {
+  if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) return;
+  try {
+    const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaStream.getTracks().forEach((trackItem) => trackItem.stop());
+  } catch {
+    // 거부·미지원 — 텍스트 입력 대체 경로 유지
+  }
+}
+
 /**
- * 사용자 응답 입력기 — 선택지 버튼 + 자유 텍스트 + (음성 시나리오) STT.
+ * 사용자 응답 입력기 — 자유 텍스트/음성 우선, 예시 답변은 선택적 공개.
  * 마이크가 거부되거나 미지원이어도 텍스트 입력 대체 경로는 항상 남는다.
  */
 export function ResponseComposer({
-  activeOptions,
+  availableOptions,
   allowFreeInput,
   voiceEnabled,
   isAwaitingResponse,
   onSelectOption,
   onSubmitFreeInput,
   composerTheme = "dark",
+  inputTutorialMode = null,
+  isInputTutorialVisible = false,
+  onDismissInputTutorial,
 }: ResponseComposerProps) {
   const [freeInputText, setFreeInputText] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [isOptionsPanelVisible, setIsOptionsPanelVisible] = useState(false);
   const recognitionRef = useRef<MinimalSpeechRecognition | null>(null);
+  const micPromptAttemptedRef = useRef(false);
+
+  const showTutorialBanner =
+    isInputTutorialVisible && inputTutorialMode !== null && inputTutorialMode !== undefined;
+
+  // 노드·선택지가 바뀌면 예시 패널 접기 (자유 입력 우선 UX 유지)
+  useEffect(() => {
+    setIsOptionsPanelVisible(false);
+  }, [availableOptions]);
+
+  // 통화 튜토리얼 — 브라우저 마이크 권한 프롬프트를 미리 띄움 (1회)
+  useEffect(() => {
+    if (!showTutorialBanner || inputTutorialMode !== "call" || micPromptAttemptedRef.current) {
+      return;
+    }
+    micPromptAttemptedRef.current = true;
+    void requestMicrophoneAccess();
+  }, [showTutorialBanner, inputTutorialMode]);
+
+  const dismissTutorialIfNeeded = useCallback(() => {
+    if (showTutorialBanner) onDismissInputTutorial?.();
+  }, [showTutorialBanner, onDismissInputTutorial]);
 
   const handleMicToggle = useCallback(() => {
+    dismissTutorialIfNeeded();
     if (isListening) {
       recognitionRef.current?.stop();
       return;
     }
     const speechRecognition = createSpeechRecognition();
-    if (!speechRecognition) return; // 미지원 → 텍스트 입력 사용
+    if (!speechRecognition) return;
 
     recognitionRef.current = speechRecognition;
     speechRecognition.lang = "ko-KR";
@@ -73,39 +118,34 @@ export function ResponseComposer({
     speechRecognition.onerror = () => setIsListening(false);
     speechRecognition.start();
     setIsListening(true);
-  }, [isListening]);
+  }, [isListening, dismissTutorialIfNeeded]);
 
   const submitFreeInput = () => {
     const trimmedInput = freeInputText.trim();
     if (!trimmedInput || isAwaitingResponse) return;
+    dismissTutorialIfNeeded();
     onSubmitFreeInput(trimmedInput);
     setFreeInputText("");
   };
 
+  const handleSelectOption = (optionLabel: string) => {
+    dismissTutorialIfNeeded();
+    onSelectOption(optionLabel);
+  };
+
   const isDarkTheme = composerTheme === "dark";
+  const hasAvailableOptions = availableOptions.length > 0;
+  const inputPlaceholder =
+    inputTutorialMode === "call" ? "말하거나 직접 입력..." : "메시지를 입력하세요...";
 
   return (
     <div className="flex flex-col gap-2 p-3">
-      {activeOptions.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {activeOptions.map((optionItem, optionIndex) => (
-            <motion.button
-              key={`${optionItem.label}-${optionIndex}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: optionIndex * 0.08 }}
-              disabled={isAwaitingResponse}
-              onClick={() => onSelectOption(optionItem.label)}
-              className={`rounded-2xl border px-4 py-2.5 text-left text-sm transition disabled:opacity-40 ${
-                isDarkTheme
-                  ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                  : "border-black/10 bg-white text-black hover:bg-neutral-100"
-              }`}
-            >
-              {optionItem.label}
-            </motion.button>
-          ))}
-        </div>
+      {showTutorialBanner && inputTutorialMode && (
+        <InputTutorialBanner
+          tutorialMode={inputTutorialMode}
+          composerTheme={composerTheme}
+          onDismissTutorial={() => onDismissInputTutorial?.()}
+        />
       )}
 
       {allowFreeInput && (
@@ -119,7 +159,7 @@ export function ResponseComposer({
               }
             }}
             disabled={isAwaitingResponse}
-            placeholder="직접 입력..."
+            placeholder={inputPlaceholder}
             className={`min-w-0 flex-1 rounded-full px-4 py-2.5 text-sm outline-none disabled:opacity-40 ${
               isDarkTheme
                 ? "bg-white/10 text-white placeholder:text-white/40"
@@ -132,7 +172,11 @@ export function ResponseComposer({
               disabled={isAwaitingResponse}
               aria-label={isListening ? "음성 입력 중지" : "음성으로 답하기"}
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg transition disabled:opacity-40 ${
-                isListening ? "animate-pulse bg-red-500 text-white" : isDarkTheme ? "bg-white/10" : "bg-neutral-100"
+                isListening
+                  ? "animate-pulse bg-red-500 text-white"
+                  : isDarkTheme
+                    ? "bg-white/10"
+                    : "bg-neutral-100"
               }`}
             >
               🎤
@@ -146,6 +190,43 @@ export function ResponseComposer({
           >
             ➤
           </button>
+        </div>
+      )}
+
+      {hasAvailableOptions && (
+        <button
+          type="button"
+          disabled={isAwaitingResponse}
+          onClick={() => setIsOptionsPanelVisible((previousVisible) => !previousVisible)}
+          className={`self-start rounded-full px-3 py-1 text-xs transition disabled:opacity-40 ${
+            isDarkTheme
+              ? "text-white/60 hover:bg-white/10 hover:text-white/90"
+              : "text-black/50 hover:bg-neutral-100 hover:text-black/80"
+          }`}
+        >
+          {isOptionsPanelVisible ? "예시 답변 닫기" : "예시 답변 보기"}
+        </button>
+      )}
+
+      {isOptionsPanelVisible && hasAvailableOptions && (
+        <div className="flex flex-col gap-2">
+          {availableOptions.map((optionItem, optionIndex) => (
+            <motion.button
+              key={`${optionItem.label}-${optionIndex}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: optionIndex * 0.08 }}
+              disabled={isAwaitingResponse}
+              onClick={() => handleSelectOption(optionItem.label)}
+              className={`rounded-2xl border px-4 py-2.5 text-left text-sm transition disabled:opacity-40 ${
+                isDarkTheme
+                  ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
+                  : "border-black/10 bg-white text-black hover:bg-neutral-100"
+              }`}
+            >
+              {optionItem.label}
+            </motion.button>
+          ))}
         </div>
       )}
     </div>

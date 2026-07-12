@@ -10,6 +10,7 @@ import { EndingReport } from "@/components/game/EndingReport";
 import { useGameStore } from "@/lib/stores/game-store";
 import { consumeAdvanceStream } from "@/lib/client/advance-stream";
 import { SentenceTtsQueue } from "@/lib/client/tts-queue";
+import { resolveInputTutorialMode } from "@/lib/scenario/input-tutorial";
 import type { PublicNodeView } from "@/lib/scenario/public-node";
 import type { NodeOption, RiskFlag, ScenarioId } from "@/lib/scenario/types";
 
@@ -44,6 +45,7 @@ export function GameController() {
   } | null>(null);
   const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
   const [isStartingScenario, setIsStartingScenario] = useState(false);
+  const [isInputTutorialVisible, setIsInputTutorialVisible] = useState(true);
 
   const lastAdvancedNodeIdRef = useRef<string | null>(null);
   const ttsQueueRef = useRef<SentenceTtsQueue | null>(null);
@@ -132,14 +134,33 @@ export function GameController() {
         entryItem.nodeId === currentNode.node_id && entryItem.speaker === "scammer",
     );
 
-  // 화면에 보여줄 선택지 — payload 도착분 우선, 복원된 노드는 그래프 정의 선택지 사용 (파생값, effect 불필요)
-  const activeOptions: NodeOption[] = useMemo(() => {
+  // 화면에 선택 가능한 답안 — payload 도착분 우선, 복원된 노드는 그래프 정의 사용 (표시는 ResponseComposer 토글)
+  const availableOptions: NodeOption[] = useMemo(() => {
     if (!currentNode || isAwaitingResponse || streamingMessage) return [];
     if (payloadOptionsEntry?.nodeId === currentNode.node_id) {
       return payloadOptionsEntry.options;
     }
     return isNodeMessageGenerated ? currentNode.options : [];
   }, [currentNode, isAwaitingResponse, streamingMessage, payloadOptionsEntry, isNodeMessageGenerated]);
+
+  const inputTutorialMode = useMemo(() => {
+    if (!currentNode) return null;
+    return resolveInputTutorialMode(
+      currentNode.app_type,
+      scenarioVoiceEnabled && currentNode.voice_enabled,
+    );
+  }, [currentNode, scenarioVoiceEnabled]);
+
+  const hasPlayerResponse = chatHistory.some((entryItem) => entryItem.speaker === "player");
+
+  const shouldShowInputTutorial =
+    isInputTutorialVisible &&
+    !hasPlayerResponse &&
+    !!currentNode?.allow_free_input &&
+    !currentNode.is_ending &&
+    !isAwaitingResponse &&
+    !streamingMessage &&
+    inputTutorialMode !== null;
 
   // 플레이 중 새 노드 진입 시 대사 생성 (마이크로태스크로 미뤄 렌더 사이클과 분리)
   useEffect(() => {
@@ -181,6 +202,7 @@ export function GameController() {
           entryNode: PublicNodeView;
         };
         lastAdvancedNodeIdRef.current = null;
+        setIsInputTutorialVisible(true);
         startScenario(entryData);
       } catch {
         setIsStartingScenario(false);
@@ -199,6 +221,7 @@ export function GameController() {
         messageText: responseText,
         nodeId: currentNode.node_id,
       });
+      setIsInputTutorialVisible(false);
       setPayloadOptionsEntry(null);
       setIsAwaitingResponse(true);
 
@@ -237,18 +260,24 @@ export function GameController() {
 
   // 타이머 만료 → 머뭇거린 것으로 간주 (caution 선택지를 자동 선택, 없으면 첫 선택지)
   const handleTimerExpire = useCallback(() => {
-    const expireOptions = activeOptions.length > 0 ? activeOptions : currentNode?.options ?? [];
+    const expireOptions =
+      availableOptions.length > 0 ? availableOptions : currentNode?.options ?? [];
     const cautionOption =
       expireOptions.find((optionItem) => optionItem.risk_flag === "caution") ??
       expireOptions[0];
     if (cautionOption) void handleUserResponse(cautionOption.label);
-  }, [activeOptions, currentNode, handleUserResponse]);
+  }, [availableOptions, currentNode, handleUserResponse]);
+
+  const handleDismissInputTutorial = useCallback(() => {
+    setIsInputTutorialVisible(false);
+  }, []);
 
   const handleRestartGame = useCallback(() => {
     lastAdvancedNodeIdRef.current = null;
     setStreamingMessage("");
     setPayloadOptionsEntry(null);
     setIsAwaitingResponse(false);
+    setIsInputTutorialVisible(true);
     resetGame();
   }, [resetGame]);
 
@@ -286,7 +315,10 @@ export function GameController() {
           currentNode={currentNode}
           chatHistory={chatHistory}
           streamingMessage={streamingMessage}
-          activeOptions={activeOptions}
+          availableOptions={availableOptions}
+          inputTutorialMode={inputTutorialMode}
+          isInputTutorialVisible={shouldShowInputTutorial}
+          onDismissInputTutorial={handleDismissInputTutorial}
           isAwaitingResponse={isAwaitingResponse}
           onSelectOption={handleUserResponse}
           onSubmitFreeInput={handleUserResponse}

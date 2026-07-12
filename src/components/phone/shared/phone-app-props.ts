@@ -1,3 +1,4 @@
+import type { InputTutorialMode } from "@/components/phone/shared/InputTutorialBanner";
 import type { PublicNodeView } from "@/lib/scenario/public-node";
 import type { ChatHistoryEntry, NodeOption, ScenarioId } from "@/lib/scenario/types";
 
@@ -11,8 +12,12 @@ export interface PhoneAppSharedProps {
   chatHistory: ChatHistoryEntry[];
   /** LLM이 스트리밍 중인 텍스트 (타이핑 효과) */
   streamingMessage: string;
-  /** 스트리밍 완료 후 표시할 선택지 (payload 기반) */
-  activeOptions: NodeOption[];
+  /** 현재 노드에서 선택 가능한 답안 (예시 패널 토글로 공개) */
+  availableOptions: NodeOption[];
+  /** 첫 턴 입력 튜토리얼 모드 (메신저 vs 통화) */
+  inputTutorialMode: InputTutorialMode | null;
+  isInputTutorialVisible: boolean;
+  onDismissInputTutorial: () => void;
   isAwaitingResponse: boolean;
   onSelectOption: (optionLabel: string) => void;
   onSubmitFreeInput: (inputText: string) => void;
