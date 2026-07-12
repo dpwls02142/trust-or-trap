@@ -31,7 +31,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "제임스 리",
+      "sender_name": "도현",
       "elapsed_days": 1
     },
     {
@@ -45,9 +45,15 @@
         "노골적 성적 표현"
       ],
       "options": [
-        { "label": "화상통화를 계속 피하는 게 이상해 직접 확인을 요구한다", "risk_flag": "safe" },
+        {
+          "label": "화상통화를 계속 피하는 게 이상해 직접 확인을 요구한다",
+          "risk_flag": "safe"
+        },
         { "label": "바쁘다니 이해하고 넘어간다", "risk_flag": "caution" },
-        { "label": "목소리만으로 충분하다며 더 깊이 의지한다", "risk_flag": "risky" }
+        {
+          "label": "목소리만으로 충분하다며 더 깊이 의지한다",
+          "risk_flag": "risky"
+        }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -58,7 +64,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "제임스 리",
+      "sender_name": "도현",
       "elapsed_days": 21
     },
     {
@@ -72,8 +78,14 @@
         "노골적 성적 표현"
       ],
       "options": [
-        { "label": "돈 이야기가 나온 순간 스캠을 의심하고 검증에 들어간다", "risk_flag": "safe" },
-        { "label": "안타깝지만 일단 상황을 더 물어본다", "risk_flag": "caution" },
+        {
+          "label": "돈 이야기가 나온 순간 스캠을 의심하고 검증에 들어간다",
+          "risk_flag": "safe"
+        },
+        {
+          "label": "안타깝지만 일단 상황을 더 물어본다",
+          "risk_flag": "caution"
+        },
         { "label": "얼마가 필요한지 먼저 물어본다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
@@ -85,7 +97,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "제임스 리",
+      "sender_name": "도현",
       "elapsed_days": 28
     },
     {
@@ -99,8 +111,14 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        { "label": "역이미지 검색 결과(도용 사진)를 확인하고 관계를 끊는다", "risk_flag": "safe" },
-        { "label": "검색 결과가 애매해 조금 더 지켜본다", "risk_flag": "caution" },
+        {
+          "label": "역이미지 검색 결과(도용 사진)를 확인하고 관계를 끊는다",
+          "risk_flag": "safe"
+        },
+        {
+          "label": "검색 결과가 애매해 조금 더 지켜본다",
+          "risk_flag": "caution"
+        },
         { "label": "의심한 게 미안해져 검증을 그만둔다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
@@ -112,7 +130,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "제임스 리",
+      "sender_name": "도현",
       "elapsed_days": 29
     },
     {
@@ -126,9 +144,15 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        { "label": "송금을 거절하고 대화를 보존한 뒤 신고한다", "risk_flag": "safe" },
+        {
+          "label": "송금을 거절하고 대화를 보존한 뒤 신고한다",
+          "risk_flag": "safe"
+        },
         { "label": "부담되지 않는 소액만 보낸다", "risk_flag": "caution" },
-        { "label": "사랑하는 사람의 부탁이니 전액 송금한다", "risk_flag": "risky" }
+        {
+          "label": "사랑하는 사람의 부탁이니 전액 송금한다",
+          "risk_flag": "risky"
+        }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -139,7 +163,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "제임스 리",
+      "sender_name": "도현",
       "elapsed_days": 30,
       "timer_seconds": 45
     },

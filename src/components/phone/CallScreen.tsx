@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ResponseComposer } from "./shared/ResponseComposer";
+import { SenderAvatar } from "./shared/SenderAvatar";
 import { TypingIndicator } from "./shared/TypingIndicator";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
@@ -10,7 +11,8 @@ import type { PhoneAppSharedProps } from "./shared/phone-app-props";
  * 상대 대사는 자막처럼 표시되고 (TTS가 음성 재생), 사용자는 말하거나(STT) 선택지로 답한다.
  */
 export function CallScreen(sharedProps: PhoneAppSharedProps) {
-  const { currentNode, chatHistory, streamingMessage, isAwaitingResponse } = sharedProps;
+  const { activeScenarioId, currentNode, chatHistory, streamingMessage, isAwaitingResponse } =
+    sharedProps;
 
   // 첫 자막 토큰 도착 전 — 상대가 말을 고르는 중임을 표시
   const showSpeechPending = isAwaitingResponse && !streamingMessage;
@@ -27,13 +29,17 @@ export function CallScreen(sharedProps: PhoneAppSharedProps) {
   return (
     <div className="flex h-full flex-col bg-gradient-to-b from-slate-800 to-slate-950 pt-14 text-white">
       <div className="flex flex-col items-center gap-2 px-6">
-        <motion.span
+        <motion.div
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ repeat: Infinity, duration: 2 }}
-          className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-600 text-4xl"
         >
-          👤
-        </motion.span>
+          <SenderAvatar
+            scenarioId={activeScenarioId}
+            senderName={currentNode.sender_name}
+            sizeClass="h-20 w-20"
+            fallbackSurfaceClass="bg-slate-600 text-4xl text-white"
+          />
+        </motion.div>
         <h2 className="text-xl font-semibold">{currentNode.sender_name}</h2>
         <p className="text-xs text-white/50">통화 중...</p>
       </div>
