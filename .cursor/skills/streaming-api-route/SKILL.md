@@ -39,7 +39,7 @@ user-invocable: true
 
 - `POST https://api.typecast.ai/v1/text-to-speech/stream`, `X-API-KEY` 헤더.
 - body: `{ text, model: "ssfm-v30", voice_id, prompt: { emotion_type: "smart", previous_text, next_text }, output: {...} }`.
-- 문장이 완성되는 즉시 호출해 오디오 청크를 순차 전달. 통 재생 금지.
+- **통화(call) 앱 전용.** 대사 생성 완료 후 문장 단위로 순차 요청·재생(동시 요청 최대 1개 — 병렬 버스트는 Typecast 429 유발).
 - **teen 시나리오 요청은 TTS를 호출하지 않는다.**
 - STT 원본 음성은 처리 후 즉시 폐기, 서버 저장 금지.
 

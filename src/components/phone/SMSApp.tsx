@@ -32,7 +32,7 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
         <ResponseComposer
           activeOptions={sharedProps.activeOptions}
           allowFreeInput={currentNode.allow_free_input}
-          voiceEnabled={currentNode.voice_enabled}
+          voiceEnabled={false}
           isAwaitingResponse={sharedProps.isAwaitingResponse}
           onSelectOption={sharedProps.onSelectOption}
           onSubmitFreeInput={sharedProps.onSubmitFreeInput}
