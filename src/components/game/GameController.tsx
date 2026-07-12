@@ -282,6 +282,7 @@ export function GameController() {
 
       {gamePhase === "playing" && currentNode && (
         <ScenarioAppRenderer
+          activeScenarioId={activeScenarioId}
           currentNode={currentNode}
           chatHistory={chatHistory}
           streamingMessage={streamingMessage}
