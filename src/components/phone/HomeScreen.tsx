@@ -9,6 +9,8 @@ interface HomeScreenProps {
   notificationAppType: AppType;
   notificationSenderName: string;
   onNotificationOpen: () => void;
+  /** 앱을 한 번 열었다가 홈으로 돌아온 경우 알림을 즉시 표시 */
+  showNotificationImmediately?: boolean;
 }
 
 const homeAppIconList: { appType: AppType; appLabel: string; iconGlyph: string; tileColor: string }[] = [
@@ -27,13 +29,17 @@ export function HomeScreen({
   notificationAppType,
   notificationSenderName,
   onNotificationOpen,
+  showNotificationImmediately = false,
 }: HomeScreenProps) {
-  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+  const [isNotificationVisible, setIsNotificationVisible] = useState(
+    showNotificationImmediately,
+  );
 
   useEffect(() => {
+    if (showNotificationImmediately) return;
     const notificationTimer = setTimeout(() => setIsNotificationVisible(true), 1800);
     return () => clearTimeout(notificationTimer);
-  }, []);
+  }, [showNotificationImmediately]);
 
   const notificationApp = homeAppIconList.find(
     (iconItem) => iconItem.appType === notificationAppType,
@@ -74,21 +80,31 @@ export function HomeScreen({
 
       {/* 앱 아이콘 그리드 */}
       <div className="mt-14 grid grid-cols-4 gap-x-4 gap-y-6">
-        {homeAppIconList.map((iconItem) => (
-          <div key={iconItem.appType} className="flex flex-col items-center gap-1.5">
-            <span
-              className={`relative flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-lg ${iconItem.tileColor}`}
+        {homeAppIconList.map((iconItem) => {
+          const isNotificationApp = iconItem.appType === notificationAppType;
+          const IconWrapper = isNotificationApp ? "button" : "div";
+
+          return (
+            <IconWrapper
+              key={iconItem.appType}
+              type={isNotificationApp ? "button" : undefined}
+              onClick={isNotificationApp ? onNotificationOpen : undefined}
+              className={`flex flex-col items-center gap-1.5 ${isNotificationApp ? "cursor-pointer" : ""}`}
             >
-              {iconItem.iconGlyph}
-              {isNotificationVisible && iconItem.appType === notificationAppType && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                  1
-                </span>
-              )}
-            </span>
-            <span className="text-[11px] text-white/90">{iconItem.appLabel}</span>
-          </div>
-        ))}
+              <span
+                className={`relative flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-lg ${iconItem.tileColor}`}
+              >
+                {iconItem.iconGlyph}
+                {isNotificationVisible && isNotificationApp && (
+                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                    1
+                  </span>
+                )}
+              </span>
+              <span className="text-[11px] text-white/90">{iconItem.appLabel}</span>
+            </IconWrapper>
+          );
+        })}
       </div>
 
       {/* 독(dock) */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { NodeOption } from "@/lib/scenario/types";
 import {
@@ -73,17 +73,17 @@ export function ResponseComposer({
 }: ResponseComposerProps) {
   const [freeInputText, setFreeInputText] = useState("");
   const [isListening, setIsListening] = useState(false);
-  const [isOptionsPanelVisible, setIsOptionsPanelVisible] = useState(false);
+  const availableOptionsKey = useMemo(
+    () => availableOptions.map((optionItem) => optionItem.label).join("\0"),
+    [availableOptions],
+  );
+  const [optionsPanelOpenKey, setOptionsPanelOpenKey] = useState<string | null>(null);
+  const isOptionsPanelVisible = optionsPanelOpenKey === availableOptionsKey;
   const recognitionRef = useRef<MinimalSpeechRecognition | null>(null);
   const micPromptAttemptedRef = useRef(false);
 
   const showTutorialBanner =
     isInputTutorialVisible && inputTutorialMode !== null && inputTutorialMode !== undefined;
-
-  // 노드·선택지가 바뀌면 예시 패널 접기 (자유 입력 우선 UX 유지)
-  useEffect(() => {
-    setIsOptionsPanelVisible(false);
-  }, [availableOptions]);
 
   // 통화 튜토리얼 — 브라우저 마이크 권한 프롬프트를 미리 띄움 (1회)
   useEffect(() => {
@@ -197,7 +197,11 @@ export function ResponseComposer({
         <button
           type="button"
           disabled={isAwaitingResponse}
-          onClick={() => setIsOptionsPanelVisible((previousVisible) => !previousVisible)}
+          onClick={() =>
+            setOptionsPanelOpenKey((previousKey) =>
+              previousKey === availableOptionsKey ? null : availableOptionsKey,
+            )
+          }
           className={`self-start rounded-full px-3 py-1 text-xs transition disabled:opacity-40 ${
             isDarkTheme
               ? "text-white/60 hover:bg-white/10 hover:text-white/90"

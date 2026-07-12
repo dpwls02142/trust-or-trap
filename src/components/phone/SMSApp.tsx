@@ -3,6 +3,7 @@
 import { MessageThread } from "./shared/MessageThread";
 import { ResponseComposer } from "./shared/ResponseComposer";
 import { SenderAvatar } from "./shared/SenderAvatar";
+import { AppBackButton } from "./shared/AppBackButton";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: sms — 문자 메시지 (범용 렌더러) */
@@ -11,7 +12,10 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
 
   return (
     <div className="flex h-full flex-col bg-white pt-10">
-      <header className="flex flex-col items-center gap-1.5 border-b border-black/10 bg-neutral-50 px-4 py-2.5">
+      <header className="relative flex flex-col items-center gap-1.5 border-b border-black/10 bg-neutral-50 px-4 py-2.5">
+        <div className="absolute left-2 top-1/2 -translate-y-1/2">
+          <AppBackButton onBack={sharedProps.onExitToHome} />
+        </div>
         <SenderAvatar
           scenarioId={activeScenarioId}
           senderName={currentNode.sender_name}

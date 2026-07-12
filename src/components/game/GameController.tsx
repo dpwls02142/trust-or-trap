@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { OnboardingForm } from "@/components/onboarding/OnboardingForm";
 import { ScenarioRecommendation } from "@/components/onboarding/ScenarioRecommendation";
 import { PhoneFrame } from "@/components/phone/PhoneFrame";
@@ -8,6 +9,10 @@ import { HomeScreen } from "@/components/phone/HomeScreen";
 import { ScenarioAppRenderer } from "@/components/phone/ScenarioAppRenderer";
 import { EndingReport } from "@/components/game/EndingReport";
 import { useGameStore } from "@/lib/stores/game-store";
+import {
+  phoneScreenMotionTransition,
+  phoneScreenMotionVariants,
+} from "@/components/phone/shared/phone-app-transition";
 import { consumeAdvanceStream } from "@/lib/client/advance-stream";
 import { SentenceTtsQueue } from "@/lib/client/tts-queue";
 import { resolveInputTutorialMode } from "@/lib/scenario/input-tutorial";
@@ -33,6 +38,7 @@ export function GameController() {
   const setUserProfile = useGameStore((storeState) => storeState.setUserProfile);
   const startScenario = useGameStore((storeState) => storeState.startScenario);
   const enterCurrentApp = useGameStore((storeState) => storeState.enterCurrentApp);
+  const exitToHome = useGameStore((storeState) => storeState.exitToHome);
   const appendChatEntry = useGameStore((storeState) => storeState.appendChatEntry);
   const advanceToNode = useGameStore((storeState) => storeState.advanceToNode);
   const resetGame = useGameStore((storeState) => storeState.resetGame);
@@ -46,6 +52,7 @@ export function GameController() {
   const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
   const [isStartingScenario, setIsStartingScenario] = useState(false);
   const [isInputTutorialVisible, setIsInputTutorialVisible] = useState(true);
+  const [hasOpenedCurrentApp, setHasOpenedCurrentApp] = useState(false);
 
   const lastAdvancedNodeIdRef = useRef<string | null>(null);
   const ttsQueueRef = useRef<SentenceTtsQueue | null>(null);
@@ -86,16 +93,18 @@ export function GameController() {
           onDeltaText: (deltaText) =>
             setStreamingMessage((previousText) => previousText + deltaText),
           onSentenceComplete: (sentenceText, previousSentence) => {
-            if (useTtsForNode) {
+            if (useTtsForNode && ttsQueueRef.current) {
               collectedSentences.push({ sentenceText, previousSentence });
             }
           },
           onFinalPayload: (finalPayload) => {
-            for (const sentenceItem of collectedSentences) {
-              ttsQueueRef.current?.enqueueSentence(
-                sentenceItem.sentenceText,
-                sentenceItem.previousSentence,
-              );
+            if (useTtsForNode && ttsQueueRef.current) {
+              for (const sentenceItem of collectedSentences) {
+                ttsQueueRef.current.enqueueSentence(
+                  sentenceItem.sentenceText,
+                  sentenceItem.previousSentence,
+                );
+              }
             }
             appendChatEntry({
               speaker: "scammer",
@@ -174,15 +183,22 @@ export function GameController() {
     return () => clearTimeout(advanceTimerId);
   }, [gamePhase, currentNode, isNodeMessageGenerated, runAdvanceForNode]);
 
-  // TTS 큐 수명 관리
+  // TTS 큐 — 홈↔앱 왕복 중에도 진행 중인 통화 대사가 끊기지 않도록 home 단계에서 유지
   useEffect(() => {
-    if (gamePhase === "playing" && activeScenarioId && scenarioVoiceEnabled) {
-      ttsQueueRef.current = new SentenceTtsQueue(activeScenarioId);
-      return () => {
-        ttsQueueRef.current?.dispose();
-        ttsQueueRef.current = null;
-      };
+    const isScenarioActive =
+      !!activeScenarioId &&
+      scenarioVoiceEnabled &&
+      (gamePhase === "playing" || gamePhase === "home");
+
+    if (isScenarioActive) {
+      if (!ttsQueueRef.current) {
+        ttsQueueRef.current = new SentenceTtsQueue(activeScenarioId!);
+      }
+      return;
     }
+
+    ttsQueueRef.current?.dispose();
+    ttsQueueRef.current = null;
   }, [gamePhase, activeScenarioId, scenarioVoiceEnabled]);
 
   const handleScenarioSelect = useCallback(
@@ -203,6 +219,7 @@ export function GameController() {
         };
         lastAdvancedNodeIdRef.current = null;
         setIsInputTutorialVisible(true);
+        setHasOpenedCurrentApp(false);
         startScenario(entryData);
       } catch {
         setIsStartingScenario(false);
@@ -272,12 +289,24 @@ export function GameController() {
     setIsInputTutorialVisible(false);
   }, []);
 
+  const handleEnterCurrentApp = useCallback(() => {
+    setHasOpenedCurrentApp(true);
+    enterCurrentApp();
+  }, [enterCurrentApp]);
+
+  const handleExitToHome = useCallback(() => {
+    lastAdvancedNodeIdRef.current = null;
+    setStreamingMessage("");
+    exitToHome();
+  }, [exitToHome]);
+
   const handleRestartGame = useCallback(() => {
     lastAdvancedNodeIdRef.current = null;
     setStreamingMessage("");
     setPayloadOptionsEntry(null);
     setIsAwaitingResponse(false);
     setIsInputTutorialVisible(true);
+    setHasOpenedCurrentApp(false);
     resetGame();
   }, [resetGame]);
 
@@ -301,39 +330,73 @@ export function GameController() {
   // ── "폰 속의 폰" ──
   return (
     <PhoneFrame>
-      {gamePhase === "home" && currentNode && (
-        <HomeScreen
-          notificationAppType={currentNode.app_type}
-          notificationSenderName={currentNode.sender_name}
-          onNotificationOpen={enterCurrentApp}
-        />
-      )}
+      <AnimatePresence mode="wait" initial={false}>
+        {gamePhase === "home" && currentNode && (
+          <motion.div
+            key="home-screen"
+            className="h-full"
+            variants={phoneScreenMotionVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={phoneScreenMotionTransition}
+          >
+            <HomeScreen
+              notificationAppType={currentNode.app_type}
+              notificationSenderName={currentNode.sender_name}
+              onNotificationOpen={handleEnterCurrentApp}
+              showNotificationImmediately={hasOpenedCurrentApp}
+            />
+          </motion.div>
+        )}
 
-      {gamePhase === "playing" && currentNode && (
-        <ScenarioAppRenderer
-          activeScenarioId={activeScenarioId}
-          currentNode={currentNode}
-          chatHistory={chatHistory}
-          streamingMessage={streamingMessage}
-          availableOptions={availableOptions}
-          inputTutorialMode={inputTutorialMode}
-          isInputTutorialVisible={shouldShowInputTutorial}
-          onDismissInputTutorial={handleDismissInputTutorial}
-          isAwaitingResponse={isAwaitingResponse}
-          onSelectOption={handleUserResponse}
-          onSubmitFreeInput={handleUserResponse}
-          onTimerExpire={handleTimerExpire}
-        />
-      )}
+        {gamePhase === "playing" && currentNode && (
+          <motion.div
+            key="playing-screen"
+            className="h-full"
+            variants={phoneScreenMotionVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={phoneScreenMotionTransition}
+          >
+            <ScenarioAppRenderer
+              activeScenarioId={activeScenarioId}
+              currentNode={currentNode}
+              chatHistory={chatHistory}
+              streamingMessage={streamingMessage}
+              availableOptions={availableOptions}
+              inputTutorialMode={inputTutorialMode}
+              isInputTutorialVisible={shouldShowInputTutorial}
+              onDismissInputTutorial={handleDismissInputTutorial}
+              isAwaitingResponse={isAwaitingResponse}
+              onSelectOption={handleUserResponse}
+              onSubmitFreeInput={handleUserResponse}
+              onExitToHome={handleExitToHome}
+              onTimerExpire={handleTimerExpire}
+            />
+          </motion.div>
+        )}
 
-      {gamePhase === "ending" && endingType && (
-        <EndingReport
-          endingType={endingType}
-          scenarioTitle={scenarioTitle}
-          riskSignalRecords={riskSignalRecords}
-          onRestartGame={handleRestartGame}
-        />
-      )}
+        {gamePhase === "ending" && endingType && (
+          <motion.div
+            key="ending-screen"
+            className="h-full"
+            variants={phoneScreenMotionVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={phoneScreenMotionTransition}
+          >
+            <EndingReport
+              endingType={endingType}
+              scenarioTitle={scenarioTitle}
+              riskSignalRecords={riskSignalRecords}
+              onRestartGame={handleRestartGame}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </PhoneFrame>
   );
 }

@@ -3,6 +3,7 @@
 import { MessageThread } from "./shared/MessageThread";
 import { ResponseComposer } from "./shared/ResponseComposer";
 import { SenderAvatar } from "./shared/SenderAvatar";
+import { AppBackButton } from "./shared/AppBackButton";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: insta — SNS DM (범용 렌더러) */
@@ -11,7 +12,8 @@ export function InstaApp(sharedProps: PhoneAppSharedProps) {
 
   return (
     <div className="flex h-full flex-col bg-white pt-10">
-      <header className="flex items-center gap-3 border-b border-black/10 px-4 py-2.5">
+      <header className="flex items-center gap-2 border-b border-black/10 px-3 py-2.5">
+        <AppBackButton onBack={sharedProps.onExitToHome} />
         <SenderAvatar
           scenarioId={activeScenarioId}
           senderName={currentNode.sender_name}
