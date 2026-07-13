@@ -30,10 +30,12 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
       {/* 상태바 */}
       <div className="absolute inset-x-0 top-0 z-40 flex items-center justify-between px-7 pt-3 text-xs font-semibold text-white">
         <span suppressHydrationWarning>{clockText}</span>
-        <span aria-hidden className="hidden sm:block h-6 w-28 rounded-full bg-black" />
+        <span
+          aria-hidden
+          className="hidden sm:block h-6 w-28 rounded-full bg-black"
+        />
         <span className="flex items-center gap-1">
-          <span aria-label="신호 세기">▂▄▆</span>
-          <span aria-label="배터리">▮ 87%</span>
+          <span aria-label="배터리">87%</span>
         </span>
       </div>
 
