@@ -156,6 +156,7 @@ export const chatHistoryEntrySchema = z.object({
   speaker: z.enum(["scammer", "player", "system"]),
   messageText: z.string().max(1000),
   nodeId: z.string().max(100),
+  elapsedDays: z.number().int().nonnegative().optional(),
 });
 
 export const userProfileSchema = z.object({

@@ -49,7 +49,7 @@ export function InstaApp(sharedProps: PhoneAppSharedProps) {
         streamingMessage={streamingMessage}
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}
-        elapsedDaysLabel={currentNode.elapsed_days}
+        currentElapsedDays={currentNode.elapsed_days}
         bubbleTheme={{
           threadBackgroundClass: "bg-white",
           incomingBubbleClass: "bg-neutral-100 text-black",
