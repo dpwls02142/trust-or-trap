@@ -8,6 +8,7 @@ import { SenderAvatar } from "./shared/SenderAvatar";
 import { AppBackButton } from "./shared/AppBackButton";
 import { ChatProfileDetail } from "./shared/ChatProfileDetail";
 import { buildSenderProfileView } from "@/lib/scenario/sender-profile";
+import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: chat — 카카오톡류 메신저 (범용 렌더러, 페르소나 7종 공유) */
@@ -18,6 +19,11 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
   const senderProfileView = useMemo(
     () => buildSenderProfileView(activeScenarioId, currentNode.sender_name),
     [activeScenarioId, currentNode.sender_name],
+  );
+
+  const threadChatHistory = useMemo(
+    () => filterChatHistoryForAppView(chatHistory, currentNode),
+    [chatHistory, currentNode],
   );
 
   return (
@@ -42,7 +48,7 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
       </header>
 
       <MessageThread
-        chatHistory={chatHistory}
+        chatHistory={threadChatHistory}
         streamingMessage={streamingMessage}
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}

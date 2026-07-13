@@ -1,14 +1,33 @@
 "use client";
 
+import { useMemo } from "react";
 import { MessageThread } from "./shared/MessageThread";
 import { ResponseComposer } from "./shared/ResponseComposer";
 import { SenderAvatar } from "./shared/SenderAvatar";
 import { AppBackButton } from "./shared/AppBackButton";
+import { resolveSenderContactLabel } from "@/lib/scenario/sender-profile";
+import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
-/** app_type: sms — 문자 메시지 (범용 렌더러) */
+/** app_type: sms — 메시지 앱 (범용 렌더러) */
 export function SMSApp(sharedProps: PhoneAppSharedProps) {
   const { activeScenarioId, currentNode, chatHistory, streamingMessage } = sharedProps;
+
+  const senderContactLabel = useMemo(
+    () =>
+      resolveSenderContactLabel(
+        activeScenarioId,
+        "sms",
+        currentNode.sender_name,
+        "",
+      ),
+    [activeScenarioId, currentNode.sender_name],
+  );
+
+  const threadChatHistory = useMemo(
+    () => filterChatHistoryForAppView(chatHistory, currentNode),
+    [chatHistory, currentNode],
+  );
 
   return (
     <div className="flex h-full flex-col bg-white pt-10">
@@ -21,11 +40,11 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
           senderName={currentNode.sender_name}
         />
         <h2 className="text-sm font-semibold text-black">{currentNode.sender_name}</h2>
-        <p className="text-[11px] text-black/40">휴대전화</p>
+        <p className="text-[11px] text-black/40">{senderContactLabel}</p>
       </header>
 
       <MessageThread
-        chatHistory={chatHistory}
+        chatHistory={threadChatHistory}
         streamingMessage={streamingMessage}
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}

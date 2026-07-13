@@ -1,8 +1,10 @@
 "use client";
 
-import { MessageThread } from "./shared/MessageThread";
-import { ResponseComposer } from "./shared/ResponseComposer";
+import { useMemo } from "react";
 import { AppBackButton } from "./shared/AppBackButton";
+import { BrowserSearchResultPanel } from "./shared/BrowserSearchResultPanel";
+import { ScenarioActionPanel } from "./shared/ScenarioActionPanel";
+import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /**
@@ -11,6 +13,11 @@ import type { PhoneAppSharedProps } from "./shared/phone-app-props";
  */
 export function BrowserApp(sharedProps: PhoneAppSharedProps) {
   const { currentNode, chatHistory, streamingMessage } = sharedProps;
+
+  const nodeChatHistory = useMemo(
+    () => filterChatHistoryForAppView(chatHistory, currentNode),
+    [chatHistory, currentNode],
+  );
 
   return (
     <div className="flex h-full flex-col bg-white pt-10">
@@ -25,34 +32,24 @@ export function BrowserApp(sharedProps: PhoneAppSharedProps) {
         이 사이트는 보안 연결(HTTPS)이 아니며 공식 도메인(go.kr)이 아닙니다
       </div>
 
-      <MessageThread
-        chatHistory={chatHistory}
+      <BrowserSearchResultPanel
+        nodeChatHistory={nodeChatHistory}
         streamingMessage={streamingMessage}
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}
-        currentElapsedDays={currentNode.elapsed_days}
-        bubbleTheme={{
-          threadBackgroundClass: "bg-white",
-          incomingBubbleClass: "bg-neutral-100 text-black",
-          outgoingBubbleClass: "bg-sky-500 text-white",
-        }}
       />
 
-      <div className="bg-neutral-50">
-        <ResponseComposer
-          composerResetKey={currentNode.node_id}
-          availableOptions={sharedProps.availableOptions}
-          allowFreeInput={currentNode.allow_free_input}
-          voiceEnabled={false}
-          isAwaitingResponse={sharedProps.isAwaitingResponse}
-          onSelectOption={sharedProps.onSelectOption}
-          onSubmitFreeInput={sharedProps.onSubmitFreeInput}
-          inputTutorialMode={sharedProps.inputTutorialMode}
-          isInputTutorialVisible={sharedProps.isInputTutorialVisible}
-          onDismissInputTutorial={sharedProps.onDismissInputTutorial}
-          composerTheme="light"
-        />
-      </div>
+      <ScenarioActionPanel
+        composerResetKey={currentNode.node_id}
+        panelTitle="검색 결과를 보고 다음 행동을 선택하세요"
+        panelHint="의심이 들면 메시지 앱에서 대화를 확인한 뒤 결정해도 됩니다."
+        availableOptions={sharedProps.availableOptions}
+        allowFreeInput={currentNode.allow_free_input}
+        freeInputPlaceholder="직접 판단을 입력..."
+        isAwaitingResponse={sharedProps.isAwaitingResponse}
+        onSelectOption={sharedProps.onSelectOption}
+        onSubmitFreeInput={sharedProps.onSubmitFreeInput}
+      />
     </div>
   );
 }

@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         const requestStreamWithModel = (modelName: string) =>
           geminiClient.models.generateContentStream({
             model: modelName,
-            contents: buildAdvanceUserPrompt(currentNode, chatHistory, userProfile),
+            contents: buildAdvanceUserPrompt(scenarioId, currentNode, chatHistory, userProfile),
             config: {
               systemInstruction: buildAdvanceSystemPrompt(currentNode, userProfile),
               maxOutputTokens: 512,

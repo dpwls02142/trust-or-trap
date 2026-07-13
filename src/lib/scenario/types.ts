@@ -111,6 +111,8 @@ export interface ChatHistoryEntry {
   nodeId: string;
   /** 노드 연출 힌트 — 메시지 스레드에서 경과일 구분선 표시용 */
   elapsedDays?: number;
+  /** 메시지가 생성된 앱 — 앱 전환 시 스레드 분리용 */
+  appType?: AppType;
 }
 
 /** LLM 대사 생성 결과 — 구조화 JSON 강제 (자유 텍스트 금지) */

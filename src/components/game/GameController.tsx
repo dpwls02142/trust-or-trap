@@ -114,6 +114,7 @@ export function GameController() {
               messageText: finalPayload.message,
               nodeId: targetNode.node_id,
               elapsedDays: targetNode.elapsed_days ?? undefined,
+              appType: targetNode.app_type,
             });
             setStreamingMessage("");
             setPayloadOptionsEntry({
@@ -129,6 +130,7 @@ export function GameController() {
               messageText: errorMessage,
               nodeId: targetNode.node_id,
               elapsedDays: targetNode.elapsed_days ?? undefined,
+              appType: targetNode.app_type,
             });
             setStreamingMessage("");
             setPayloadOptionsEntry({ nodeId: targetNode.node_id, options: targetNode.options });
@@ -247,6 +249,7 @@ export function GameController() {
         messageText: responseText,
         nodeId: currentNode.node_id,
         elapsedDays: currentNode.elapsed_days ?? undefined,
+        appType: currentNode.app_type,
       });
       setIsInputTutorialVisible(false);
       setPayloadOptionsEntry(null);
@@ -274,6 +277,7 @@ export function GameController() {
           messageText: "연결이 불안정합니다. 다시 응답해주세요.",
           nodeId: currentNode.node_id,
           elapsedDays: currentNode.elapsed_days ?? undefined,
+          appType: currentNode.app_type,
         });
         setPayloadOptionsEntry({
           nodeId: currentNode.node_id,
@@ -354,7 +358,6 @@ export function GameController() {
     );
   }
 
-  // ── "폰 속의 폰" ──
   return (
     <PhoneFrame>
       <AnimatePresence mode="wait" initial={false}>
@@ -387,7 +390,12 @@ export function GameController() {
             exit="exit"
             transition={phoneScreenMotionTransition}
           >
-            <HomeAppShell appType={shellAppType} onExitToHome={handleExitToHome} />
+            <HomeAppShell
+              appType={shellAppType}
+              onExitToHome={handleExitToHome}
+              chatHistory={chatHistory}
+              scenarioSenderName={currentNode?.sender_name ?? null}
+            />
           </motion.div>
         )}
 

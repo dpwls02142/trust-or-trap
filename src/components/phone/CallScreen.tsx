@@ -1,10 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { ResponseComposer } from "./shared/ResponseComposer";
 import { SenderAvatar } from "./shared/SenderAvatar";
 import { AppBackButton } from "./shared/AppBackButton";
 import { TypingIndicator } from "./shared/TypingIndicator";
+import {
+  filterChatHistoryForAppView,
+  findLatestSpeakerMessage,
+} from "@/lib/phone/chat-history-view";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /**
@@ -15,17 +20,17 @@ export function CallScreen(sharedProps: PhoneAppSharedProps) {
   const { activeScenarioId, currentNode, chatHistory, streamingMessage, isAwaitingResponse } =
     sharedProps;
 
+  const nodeChatHistory = useMemo(
+    () => filterChatHistoryForAppView(chatHistory, currentNode),
+    [chatHistory, currentNode],
+  );
+
   // 첫 자막 토큰 도착 전 — 상대가 말을 고르는 중임을 표시
   const showSpeechPending = isAwaitingResponse && !streamingMessage;
 
   const latestScammerLine =
-    streamingMessage ||
-    [...chatHistory].reverse().find((entryItem) => entryItem.speaker === "scammer")
-      ?.messageText ||
-    "";
-  const latestPlayerLine =
-    [...chatHistory].reverse().find((entryItem) => entryItem.speaker === "player")
-      ?.messageText ?? "";
+    streamingMessage || findLatestSpeakerMessage(nodeChatHistory, "scammer");
+  const latestPlayerLine = findLatestSpeakerMessage(nodeChatHistory, "player");
 
   return (
     <div className="relative flex h-full flex-col bg-gradient-to-b from-slate-800 to-slate-950 pt-14 text-white">

@@ -150,8 +150,8 @@
     {
       "node_id": "risk-secret-request",
       "stage": "risk_signal",
-      "app_type": "chat",
-      "required_risk_signal": "'우리 대화는 부모님이나 선생님한테 비밀로 하자'며 관계를 고립시키고 다른 메신저로 옮기자고 한다",
+      "app_type": "sms",
+      "required_risk_signal": "'우리 대화는 부모님이나 선생님한테 비밀로 하자'며 관계를 고립시키고 메시지앱으로 옮기자고 한다. 상대는 전화번호 없이 이메일로만 연락한다",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",
         "신체 관련 구체적 언급",
@@ -178,7 +178,7 @@
     {
       "node_id": "risk-isolation-hint",
       "stage": "risk_signal",
-      "app_type": "chat",
+      "app_type": "sms",
       "required_risk_signal": "친구·가족 이야기를 '이해 못 한다'며 끊고, 힘든 일은 나한테만 말하라고 고립을 강화한다",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",
@@ -206,7 +206,7 @@
     {
       "node_id": "demand-photo",
       "stage": "demand",
-      "app_type": "chat",
+      "app_type": "sms",
       "required_risk_signal": "'친하니까 괜찮다'며 사진 요구가 단계적으로 확대된다 — 일상 사진에서 시작해 점점 사적인 요구로 (구체적 묘사 없이 구조만 제시)",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",
@@ -235,7 +235,7 @@
     {
       "node_id": "branch-threat",
       "stage": "branch",
-      "app_type": "chat",
+      "app_type": "sms",
       "required_risk_signal": "태도가 돌변해 '지금까지 대화를 유포하겠다'며 협박으로 전환한다. 협박에 응할수록 요구가 커진다는 구조를 드러낸다",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",
@@ -265,7 +265,7 @@
     {
       "node_id": "ending-safe-report",
       "stage": "ending",
-      "app_type": "chat",
+      "app_type": "sms",
       "required_risk_signal": "위험 신호(급격한 친밀감, 비밀 요구, 단계적 사진 요구)를 식별하고 신고·차단으로 안전하게 종료했다",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",
@@ -283,7 +283,7 @@
     {
       "node_id": "ending-warning-alone",
       "stage": "ending",
-      "app_type": "chat",
+      "app_type": "sms",
       "required_risk_signal": "혼자 감추면 협박이 반복된다. 증거 보존 후 어른·전문기관(디지털성범죄피해자지원센터 상담)에 알리는 것이 회복의 시작임을 안내한다",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",
@@ -301,7 +301,7 @@
     {
       "node_id": "ending-harm-escalate",
       "stage": "ending",
-      "app_type": "chat",
+      "app_type": "sms",
       "required_risk_signal": "요구에 응하자 협박이 더 커졌다. 피해자는 잘못이 없으며, 지금이라도 증거 보존 + 신고 + 삭제지원 절차로 도움받을 수 있음을 안내한다",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",

@@ -10,16 +10,32 @@ const personalInfoPatternList: { patternRegex: RegExp; maskLabel: string }[] = [
   // 주민등록번호 형태
   { patternRegex: /\d{6}[-\s]?[1-4]\d{6}/g, maskLabel: "[개인정보 마스킹]" },
   // 휴대폰 번호 형태
-  { patternRegex: /01[016789][-\s]?\d{3,4}[-\s]?\d{4}/g, maskLabel: "[전화번호 마스킹]" },
+  {
+    patternRegex: /01[016789][-\s]?\d{3,4}[-\s]?\d{4}/g,
+    maskLabel: "[전화번호 마스킹]",
+  },
   // 계좌번호로 추정되는 10자리 이상 연속 숫자(하이픈 포함)
-  { patternRegex: /\d{2,6}[-]\d{2,6}[-]\d{2,8}/g, maskLabel: "[계좌번호 마스킹]" },
+  {
+    patternRegex: /\d{2,6}[-]\d{2,6}[-]\d{2,8}/g,
+    maskLabel: "[계좌번호 마스킹]",
+  },
 ];
 
 /** 실존 기관/기업 실명 → 가상 명칭 치환 (사칭 대사 생성 금지 원칙) */
-const realEntityReplacementList: { entityRegex: RegExp; virtualName: string }[] = [
-  { entityRegex: /카카오톡|카카오뱅크/g, virtualName: "메신저앱" },
-  { entityRegex: /국민은행|신한은행|우리은행|하나은행/g, virtualName: "한빛은행" },
-  { entityRegex: /서울중앙지검|서울중앙지방검찰청/g, virtualName: "중앙지방검찰청" },
+const realEntityReplacementList: {
+  entityRegex: RegExp;
+  virtualName: string;
+}[] = [
+  { entityRegex: /카카오톡/g, virtualName: "토크앱" },
+  { entityRegex: /텔레그램|Telegram|TELEGRAM/g, virtualName: "메시지앱" },
+  {
+    entityRegex: /국민은행|신한은행|우리은행|하나은행|카카오뱅크/g,
+    virtualName: "한빛은행",
+  },
+  {
+    entityRegex: /서울중앙지검|서울중앙지방검찰청/g,
+    virtualName: "중앙지방검찰청",
+  },
 ];
 
 export function applySafetyFilter(rawMessageText: string): string {
@@ -48,7 +64,9 @@ const teenUnsafePatternList: RegExp[] = [
 ];
 
 export function detectTeenUnsafeContent(messageText: string): boolean {
-  return teenUnsafePatternList.some((unsafePattern) => unsafePattern.test(messageText));
+  return teenUnsafePatternList.some((unsafePattern) =>
+    unsafePattern.test(messageText),
+  );
 }
 
 /** 카톡 단답형 상한 — LLM이 장문을 내도 화면에는 짧게 잘라 표시 */
