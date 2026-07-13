@@ -89,6 +89,7 @@ export function CallScreen(sharedProps: PhoneAppSharedProps) {
 
       <div className="bg-black/40 pb-4 backdrop-blur">
         <ResponseComposer
+          composerResetKey={currentNode.node_id}
           availableOptions={sharedProps.availableOptions}
           allowFreeInput={currentNode.allow_free_input}
           voiceEnabled={currentNode.voice_enabled}

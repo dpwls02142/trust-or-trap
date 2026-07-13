@@ -8,7 +8,7 @@ interface HomeScreenProps {
   /** 알림이 도착할 앱 (시나리오 entry 노드의 app_type) */
   notificationAppType: AppType;
   notificationSenderName: string;
-  onNotificationOpen: () => void;
+  onAppOpen: (appType: AppType) => void;
   /** 앱을 한 번 열었다가 홈으로 돌아온 경우 알림을 즉시 표시 */
   showNotificationImmediately?: boolean;
 }
@@ -24,11 +24,12 @@ const homeAppIconList: { appType: AppType; appLabel: string; iconGlyph: string; 
 
 /**
  * 홈 화면 — 앱 아이콘 그리드 + 실시간 알림 배너로 스토리 시작.
+ * 모든 앱 아이콘을 탭해 해당 앱으로 진입할 수 있다.
  */
 export function HomeScreen({
   notificationAppType,
   notificationSenderName,
-  onNotificationOpen,
+  onAppOpen,
   showNotificationImmediately = false,
 }: HomeScreenProps) {
   const [isNotificationVisible, setIsNotificationVisible] = useState(
@@ -60,7 +61,7 @@ export function HomeScreen({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -90, opacity: 0 }}
             transition={{ type: "spring", damping: 20 }}
-            onClick={onNotificationOpen}
+            onClick={() => onAppOpen(notificationAppType)}
             className="absolute inset-x-3 top-12 z-30 flex items-center gap-3 rounded-2xl bg-white/95 p-3.5 text-left text-black shadow-xl backdrop-blur"
           >
             <span
@@ -82,14 +83,13 @@ export function HomeScreen({
       <div className="mt-14 grid grid-cols-4 gap-x-4 gap-y-6">
         {homeAppIconList.map((iconItem) => {
           const isNotificationApp = iconItem.appType === notificationAppType;
-          const IconWrapper = isNotificationApp ? "button" : "div";
 
           return (
-            <IconWrapper
+            <button
               key={iconItem.appType}
-              type={isNotificationApp ? "button" : undefined}
-              onClick={isNotificationApp ? onNotificationOpen : undefined}
-              className={`flex flex-col items-center gap-1.5 ${isNotificationApp ? "cursor-pointer" : ""}`}
+              type="button"
+              onClick={() => onAppOpen(iconItem.appType)}
+              className="flex cursor-pointer flex-col items-center gap-1.5"
             >
               <span
                 className={`relative flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-lg ${iconItem.tileColor}`}
@@ -102,7 +102,7 @@ export function HomeScreen({
                 )}
               </span>
               <span className="text-[11px] text-white/90">{iconItem.appLabel}</span>
-            </IconWrapper>
+            </button>
           );
         })}
       </div>
@@ -110,13 +110,15 @@ export function HomeScreen({
       {/* 독(dock) */}
       <div className="mx-auto flex w-full items-center justify-center gap-6 rounded-3xl bg-white/10 py-3 backdrop-blur">
         {homeAppIconList.slice(0, 4).map((iconItem) => (
-          <span
+          <button
             key={iconItem.appType}
+            type="button"
+            onClick={() => onAppOpen(iconItem.appType)}
             className={`flex h-12 w-12 items-center justify-center rounded-2xl text-xl ${iconItem.tileColor}`}
             aria-label={iconItem.appLabel}
           >
             {iconItem.iconGlyph}
-          </span>
+          </button>
         ))}
       </div>
     </div>

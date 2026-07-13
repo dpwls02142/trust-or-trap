@@ -1,27 +1,44 @@
 "use client";
 
+import { useMemo, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import { MessageThread } from "./shared/MessageThread";
 import { ResponseComposer } from "./shared/ResponseComposer";
 import { SenderAvatar } from "./shared/SenderAvatar";
 import { AppBackButton } from "./shared/AppBackButton";
+import { ChatProfileDetail } from "./shared/ChatProfileDetail";
+import { buildSenderProfileView } from "@/lib/scenario/sender-profile";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: chat — 카카오톡류 메신저 (범용 렌더러, 페르소나 7종 공유) */
 export function ChatApp(sharedProps: PhoneAppSharedProps) {
   const { activeScenarioId, currentNode, chatHistory, streamingMessage } = sharedProps;
+  const [isProfileDetailVisible, setIsProfileDetailVisible] = useState(false);
+
+  const senderProfileView = useMemo(
+    () => buildSenderProfileView(activeScenarioId, currentNode.sender_name),
+    [activeScenarioId, currentNode.sender_name],
+  );
 
   return (
-    <div className="flex h-full flex-col bg-[#bacee0] pt-10">
+    <div className="relative flex h-full flex-col bg-[#bacee0] pt-10">
       <header className="flex items-center gap-2 border-b border-black/10 bg-[#bacee0] px-3 py-2.5">
         <AppBackButton onBack={sharedProps.onExitToHome} />
-        <SenderAvatar
-          scenarioId={activeScenarioId}
-          senderName={currentNode.sender_name}
-        />
-        <div>
-          <h2 className="text-sm font-semibold text-black">{currentNode.sender_name}</h2>
-          <p className="text-[11px] text-black/50">보통 몇 분 내 응답</p>
-        </div>
+        <button
+          type="button"
+          onClick={() => setIsProfileDetailVisible(true)}
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left transition hover:bg-black/5"
+          aria-label={`${currentNode.sender_name} 프로필 상세보기`}
+        >
+          <SenderAvatar
+            scenarioId={activeScenarioId}
+            senderName={currentNode.sender_name}
+          />
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-semibold text-black">{currentNode.sender_name}</h2>
+            <p className="truncate text-[11px] text-black/50">{senderProfileView.statusMessage}</p>
+          </div>
+        </button>
       </header>
 
       <MessageThread
@@ -39,6 +56,7 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
 
       <div className="bg-white">
         <ResponseComposer
+          composerResetKey={currentNode.node_id}
           availableOptions={sharedProps.availableOptions}
           allowFreeInput={currentNode.allow_free_input}
           voiceEnabled={false}
@@ -51,6 +69,15 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
           composerTheme="light"
         />
       </div>
+
+      <AnimatePresence>
+        {isProfileDetailVisible && (
+          <ChatProfileDetail
+            profileView={senderProfileView}
+            onCloseProfile={() => setIsProfileDetailVisible(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

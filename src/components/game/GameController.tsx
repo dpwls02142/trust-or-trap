@@ -7,6 +7,7 @@ import { ScenarioRecommendation } from "@/components/onboarding/ScenarioRecommen
 import { PhoneFrame } from "@/components/phone/PhoneFrame";
 import { HomeScreen } from "@/components/phone/HomeScreen";
 import { ScenarioAppRenderer } from "@/components/phone/ScenarioAppRenderer";
+import { HomeAppShell } from "@/components/phone/HomeAppShell";
 import { EndingReport } from "@/components/game/EndingReport";
 import { useGameStore } from "@/lib/stores/game-store";
 import {
@@ -17,7 +18,7 @@ import { consumeAdvanceStream } from "@/lib/client/advance-stream";
 import { SentenceTtsQueue } from "@/lib/client/tts-queue";
 import { resolveInputTutorialMode } from "@/lib/scenario/input-tutorial";
 import type { PublicNodeView } from "@/lib/scenario/public-node";
-import type { NodeOption, RiskFlag, ScenarioId } from "@/lib/scenario/types";
+import type { AppType, NodeOption, RiskFlag, ScenarioId } from "@/lib/scenario/types";
 
 /**
  * 게임 오케스트레이터 — 온보딩 → 홈(알림) → 시나리오 플레이 → 엔딩 리포트.
@@ -53,6 +54,8 @@ export function GameController() {
   const [isStartingScenario, setIsStartingScenario] = useState(false);
   const [isInputTutorialVisible, setIsInputTutorialVisible] = useState(true);
   const [hasOpenedCurrentApp, setHasOpenedCurrentApp] = useState(false);
+  const [appPlayMode, setAppPlayMode] = useState<"scenario" | "shell">("scenario");
+  const [shellAppType, setShellAppType] = useState<AppType | null>(null);
 
   const lastAdvancedNodeIdRef = useRef<string | null>(null);
   const ttsQueueRef = useRef<SentenceTtsQueue | null>(null);
@@ -173,7 +176,9 @@ export function GameController() {
 
   // 플레이 중 새 노드 진입 시 대사 생성 (마이크로태스크로 미뤄 렌더 사이클과 분리)
   useEffect(() => {
-    if (gamePhase !== "playing" || !currentNode || currentNode.is_ending) return;
+    if (gamePhase !== "playing" || appPlayMode !== "scenario" || !currentNode || currentNode.is_ending) {
+      return;
+    }
     if (lastAdvancedNodeIdRef.current === currentNode.node_id) return;
 
     lastAdvancedNodeIdRef.current = currentNode.node_id;
@@ -181,7 +186,7 @@ export function GameController() {
 
     const advanceTimerId = setTimeout(() => void runAdvanceForNode(currentNode), 0);
     return () => clearTimeout(advanceTimerId);
-  }, [gamePhase, currentNode, isNodeMessageGenerated, runAdvanceForNode]);
+  }, [gamePhase, appPlayMode, currentNode, isNodeMessageGenerated, runAdvanceForNode]);
 
   // TTS 큐 — 홈↔앱 왕복 중에도 진행 중인 통화 대사가 끊기지 않도록 home 단계에서 유지
   useEffect(() => {
@@ -220,6 +225,8 @@ export function GameController() {
         lastAdvancedNodeIdRef.current = null;
         setIsInputTutorialVisible(true);
         setHasOpenedCurrentApp(false);
+        setAppPlayMode("scenario");
+        setShellAppType(null);
         startScenario(entryData);
       } catch {
         setIsStartingScenario(false);
@@ -289,14 +296,28 @@ export function GameController() {
     setIsInputTutorialVisible(false);
   }, []);
 
-  const handleEnterCurrentApp = useCallback(() => {
-    setHasOpenedCurrentApp(true);
-    enterCurrentApp();
-  }, [enterCurrentApp]);
+  const handleAppOpen = useCallback(
+    (selectedAppType: AppType) => {
+      if (selectedAppType === currentNode?.app_type) {
+        setAppPlayMode("scenario");
+        setShellAppType(null);
+        setHasOpenedCurrentApp(true);
+        enterCurrentApp();
+        return;
+      }
+
+      setAppPlayMode("shell");
+      setShellAppType(selectedAppType);
+      enterCurrentApp();
+    },
+    [currentNode, enterCurrentApp],
+  );
 
   const handleExitToHome = useCallback(() => {
     lastAdvancedNodeIdRef.current = null;
     setStreamingMessage("");
+    setAppPlayMode("scenario");
+    setShellAppType(null);
     exitToHome();
   }, [exitToHome]);
 
@@ -307,6 +328,8 @@ export function GameController() {
     setIsAwaitingResponse(false);
     setIsInputTutorialVisible(true);
     setHasOpenedCurrentApp(false);
+    setAppPlayMode("scenario");
+    setShellAppType(null);
     resetGame();
   }, [resetGame]);
 
@@ -344,13 +367,27 @@ export function GameController() {
             <HomeScreen
               notificationAppType={currentNode.app_type}
               notificationSenderName={currentNode.sender_name}
-              onNotificationOpen={handleEnterCurrentApp}
+              onAppOpen={handleAppOpen}
               showNotificationImmediately={hasOpenedCurrentApp}
             />
           </motion.div>
         )}
 
-        {gamePhase === "playing" && currentNode && (
+        {gamePhase === "playing" && appPlayMode === "shell" && shellAppType && (
+          <motion.div
+            key="shell-screen"
+            className="h-full"
+            variants={phoneScreenMotionVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={phoneScreenMotionTransition}
+          >
+            <HomeAppShell appType={shellAppType} onExitToHome={handleExitToHome} />
+          </motion.div>
+        )}
+
+        {gamePhase === "playing" && appPlayMode === "scenario" && currentNode && (
           <motion.div
             key="playing-screen"
             className="h-full"

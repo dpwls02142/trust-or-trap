@@ -39,6 +39,7 @@ export function BankApp(sharedProps: PhoneAppSharedProps) {
 
       <div className="bg-white">
         <ResponseComposer
+          composerResetKey={currentNode.node_id}
           availableOptions={sharedProps.availableOptions}
           allowFreeInput={currentNode.allow_free_input}
           voiceEnabled={false}

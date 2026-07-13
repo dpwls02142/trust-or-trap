@@ -40,6 +40,7 @@ export function BrowserApp(sharedProps: PhoneAppSharedProps) {
 
       <div className="bg-neutral-50">
         <ResponseComposer
+          composerResetKey={currentNode.node_id}
           availableOptions={sharedProps.availableOptions}
           allowFreeInput={currentNode.allow_free_input}
           voiceEnabled={false}
