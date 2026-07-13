@@ -6,6 +6,7 @@ import { ResponseComposer } from "./shared/ResponseComposer";
 import { SenderAvatar } from "./shared/SenderAvatar";
 import { AppBackButton } from "./shared/AppBackButton";
 import { resolveSenderContactLabel } from "@/lib/scenario/sender-profile";
+import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: sms — 메시지 앱 (범용 렌더러) */
@@ -23,6 +24,11 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
     [activeScenarioId, currentNode.sender_name],
   );
 
+  const threadChatHistory = useMemo(
+    () => filterChatHistoryForAppView(chatHistory, currentNode),
+    [chatHistory, currentNode],
+  );
+
   return (
     <div className="flex h-full flex-col bg-white pt-10">
       <header className="relative flex flex-col items-center gap-1.5 border-b border-black/10 bg-neutral-50 px-4 py-2.5">
@@ -38,7 +44,7 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
       </header>
 
       <MessageThread
-        chatHistory={chatHistory}
+        chatHistory={threadChatHistory}
         streamingMessage={streamingMessage}
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}

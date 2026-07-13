@@ -1,20 +1,57 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { AppBackButton } from "./shared/AppBackButton";
+import { MessageAppThreadView } from "./shared/MessageAppThreadView";
 import { resolveAppLabel } from "@/lib/phone/app-display";
-import type { AppType } from "@/lib/scenario/types";
+import { buildScenarioMessageThread } from "@/lib/phone/message-thread-summary";
+import type { AppType, ChatHistoryEntry } from "@/lib/scenario/types";
 
 interface HomeAppShellProps {
   appType: AppType;
   onExitToHome: () => void;
+  chatHistory?: ChatHistoryEntry[];
+  scenarioSenderName?: string | null;
 }
+
+type MessageShellAppType = Extract<AppType, "chat" | "sms" | "insta">;
 
 /**
  * 시나리오와 무관하게 홈에서 진입한 앱의 기본 탐색 화면.
- * 알림 대상 앱이 아닐 때 "실제 폰처럼" 앱을 열어볼 수 있게 한다.
+ * 메시지형 앱은 저장된 대화 목록·스레드 열람을 지원한다.
  */
-export function HomeAppShell({ appType, onExitToHome }: HomeAppShellProps) {
+export function HomeAppShell({
+  appType,
+  onExitToHome,
+  chatHistory = [],
+  scenarioSenderName = null,
+}: HomeAppShellProps) {
   const shellTitle = appType === "home" ? "앱" : resolveAppLabel(appType);
+  const [openThreadSender, setOpenThreadSender] = useState<string | null>(null);
+
+  const scenarioThread = useMemo(() => {
+    if (!scenarioSenderName) return null;
+    if (appType !== "chat" && appType !== "sms" && appType !== "insta") return null;
+    return buildScenarioMessageThread(chatHistory, appType, scenarioSenderName);
+  }, [chatHistory, appType, scenarioSenderName]);
+
+  const openThreadSummary =
+    openThreadSender && scenarioThread?.senderName === openThreadSender
+      ? scenarioThread
+      : null;
+
+  if (openThreadSummary && isMessageShellApp(appType)) {
+    return (
+      <div className="flex h-full flex-col pt-10">
+        <MessageAppThreadView
+          appType={appType}
+          senderName={openThreadSummary.senderName}
+          threadHistory={openThreadSummary.threadHistory}
+          onBackToList={() => setOpenThreadSender(null)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col bg-white pt-10">
@@ -24,9 +61,24 @@ export function HomeAppShell({ appType, onExitToHome }: HomeAppShellProps) {
       </header>
 
       <div className="phone-scroll flex-1 overflow-y-auto">
-        {appType === "chat" && <ChatShellContent />}
-        {appType === "sms" && <SmsShellContent />}
-        {appType === "insta" && <InstaShellContent />}
+        {appType === "chat" && (
+          <ChatShellContent
+            scenarioThread={scenarioThread}
+            onOpenThread={setOpenThreadSender}
+          />
+        )}
+        {appType === "sms" && (
+          <SmsShellContent
+            scenarioThread={scenarioThread}
+            onOpenThread={setOpenThreadSender}
+          />
+        )}
+        {appType === "insta" && (
+          <InstaShellContent
+            scenarioThread={scenarioThread}
+            onOpenThread={setOpenThreadSender}
+          />
+        )}
         {appType === "call" && <CallShellContent />}
         {appType === "bank" && <BankShellContent />}
         {appType === "browser" && <BrowserShellContent />}
@@ -35,53 +87,87 @@ export function HomeAppShell({ appType, onExitToHome }: HomeAppShellProps) {
   );
 }
 
-function ChatShellContent() {
-  const chatRows = [
-    { name: "베프", preview: "주말에 만날래?", time: "오후 2:30", unread: 2 },
+function isMessageShellApp(appType: AppType): appType is MessageShellAppType {
+  return appType === "chat" || appType === "sms" || appType === "insta";
+}
+
+interface MessageShellContentProps {
+  scenarioThread: ReturnType<typeof buildScenarioMessageThread>;
+  onOpenThread: (senderName: string) => void;
+}
+
+function ChatShellContent({ scenarioThread, onOpenThread }: MessageShellContentProps) {
+  const decoyRows = [
+    { name: "베프", preview: "주말에 만날래?", time: "오후 2:30", unread: 0 },
   ];
 
   return (
     <ul className="divide-y divide-black/5">
-      {chatRows.map((rowItem) => (
-        <li key={rowItem.name} className="flex items-center gap-3 px-4 py-3">
+      {scenarioThread && (
+        <li>
+          <button
+            type="button"
+            onClick={() => onOpenThread(scenarioThread.senderName)}
+            className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-neutral-50"
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-300 text-xl">
+              💬
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-black">
+                {scenarioThread.senderName}
+              </p>
+              <p className="truncate text-xs text-black/50">{scenarioThread.previewText}</p>
+            </div>
+          </button>
+        </li>
+      )}
+      {decoyRows.map((rowItem) => (
+        <li key={rowItem.name} className="flex items-center gap-3 px-4 py-3 opacity-60">
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-300 text-xl">
             💬
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline justify-between gap-2">
-              <p className="truncate text-sm font-semibold text-black">
-                {rowItem.name}
-              </p>
-              <span className="shrink-0 text-[11px] text-black/40">
-                {rowItem.time}
-              </span>
+              <p className="truncate text-sm font-semibold text-black">{rowItem.name}</p>
+              <span className="shrink-0 text-[11px] text-black/40">{rowItem.time}</span>
             </div>
             <p className="truncate text-xs text-black/50">{rowItem.preview}</p>
           </div>
-          {rowItem.unread > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-              {rowItem.unread}
-            </span>
-          )}
         </li>
       ))}
     </ul>
   );
 }
 
-function SmsShellContent() {
+function SmsShellContent({ scenarioThread, onOpenThread }: MessageShellContentProps) {
   return (
     <ul className="divide-y divide-black/5">
-      {["010-1234-5678", "1588-0000", "택배"].map((senderLabel) => (
-        <li key={senderLabel} className="flex items-center gap-3 px-4 py-3">
+      {scenarioThread && (
+        <li>
+          <button
+            type="button"
+            onClick={() => onOpenThread(scenarioThread.senderName)}
+            className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-neutral-50"
+          >
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-lg">
+              ✉️
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-black">{scenarioThread.senderName}</p>
+              <p className="truncate text-xs text-black/50">{scenarioThread.previewText}</p>
+            </div>
+          </button>
+        </li>
+      )}
+      {["1588-0000", "택배"].map((senderLabel) => (
+        <li key={senderLabel} className="flex items-center gap-3 px-4 py-3 opacity-60">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-lg">
             ✉️
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-black">{senderLabel}</p>
-            <p className="truncate text-xs text-black/50">
-              최근 메시지가 없습니다
-            </p>
+            <p className="truncate text-xs text-black/50">최근 메시지가 없습니다</p>
           </div>
         </li>
       ))}
@@ -89,10 +175,25 @@ function SmsShellContent() {
   );
 }
 
-function InstaShellContent() {
+function InstaShellContent({ scenarioThread, onOpenThread }: MessageShellContentProps) {
   return (
     <div>
-      <div className="grid grid-cols-3 gap-0.5">
+      {scenarioThread && (
+        <button
+          type="button"
+          onClick={() => onOpenThread(scenarioThread.senderName)}
+          className="flex w-full items-center gap-3 border-b border-black/5 px-4 py-3 text-left transition hover:bg-neutral-50"
+        >
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 text-sm text-white">
+            DM
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-black">{scenarioThread.senderName}</p>
+            <p className="truncate text-xs text-black/50">{scenarioThread.previewText}</p>
+          </div>
+        </button>
+      )}
+      <div className="grid grid-cols-3 gap-0.5 opacity-80">
         {Array.from({ length: 12 }, (_, tileIndex) => (
           <div
             key={`insta-tile-${tileIndex}`}
@@ -100,9 +201,6 @@ function InstaShellContent() {
           />
         ))}
       </div>
-      <p className="px-4 py-6 text-center text-xs text-black/40">
-        홈 피드 · 탐색
-      </p>
     </div>
   );
 }
