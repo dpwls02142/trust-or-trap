@@ -19,10 +19,10 @@ export function ChatProfileDetail({
 }: ChatProfileDetailProps) {
   return (
     <motion.div
-      initial={{ y: "100%" }}
-      animate={{ y: 0 }}
-      exit={{ y: "100%" }}
-      transition={{ type: "spring", damping: 28, stiffness: 320 }}
+      initial={{ x: "100%", opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: "100%", opacity: 0 }}
+      transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
       className="absolute inset-0 z-20 flex flex-col bg-[#bacee0]"
     >
       <section className="relative flex min-h-full shrink-0 flex-col bg-black">
