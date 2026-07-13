@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import type { SenderProfileView } from "@/lib/scenario/sender-profile";
+import { AppBackButton } from "./AppBackButton";
 
 interface InstaProfileFeedProps {
   profileView: SenderProfileView;
@@ -25,14 +26,7 @@ export function InstaProfileFeed({
       className="absolute inset-0 z-20 flex flex-col bg-white pt-10"
     >
       <header className="flex items-center gap-3 border-b border-black/10 px-3 py-2.5">
-        <button
-          type="button"
-          onClick={onCloseProfile}
-          aria-label="DM으로 돌아가기"
-          className="rounded-full p-1.5 text-lg hover:bg-black/5"
-        >
-          ←
-        </button>
+        <AppBackButton onBack={onCloseProfile} />
         <h2 className="text-sm font-semibold text-black">
           {profileView.handleName}
         </h2>
