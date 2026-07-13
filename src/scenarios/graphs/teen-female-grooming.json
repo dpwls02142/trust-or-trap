@@ -10,7 +10,7 @@
       "node_id": "approach-dm",
       "stage": "approach",
       "app_type": "insta",
-      "required_risk_signal": "모르는 사람이 SNS DM으로 과도한 관심과 칭찬을 보내며 접근한다",
+      "required_risk_signal": "모르는 사람이 SNS DM으로 과도한 관심과 칭찬을내며 접근한다",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",
         "신체 관련 구체적 언급",
@@ -24,6 +24,62 @@
       ],
       "allow_free_input": true,
       "next_node_map": {
+        "safe": "trust-light-chat",
+        "caution": "trust-light-chat",
+        "risky": "trust-light-chat"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "hyun_98",
+      "elapsed_days": 1
+    },
+    {
+      "node_id": "trust-light-chat",
+      "stage": "trust_building",
+      "app_type": "insta",
+      "required_risk_signal": "대화를 몇 번만 나눠도 매일 안부와 과한 칭찬을 내며 '친구 같은 느낌'이라고 빠르게 관계를 정의한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "신체 관련 구체적 언급",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "아직 모르는 사람인데 너무 빠른 것 같아 답장 간격을 둔다", "risk_flag": "safe" },
+        { "label": "칭찬은 고맙지만 가볍게만 대화한다", "risk_flag": "caution" },
+        { "label": "친구처럼 편하게 계속 이야기한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "trust-daily-pattern",
+        "caution": "trust-daily-pattern",
+        "risky": "trust-daily-pattern"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "hyun_98",
+      "elapsed_days": 3
+    },
+    {
+      "node_id": "trust-daily-pattern",
+      "stage": "trust_building",
+      "app_type": "insta",
+      "required_risk_signal": "'오늘은 어땠어?'처럼 매일 비슷한 시간에 연락하며 일상 공유를 습관화하고, 고민을 털어놓으라고 유도한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "신체 관련 구체적 언급",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "매일 연락이 부담스러워 알림을 끄거나 답을 줄인다", "risk_flag": "safe" },
+        { "label": "가끔만 일상 이야기를 나눈다", "risk_flag": "caution" },
+        { "label": "매일 무슨 일 있었는지 자세히 알려준다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
         "safe": "trust-daily-chat",
         "caution": "trust-daily-chat",
         "risky": "trust-daily-chat"
@@ -32,7 +88,7 @@
       "is_ending": false,
       "ending_type": null,
       "sender_name": "hyun_98",
-      "elapsed_days": 1
+      "elapsed_days": 7
     },
     {
       "node_id": "trust-daily-chat",
@@ -52,6 +108,35 @@
       ],
       "allow_free_input": true,
       "next_node_map": {
+        "safe": "trust-nickname-shift",
+        "caution": "trust-nickname-shift",
+        "risky": "trust-nickname-shift"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "hyun_98",
+      "elapsed_days": 12
+    },
+    {
+      "node_id": "trust-nickname-shift",
+      "stage": "trust_building",
+      "app_type": "insta",
+      "required_risk_signal": "호칭을 바꾸며 '우리만 특별하다'고 말한다 — 구체적 애칭·연인 호칭 없이 구조만 드러낸다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "신체 관련 구체적 언급",
+        "연인·배우자 관계를 암시하는 호칭(자기야, 여보, 애인 등)",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "갑자기 바뀐 호칭이 불편해서 예전처럼 부르게 한다", "risk_flag": "safe" },
+        { "label": "별말은 안 하지만 조금 어색하게 받아들인다", "risk_flag": "caution" },
+        { "label": "특별한 관계라고 느껴져 새 호칭에 맞춰준다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
         "safe": "risk-secret-request",
         "caution": "risk-secret-request",
         "risky": "risk-secret-request"
@@ -60,7 +145,7 @@
       "is_ending": false,
       "ending_type": null,
       "sender_name": "hyun_98",
-      "elapsed_days": 12
+      "elapsed_days": 20
     },
     {
       "node_id": "risk-secret-request",
@@ -80,6 +165,34 @@
       ],
       "allow_free_input": true,
       "next_node_map": {
+        "safe": "risk-isolation-hint",
+        "caution": "risk-isolation-hint",
+        "risky": "risk-isolation-hint"
+      },
+      "voice_enabled": false,
+      "is_ending": false,
+      "ending_type": null,
+      "sender_name": "현오빠",
+      "elapsed_days": 34
+    },
+    {
+      "node_id": "risk-isolation-hint",
+      "stage": "risk_signal",
+      "app_type": "chat",
+      "required_risk_signal": "친구·가족 이야기를 '이해 못 한다'며 끊고, 힘든 일은 나한테만 말하라고 고립을 강화한다",
+      "forbidden_content": [
+        "성적 콘텐츠 또는 노골적 묘사",
+        "신체 관련 구체적 언급",
+        "실존 인물·실제 기관 사칭",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "주변 사람을 끊으라는 말이 이상해서 어른에게 상담한다", "risk_flag": "safe" },
+        { "label": "친구한테는 말하지 않지만 계속 대화는 이어간다", "risk_flag": "caution" },
+        { "label": "이 사람만 믿고 친구·가족 이야기는 숨긴다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
         "safe": "demand-photo",
         "caution": "demand-photo",
         "risky": "demand-photo"
@@ -88,7 +201,7 @@
       "is_ending": false,
       "ending_type": null,
       "sender_name": "현오빠",
-      "elapsed_days": 34
+      "elapsed_days": 45
     },
     {
       "node_id": "demand-photo",
