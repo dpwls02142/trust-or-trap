@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { TypingIndicator } from "./TypingIndicator";
 import type { ChatHistoryEntry } from "@/lib/scenario/types";
@@ -17,7 +17,47 @@ interface MessageThreadProps {
     outgoingBubbleClass: string;
     threadBackgroundClass: string;
   };
-  elapsedDaysLabel?: number | null;
+  /** 현재 노드 경과일 — 스트리밍/입력 중 말풍선 앞 구분선용 */
+  currentElapsedDays?: number | null;
+}
+
+type ThreadRenderItem =
+  | { kind: "day-separator"; elapsedDays: number; itemKey: string }
+  | { kind: "message"; entry: ChatHistoryEntry; entryIndex: number };
+
+function ElapsedDaysSeparator({ elapsedDays }: { elapsedDays: number }) {
+  return (
+    <p className="py-1 text-center text-[11px] text-black/40">
+      — 대화 {elapsedDays}일째 —
+    </p>
+  );
+}
+
+function buildThreadRenderItems(chatHistory: ChatHistoryEntry[]): {
+  renderItems: ThreadRenderItem[];
+  lastShownElapsedDays: number | null;
+} {
+  const renderItems: ThreadRenderItem[] = [];
+  let lastShownElapsedDays: number | null = null;
+
+  chatHistory.forEach((entryItem, entryIndex) => {
+    const entryElapsedDays = entryItem.elapsedDays;
+    if (
+      typeof entryElapsedDays === "number" &&
+      entryElapsedDays > 0 &&
+      entryElapsedDays !== lastShownElapsedDays
+    ) {
+      lastShownElapsedDays = entryElapsedDays;
+      renderItems.push({
+        kind: "day-separator",
+        elapsedDays: entryElapsedDays,
+        itemKey: `day-${entryElapsedDays}-${entryIndex}`,
+      });
+    }
+    renderItems.push({ kind: "message", entry: entryItem, entryIndex });
+  });
+
+  return { renderItems, lastShownElapsedDays };
 }
 
 /**
@@ -31,12 +71,22 @@ export function MessageThread({
   senderName,
   isAwaitingResponse = false,
   bubbleTheme,
-  elapsedDaysLabel,
+  currentElapsedDays,
 }: MessageThreadProps) {
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
 
-  // 첫 토큰 도착 전(thinking 구간) — 진행 중임을 알리는 "입력 중" 말풍선
+  const { renderItems, lastShownElapsedDays } = useMemo(
+    () => buildThreadRenderItems(chatHistory),
+    [chatHistory],
+  );
+
   const showTypingIndicator = isAwaitingResponse && !streamingMessage;
+
+  const shouldShowCurrentDaySeparator =
+    typeof currentElapsedDays === "number" &&
+    currentElapsedDays > 0 &&
+    currentElapsedDays !== lastShownElapsedDays &&
+    (showTypingIndicator || !!streamingMessage);
 
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -46,13 +96,19 @@ export function MessageThread({
     <div
       className={`phone-scroll flex-1 space-y-2.5 overflow-y-auto px-3 py-3 ${bubbleTheme.threadBackgroundClass}`}
     >
-      {typeof elapsedDaysLabel === "number" && elapsedDaysLabel > 0 && (
-        <p className="py-1 text-center text-[11px] text-black/40">
-          — 대화 {elapsedDaysLabel}일째 —
-        </p>
-      )}
+      {renderItems.map((renderItem) => {
+        if (renderItem.kind === "day-separator") {
+          return (
+            <ElapsedDaysSeparator
+              key={renderItem.itemKey}
+              elapsedDays={renderItem.elapsedDays}
+            />
+          );
+        }
 
-      {chatHistory.map((entryItem, entryIndex) => {
+        const entryItem = renderItem.entry;
+        const entryIndex = renderItem.entryIndex;
+
         if (entryItem.speaker === "system") {
           return (
             <p key={entryIndex} className="py-1 text-center text-[11px] text-black/40">
@@ -87,6 +143,10 @@ export function MessageThread({
           </motion.div>
         );
       })}
+
+      {shouldShowCurrentDaySeparator && currentElapsedDays != null && (
+        <ElapsedDaysSeparator elapsedDays={currentElapsedDays} />
+      )}
 
       {streamingMessage && (
         <div className="flex justify-start">

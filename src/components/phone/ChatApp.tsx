@@ -46,7 +46,7 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
         streamingMessage={streamingMessage}
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}
-        elapsedDaysLabel={currentNode.elapsed_days}
+        currentElapsedDays={currentNode.elapsed_days}
         bubbleTheme={{
           threadBackgroundClass: "bg-[#bacee0]",
           incomingBubbleClass: "bg-white text-black",

@@ -113,6 +113,7 @@ export function GameController() {
               speaker: "scammer",
               messageText: finalPayload.message,
               nodeId: targetNode.node_id,
+              elapsedDays: targetNode.elapsed_days ?? undefined,
             });
             setStreamingMessage("");
             setPayloadOptionsEntry({
@@ -127,6 +128,7 @@ export function GameController() {
               speaker: "system",
               messageText: errorMessage,
               nodeId: targetNode.node_id,
+              elapsedDays: targetNode.elapsed_days ?? undefined,
             });
             setStreamingMessage("");
             setPayloadOptionsEntry({ nodeId: targetNode.node_id, options: targetNode.options });
@@ -244,6 +246,7 @@ export function GameController() {
         speaker: "player",
         messageText: responseText,
         nodeId: currentNode.node_id,
+        elapsedDays: currentNode.elapsed_days ?? undefined,
       });
       setIsInputTutorialVisible(false);
       setPayloadOptionsEntry(null);
@@ -270,6 +273,7 @@ export function GameController() {
           speaker: "system",
           messageText: "연결이 불안정합니다. 다시 응답해주세요.",
           nodeId: currentNode.node_id,
+          elapsedDays: currentNode.elapsed_days ?? undefined,
         });
         setPayloadOptionsEntry({
           nodeId: currentNode.node_id,
