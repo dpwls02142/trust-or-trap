@@ -52,6 +52,7 @@ export function GameController() {
   } | null>(null);
   const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
   const [isStartingScenario, setIsStartingScenario] = useState(false);
+  const [isEditingOnboardingProfile, setIsEditingOnboardingProfile] = useState(false);
   const [isInputTutorialVisible, setIsInputTutorialVisible] = useState(true);
   const [hasOpenedCurrentApp, setHasOpenedCurrentApp] = useState(false);
   const [appPlayMode, setAppPlayMode] = useState<"scenario" | "shell">("scenario");
@@ -59,6 +60,7 @@ export function GameController() {
 
   const lastAdvancedNodeIdRef = useRef<string | null>(null);
   const ttsQueueRef = useRef<SentenceTtsQueue | null>(null);
+  const scenarioSelectGenerationRef = useRef(0);
 
   // SSR/hydration 안전 가드 — persist 복원 전 첫 렌더 불일치 방지
   // (서버 스냅샷 false, 클라이언트 true → effect 없이 하이드레이션 여부 구독)
@@ -212,6 +214,7 @@ export function GameController() {
 
   const handleScenarioSelect = useCallback(
     async (selectedScenarioId: ScenarioId) => {
+      const selectGeneration = ++scenarioSelectGenerationRef.current;
       setIsStartingScenario(true);
       try {
         const entryResponse = await fetch("/api/scenario/entry", {
@@ -226,6 +229,8 @@ export function GameController() {
           voiceEnabled: boolean;
           entryNode: PublicNodeView;
         };
+        if (selectGeneration !== scenarioSelectGenerationRef.current) return;
+
         lastAdvancedNodeIdRef.current = null;
         setIsInputTutorialVisible(true);
         setHasOpenedCurrentApp(false);
@@ -233,9 +238,13 @@ export function GameController() {
         setShellAppType(null);
         startScenario(entryData);
       } catch {
+        if (selectGeneration !== scenarioSelectGenerationRef.current) return;
+        setIsStartingScenario(false);
+        return;
+      }
+      if (selectGeneration === scenarioSelectGenerationRef.current) {
         setIsStartingScenario(false);
       }
-      setIsStartingScenario(false);
     },
     [startScenario],
   );
@@ -338,8 +347,23 @@ export function GameController() {
     setHasOpenedCurrentApp(false);
     setAppPlayMode("scenario");
     setShellAppType(null);
+    setIsEditingOnboardingProfile(false);
     resetGame();
   }, [resetGame]);
+
+  const handleProfileSubmit = useCallback(
+    (profileValue: NonNullable<typeof userProfile>) => {
+      setUserProfile(profileValue);
+      setIsEditingOnboardingProfile(false);
+    },
+    [setUserProfile],
+  );
+
+  const handleEditOnboardingProfile = useCallback(() => {
+    scenarioSelectGenerationRef.current += 1;
+    setIsStartingScenario(false);
+    setIsEditingOnboardingProfile(true);
+  }, []);
 
   if (!isHydrated) {
     return <div className="h-dvh w-full max-w-[430px]" aria-hidden />;
@@ -347,14 +371,20 @@ export function GameController() {
 
   // ── 온보딩 (폰 프레임 밖) ──
   if (gamePhase === "onboarding") {
-    return userProfile ? (
+    const shouldShowScenarioRecommendation = userProfile && !isEditingOnboardingProfile;
+
+    return shouldShowScenarioRecommendation ? (
       <ScenarioRecommendation
         userProfile={userProfile}
         onScenarioSelect={handleScenarioSelect}
+        onEditProfile={handleEditOnboardingProfile}
         isStarting={isStartingScenario}
       />
     ) : (
-      <OnboardingForm onProfileSubmit={setUserProfile} />
+      <OnboardingForm
+        initialProfile={userProfile ?? undefined}
+        onProfileSubmit={handleProfileSubmit}
+      />
     );
   }
 

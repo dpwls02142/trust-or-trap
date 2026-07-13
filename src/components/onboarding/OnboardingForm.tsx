@@ -23,15 +23,20 @@ type OnboardingFormValues = z.infer<typeof onboardingFormSchema>;
 
 interface OnboardingFormProps {
   onProfileSubmit: (profileValue: UserProfile) => void;
+  /** 시나리오 추천 화면에서 돌아온 경우 기존 입력값을 채움 */
+  initialProfile?: UserProfile;
 }
 
-export function OnboardingForm({ onProfileSubmit }: OnboardingFormProps) {
+export function OnboardingForm({ onProfileSubmit, initialProfile }: OnboardingFormProps) {
+  const isEditingProfile = !!initialProfile;
+
   const {
     register,
     handleSubmit,
     formState: { errors: formErrors, isSubmitting },
   } = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingFormSchema),
+    defaultValues: initialProfile,
   });
 
   return (
@@ -41,11 +46,21 @@ export function OnboardingForm({ onProfileSubmit }: OnboardingFormProps) {
       className="flex w-full max-w-sm flex-col gap-6 px-6"
     >
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Trust or Trap</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {isEditingProfile ? "내 정보 수정" : "Trust or Trap"}
+        </h1>
         <p className="mt-2 text-sm text-white/60">
-          당신의 폰에서 벌어지는 실전 시뮬레이션.
-          <br />
-          위험 신호를 스스로 찾아내 보세요.
+          {isEditingProfile ? (
+            <>
+              잘못 입력했나요? 수정 후 다시 시나리오를 확인할 수 있어요.
+            </>
+          ) : (
+            <>
+              당신의 폰에서 벌어지는 실전 시뮬레이션.
+              <br />
+              위험 신호를 스스로 찾아내 보세요.
+            </>
+          )}
         </p>
       </div>
 
@@ -102,7 +117,7 @@ export function OnboardingForm({ onProfileSubmit }: OnboardingFormProps) {
           disabled={isSubmitting}
           className="mt-2 rounded-xl bg-sky-500 py-3.5 text-base font-semibold transition hover:bg-sky-400 disabled:opacity-50"
         >
-          시작하기
+          {isEditingProfile ? "수정 완료" : "시작하기"}
         </button>
       </form>
 
