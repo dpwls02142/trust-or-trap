@@ -19,76 +19,57 @@ export function ChatProfileDetail({
 }: ChatProfileDetailProps) {
   return (
     <motion.div
-      initial={{ y: "100%" }}
-      animate={{ y: 0 }}
-      exit={{ y: "100%" }}
-      transition={{ type: "spring", damping: 28, stiffness: 320 }}
-      className="absolute inset-0 z-20 flex flex-col bg-[#bacee0] pt-10"
+      initial={{ x: "100%", opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: "100%", opacity: 0 }}
+      transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+      className="absolute inset-0 z-20 flex flex-col bg-[#bacee0]"
     >
-      <header className="flex items-center border-b border-black/10 bg-[#bacee0] px-3 py-2.5">
-        <AppBackButton onBack={onCloseProfile} />
-        <h2 className="flex-1 text-center text-sm font-semibold text-black">
-          프로필
-        </h2>
-        <span className="w-8" aria-hidden />
-      </header>
+      <section className="relative flex min-h-full shrink-0 flex-col bg-black">
+        {profileView.avatarPath ? (
+          <img
+            src={profileView.avatarPath}
+            alt=""
+            aria-hidden
+            className="absolute inset-0 h-full w-full object-cover opacity-15 blur-2xl"
+          />
+        ) : null}
 
-      <div className="phone-scroll flex-1 overflow-y-auto">
-        <div className="bg-gradient-to-b from-[#9eb6cf] to-[#bacee0] px-6 pb-8 pt-6 text-center">
-          {profileView.avatarPath ? (
-            <img
-              src={profileView.avatarPath}
-              alt={`${profileView.displayName} 프로필`}
-              className="mx-auto h-24 w-24 rounded-3xl object-cover shadow-md"
-            />
-          ) : (
-            <span className="mx-auto flex h-24 w-24 items-center justify-center rounded-3xl bg-white text-4xl shadow-md">
-              👤
-            </span>
-          )}
-          <h3 className="mt-4 text-lg font-bold text-black">
-            {profileView.displayName}
-          </h3>
-          <p className="mt-1 text-sm text-black/60">
-            {profileView.statusMessage}
-          </p>
-        </div>
-
-        <div className="mx-4 mt-2 overflow-hidden rounded-2xl bg-white shadow-sm">
-          {[
-            { label: "친구 이름", value: profileView.displayName },
-            { label: "상태 메시지", value: profileView.statusMessage },
-          ].map((rowItem, rowIndex) => (
-            <div
-              key={rowItem.label}
-              className={`flex items-center justify-between px-4 py-3.5 text-sm ${
-                rowIndex > 0 ? "border-t border-black/5" : ""
-              }`}
-            >
-              <span className="text-black/50">{rowItem.label}</span>
-              <span className="max-w-[55%] truncate font-medium text-black">
-                {rowItem.value}
+        <header className="relative z-10 flex items-center px-3 pb-2.5 pt-10">
+          <AppBackButton
+            onBack={onCloseProfile}
+            tone="dark"
+            ariaLabel="프로필 닫기"
+          />
+          <h2 className="flex-1 text-center text-sm font-semibold text-white">
+            프로필
+          </h2>
+          <span className="w-8" aria-hidden />
+        </header>
+        <div className="relative z-10 mt-auto w-full px-4 pb-8">
+          <div className="flex flex-col items-start gap-3">
+            {profileView.avatarPath ? (
+              <img
+                src={profileView.avatarPath}
+                alt={`${profileView.displayName} 프로필`}
+                className="h-24 w-24 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-neutral-800 text-4xl">
+                👤
               </span>
+            )}
+            <div className="min-w-0 w-full">
+              <h3 className="truncate text-base font-bold text-white">
+                {profileView.displayName}
+              </h3>
+              <p className="mt-0.5 truncate text-xs text-white/70">
+                {profileView.statusMessage}
+              </p>
             </div>
-          ))}
+          </div>
         </div>
-
-        <div className="mx-4 mt-4 overflow-hidden rounded-2xl bg-white shadow-sm">
-          {["즐겨찾기", "대화방 서랍", "알림 설정"].map(
-            (menuLabel, menuIndex) => (
-              <button
-                key={menuLabel}
-                type="button"
-                className={`block w-full px-4 py-3.5 text-left text-sm text-black/80 hover:bg-neutral-50 ${
-                  menuIndex > 0 ? "border-t border-black/5" : ""
-                }`}
-              >
-                {menuLabel}
-              </button>
-            ),
-          )}
-        </div>
-      </div>
+      </section>
     </motion.div>
   );
 }
