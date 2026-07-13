@@ -354,7 +354,6 @@ export function GameController() {
     );
   }
 
-  // ── "폰 속의 폰" ──
   return (
     <PhoneFrame>
       <AnimatePresence mode="wait" initial={false}>

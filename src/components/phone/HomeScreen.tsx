@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  homeAppIconList,
+  resolveAppDisplayConfig,
+  resolveNotificationPreview,
+} from "@/lib/phone/app-display";
 import type { AppType } from "@/lib/scenario/types";
 
 interface HomeScreenProps {
@@ -12,15 +17,6 @@ interface HomeScreenProps {
   /** 앱을 한 번 열었다가 홈으로 돌아온 경우 알림을 즉시 표시 */
   showNotificationImmediately?: boolean;
 }
-
-const homeAppIconList: { appType: AppType; appLabel: string; iconGlyph: string; tileColor: string }[] = [
-  { appType: "chat", appLabel: "토크", iconGlyph: "💬", tileColor: "bg-yellow-400" },
-  { appType: "sms", appLabel: "메시지", iconGlyph: "✉️", tileColor: "bg-green-500" },
-  { appType: "insta", appLabel: "포토그램", iconGlyph: "📷", tileColor: "bg-gradient-to-tr from-purple-500 to-pink-500" },
-  { appType: "call", appLabel: "전화", iconGlyph: "📞", tileColor: "bg-emerald-500" },
-  { appType: "bank", appLabel: "한빛은행", iconGlyph: "🏦", tileColor: "bg-blue-600" },
-  { appType: "browser", appLabel: "브라우저", iconGlyph: "🌐", tileColor: "bg-sky-500" },
-];
 
 /**
  * 홈 화면 — 앱 아이콘 그리드 + 실시간 알림 배너로 스토리 시작.
@@ -44,6 +40,10 @@ export function HomeScreen({
 
   const notificationApp = homeAppIconList.find(
     (iconItem) => iconItem.appType === notificationAppType,
+  );
+  const notificationPreviewText = resolveNotificationPreview(
+    notificationAppType,
+    notificationSenderName,
   );
 
   return (
@@ -70,9 +70,11 @@ export function HomeScreen({
               {notificationApp?.iconGlyph ?? "🔔"}
             </span>
             <span className="min-w-0">
-              <span className="block text-sm font-semibold">{notificationSenderName}</span>
+              <span className="block text-sm font-semibold">
+                {resolveAppDisplayConfig(notificationAppType)?.appLabel ?? "알림"}
+              </span>
               <span className="block truncate text-sm text-black/60">
-                새 메시지가 도착했습니다. 눌러서 확인하세요.
+                {notificationPreviewText}
               </span>
             </span>
           </motion.button>

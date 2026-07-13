@@ -1,6 +1,7 @@
 "use client";
 
 import { AppBackButton } from "./shared/AppBackButton";
+import { resolveAppLabel } from "@/lib/phone/app-display";
 import type { AppType } from "@/lib/scenario/types";
 
 interface HomeAppShellProps {
@@ -8,22 +9,12 @@ interface HomeAppShellProps {
   onExitToHome: () => void;
 }
 
-const shellTitleByApp: Record<Exclude<AppType, "home">, string> = {
-  chat: "토크",
-  sms: "메시지",
-  insta: "포토그램",
-  call: "전화",
-  bank: "한빛은행",
-  browser: "브라우저",
-};
-
 /**
  * 시나리오와 무관하게 홈에서 진입한 앱의 기본 탐색 화면.
  * 알림 대상 앱이 아닐 때 "실제 폰처럼" 앱을 열어볼 수 있게 한다.
  */
 export function HomeAppShell({ appType, onExitToHome }: HomeAppShellProps) {
-  const shellTitle =
-    shellTitleByApp[appType as Exclude<AppType, "home">] ?? "앱";
+  const shellTitle = appType === "home" ? "앱" : resolveAppLabel(appType);
 
   return (
     <div className="flex h-full flex-col bg-white pt-10">

@@ -1,5 +1,5 @@
 import { resolveSenderAvatarPath } from "@/lib/scenario/sender-avatar";
-import type { ScenarioId } from "@/lib/scenario/types";
+import type { AppType, ScenarioId } from "@/lib/scenario/types";
 
 export interface SenderFeedPost {
   postId: string;
@@ -88,4 +88,42 @@ export function buildSenderProfileView(
     avatarPath: resolveSenderAvatarPath(scenarioId, senderName),
     feedPosts,
   };
+}
+
+function normalizeEmailHandle(senderName: string): string {
+  const asciiHandle = senderName
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9._-]/g, "");
+  if (asciiHandle.length >= 3) return asciiHandle;
+  return `user${hashSenderSeed(senderName) % 9000}`;
+}
+
+/** teen 시나리오 메시지앱(sms) — 전화번호 없이 이메일로만 연락하는 연출 */
+const emailContactScenarioIds: ScenarioId[] = ["teen-female-grooming"];
+
+export function buildSenderEmailAddress(senderName: string): string {
+  return `${normalizeEmailHandle(senderName)}@mail.com`;
+}
+
+/**
+ * 앱 헤더에 표시할 연락처 라벨.
+ * teen 그루밍 시나리오의 메시지앱(sms)은 이메일, 그 외 sms는 휴대전화, chat은 상태 메시지.
+ */
+export function resolveSenderContactLabel(
+  scenarioId: ScenarioId | null,
+  appType: AppType,
+  senderName: string,
+  statusMessage: string,
+): string {
+  if (
+    appType === "sms" &&
+    scenarioId &&
+    emailContactScenarioIds.includes(scenarioId)
+  ) {
+    return buildSenderEmailAddress(senderName);
+  }
+  if (appType === "sms") return "휴대전화";
+  if (appType === "chat") return statusMessage;
+  return statusMessage;
 }

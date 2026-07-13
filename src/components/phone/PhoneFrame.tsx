@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { resolveAppDisplayConfig } from "@/lib/phone/app-display";
+import { useCallSessionActive } from "@/lib/phone/use-call-session-active";
 
 interface PhoneFrameProps {
   children: React.ReactNode;
@@ -12,6 +14,8 @@ interface PhoneFrameProps {
  */
 export function PhoneFrame({ children }: PhoneFrameProps) {
   const [clockText, setClockText] = useState("");
+  const isCallSessionActive = useCallSessionActive();
+  const callDisplayConfig = resolveAppDisplayConfig("call");
 
   useEffect(() => {
     const updateClock = () => {
@@ -34,7 +38,16 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
           aria-hidden
           className="hidden sm:block h-6 w-28 rounded-full bg-black"
         />
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1.5">
+          {isCallSessionActive && callDisplayConfig?.statusBarLabel && (
+            <span
+              className="flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white"
+              aria-label={callDisplayConfig.statusBarLabel}
+            >
+              <span aria-hidden>{callDisplayConfig.iconGlyph}</span>
+              {callDisplayConfig.statusBarLabel}
+            </span>
+          )}
           <span aria-label="배터리">87%</span>
         </span>
       </div>

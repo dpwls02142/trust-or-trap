@@ -2,7 +2,7 @@ import "server-only";
 
 import { GoogleGenAI, ThinkingLevel, type ThinkingConfig } from "@google/genai";
 import { resolveAgeBand } from "@/lib/scenario/persona-matching";
-import type { AppType, ChatHistoryEntry, ScenarioNode, UserProfile } from "@/lib/scenario/types";
+import type { AppType, ChatHistoryEntry, ScenarioId, ScenarioNode, UserProfile } from "@/lib/scenario/types";
 
 /**
  * Gemini API 클라이언트 (서버 전용).
@@ -68,7 +68,7 @@ function buildDialogueStyleGuide(currentNode: ScenarioNode, userProfile: UserPro
   const isMaleUser = userProfile.gender === "male";
 
   const appChannelGuide: Record<Exclude<AppType, "home">, string> = {
-    chat: "카카오톡 1:1 채팅. 한 번에 보내는 말풍선 1개, 15~50자. 줄바꿈·장문·설명체 금지.",
+    chat: "메시지앱 1:1 채팅. 한 번에 보내는 말풍선 1개, 15~50자. 줄바꿈·장문·설명체 금지. 카카오톡·텔레그램 등 실제 앱명 언급 금지.",
     sms: "문자 메시지. 10~35자. 딱딱하거나 급한 톤. 한 줄.",
     insta: "인스타 DM/댓글 톤. 10~40자. 가볍고 짧게. 이모지 0~1개만(과다 금지).",
     call: "통화 자막. 구어체 단편 10~45자. '어 그게', '지금요?'처럼 끊어 말함.",
@@ -114,7 +114,7 @@ export function buildAdvanceSystemPrompt(
 ): string {
   return [
     "당신은 피싱/디지털 스캠 '예방 교육 시뮬레이션'의 대사 생성기다.",
-    "역할: 아래 노드 스펙의 사건을 **실제 한국인이 카톡·DM·문자로 주고받는 것처럼** 짧은 한국어 대사 1개로 표현.",
+    "역할: 아래 노드 스펙의 사건을 **실제 한국인이 메시지앱·DM·문자로 주고받는 것처럼** 짧은 한국어 대사 1개로 표현.",
     "",
     buildDialogueStyleGuide(currentNode, userProfile),
     "",
@@ -145,6 +145,7 @@ export function buildAdvanceSystemPrompt(
 }
 
 export function buildAdvanceUserPrompt(
+  scenarioId: ScenarioId,
   currentNode: ScenarioNode,
   chatHistory: ChatHistoryEntry[],
   userProfile: UserProfile,
@@ -156,9 +157,16 @@ export function buildAdvanceUserPrompt(
           .map((entryItem) => `[${entryItem.speaker}] ${entryItem.messageText}`)
           .join("\n");
 
+  const usesEmailContact =
+    currentNode.app_type === "sms" && scenarioId === "teen-female-grooming";
+  const emailContactNote = usesEmailContact
+    ? "연락처 맥락: 상대는 휴대전화 번호가 없고 이메일로만 연락한다. '메시지앱'으로 옮기자고 하되 텔레그램·카카오톡 등 실제 앱명은 쓰지 않는다."
+    : null;
+
   return [
     `사용자: ${userProfile.displayName}, ${userProfile.userAge}, ${userProfile.gender}`,
     `앱: ${currentNode.app_type}, 상대: ${currentNode.sender_name}`,
+    ...(emailContactNote ? [emailContactNote] : []),
     "",
     "지금까지 대화:",
     historyText,
