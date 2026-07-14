@@ -34,7 +34,10 @@ export function HomeScreen({
 
   useEffect(() => {
     if (showNotificationImmediately) return;
-    const notificationTimer = setTimeout(() => setIsNotificationVisible(true), 1800);
+    const notificationTimer = setTimeout(
+      () => setIsNotificationVisible(true),
+      1800,
+    );
     return () => clearTimeout(notificationTimer);
   }, [showNotificationImmediately]);
 
@@ -47,12 +50,7 @@ export function HomeScreen({
   );
 
   return (
-    <div
-      className="relative flex h-full flex-col justify-between bg-cover bg-center px-6 pb-8 pt-16"
-      style={{
-        backgroundImage: "linear-gradient(160deg, #1e293b 0%, #0f172a 55%, #020617 100%)",
-      }}
-    >
+    <div className="relative flex h-full flex-col justify-between bg-gray-600 px-6 pb-8 pt-16">
       {/* 실시간 알림 배너 */}
       <AnimatePresence>
         {isNotificationVisible && (
@@ -71,7 +69,8 @@ export function HomeScreen({
             </span>
             <span className="min-w-0">
               <span className="block text-sm font-semibold">
-                {resolveAppDisplayConfig(notificationAppType)?.appLabel ?? "알림"}
+                {resolveAppDisplayConfig(notificationAppType)?.appLabel ??
+                  "알림"}
               </span>
               <span className="block truncate text-sm text-black/60">
                 {notificationPreviewText}
@@ -103,7 +102,9 @@ export function HomeScreen({
                   </span>
                 )}
               </span>
-              <span className="text-[11px] text-white/90">{iconItem.appLabel}</span>
+              <span className="text-[11px] text-white/90">
+                {iconItem.appLabel}
+              </span>
             </button>
           );
         })}
