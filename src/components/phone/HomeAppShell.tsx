@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { BrowserHomeView } from "./BrowserHomeView";
 import { AppBackButton } from "./shared/AppBackButton";
 import { MessageAppThreadView } from "./shared/MessageAppThreadView";
 import { resolveAppLabel } from "@/lib/phone/app-display";
@@ -53,6 +54,14 @@ export function HomeAppShell({
     );
   }
 
+  if (appType === "browser") {
+    return (
+      <div className="flex h-full flex-col bg-white pt-10">
+        <BrowserHomeView onExitToHome={onExitToHome} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full flex-col bg-white pt-10">
       <header className="flex items-center gap-2 border-b border-black/10 px-3 py-2.5">
@@ -81,7 +90,6 @@ export function HomeAppShell({
         )}
         {appType === "call" && <CallShellContent />}
         {appType === "bank" && <BankShellContent />}
-        {appType === "browser" && <BrowserShellContent />}
       </div>
     </div>
   );
@@ -248,22 +256,3 @@ function BankShellContent() {
   );
 }
 
-function BrowserShellContent() {
-  return (
-    <div className="p-4">
-      <div className="rounded-full bg-neutral-100 px-4 py-2.5 text-sm text-black/50">
-        검색 또는 URL 입력
-      </div>
-      <div className="mt-6 grid grid-cols-4 gap-4 text-center text-xs text-black/60">
-        {["뉴스", "날씨", "지도", "쇼핑"].map((shortcutLabel) => (
-          <div key={shortcutLabel} className="flex flex-col items-center gap-1">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-lg">
-              🌐
-            </span>
-            {shortcutLabel}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
