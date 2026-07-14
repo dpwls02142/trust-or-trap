@@ -1,43 +1,82 @@
 "use client";
 
-import { useMemo } from "react";
-import { AppBackButton } from "./shared/AppBackButton";
+import { useMemo, useState } from "react";
+import { BrowserAddressBar } from "./shared/BrowserAddressBar";
 import { BrowserSearchResultPanel } from "./shared/BrowserSearchResultPanel";
+import { BrowserPageView } from "./shared/BrowserPageView";
 import { ScenarioActionPanel } from "./shared/ScenarioActionPanel";
 import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
+import {
+  getScenarioSiteSecurityWarning,
+  resolveBrowserNavigationUrl,
+  SCENARIO_FAKE_SITE_URL,
+} from "@/lib/phone/browser-navigation";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /**
  * app_type: browser — 가짜 사이트/역이미지 검색 화면 (범용 렌더러).
- * 수상한 주소창(비공식 도메인)을 항상 노출해 위험 신호 학습을 돕는다.
+ * 주소창에 URL·검색어를 입력하면 iframe으로 실제 페이지를 연다.
+ * 기본 가짜 URL은 시나리오 연출(역이미지 검색)을 유지한다.
  */
 export function BrowserApp(sharedProps: PhoneAppSharedProps) {
+  return <BrowserAppBody key={sharedProps.currentNode.node_id} sharedProps={sharedProps} />;
+}
+
+function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
   const { currentNode, chatHistory, streamingMessage } = sharedProps;
+  const [addressInputValue, setAddressInputValue] = useState(SCENARIO_FAKE_SITE_URL);
+  const [activeNavigationUrl, setActiveNavigationUrl] = useState<string | null>(null);
 
   const nodeChatHistory = useMemo(
     () => filterChatHistoryForAppView(chatHistory, currentNode),
     [chatHistory, currentNode],
   );
 
+  const securityWarning = getScenarioSiteSecurityWarning(
+    activeNavigationUrl ?? addressInputValue,
+  );
+
+  const handleNavigate = (submittedValue: string) => {
+    const resolvedUrl = resolveBrowserNavigationUrl(submittedValue);
+    if (!resolvedUrl) {
+      return;
+    }
+
+    setAddressInputValue(resolvedUrl);
+
+    if (resolvedUrl === SCENARIO_FAKE_SITE_URL) {
+      setActiveNavigationUrl(null);
+      return;
+    }
+
+    setActiveNavigationUrl(resolvedUrl);
+  };
+
   return (
     <div className="flex h-full flex-col bg-white pt-10">
-      <div className="flex items-center gap-1 border-b border-black/10 bg-neutral-50 px-2 py-2">
-        <AppBackButton onBack={sharedProps.onExitToHome} />
-        <span aria-hidden>🔓</span>
-        <span className="min-w-0 flex-1 truncate rounded-full bg-neutral-200 px-3 py-1.5 text-xs text-black/70">
-          http://secure-check.info-portal.xyz
-        </span>
-      </div>
-      <div className="border-b border-black/10 bg-red-50 px-4 py-1.5 text-[11px] text-red-700">
-        이 사이트는 보안 연결(HTTPS)이 아니며 공식 도메인(go.kr)이 아닙니다
-      </div>
-
-      <BrowserSearchResultPanel
-        nodeChatHistory={nodeChatHistory}
-        streamingMessage={streamingMessage}
-        senderName={currentNode.sender_name}
-        isAwaitingResponse={sharedProps.isAwaitingResponse}
+      <BrowserAddressBar
+        addressValue={addressInputValue}
+        onAddressChange={setAddressInputValue}
+        onNavigate={handleNavigate}
+        onBack={sharedProps.onExitToHome}
       />
+
+      {securityWarning && (
+        <div className="border-b border-black/10 bg-red-50 px-4 py-1.5 text-[11px] text-red-700">
+          {securityWarning}
+        </div>
+      )}
+
+      {activeNavigationUrl ? (
+        <BrowserPageView pageUrl={activeNavigationUrl} />
+      ) : (
+        <BrowserSearchResultPanel
+          nodeChatHistory={nodeChatHistory}
+          streamingMessage={streamingMessage}
+          senderName={currentNode.sender_name}
+          isAwaitingResponse={sharedProps.isAwaitingResponse}
+        />
+      )}
 
       <ScenarioActionPanel
         composerResetKey={currentNode.node_id}
