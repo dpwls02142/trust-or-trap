@@ -6,6 +6,7 @@ import { AppBackButton } from "@/components/phone/shared/AppBackButton";
 import { matchPersonaScenario } from "@/lib/scenario/persona-matching";
 import { scenarioCatalog } from "@/lib/scenario/scenario-catalog";
 import type { ScenarioId, UserProfile } from "@/lib/scenario/types";
+import { OnboardingCopyright } from "@/components/onboarding/OnboardingCopyright";
 
 interface ScenarioRecommendationProps {
   userProfile: UserProfile;
@@ -113,6 +114,10 @@ export function ScenarioRecommendation({
               })}
             </motion.ul>
           )}
+
+          <div className="flex justify-center pt-2">
+            <OnboardingCopyright />
+          </div>
         </div>
       </div>
     </motion.div>
