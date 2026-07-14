@@ -13,7 +13,8 @@ import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: chat — 카카오톡류 메신저 (범용 렌더러, 페르소나 7종 공유) */
 export function ChatApp(sharedProps: PhoneAppSharedProps) {
-  const { activeScenarioId, currentNode, chatHistory, streamingMessage } = sharedProps;
+  const { activeScenarioId, currentNode, chatHistory, streamingMessage } =
+    sharedProps;
   const [isProfileDetailVisible, setIsProfileDetailVisible] = useState(false);
 
   const senderProfileView = useMemo(
@@ -33,7 +34,7 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
         <button
           type="button"
           onClick={() => setIsProfileDetailVisible(true)}
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left transition hover:bg-black/5"
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left transition"
           aria-label={`${currentNode.sender_name} 프로필 상세보기`}
         >
           <SenderAvatar
@@ -41,8 +42,12 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
             senderName={currentNode.sender_name}
           />
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-black">{currentNode.sender_name}</h2>
-            <p className="truncate text-[11px] text-black/50">{senderProfileView.statusMessage}</p>
+            <h2 className="truncate text-sm font-semibold text-black">
+              {currentNode.sender_name}
+            </h2>
+            <p className="truncate text-[11px] text-black/50">
+              {senderProfileView.statusMessage}
+            </p>
           </div>
         </button>
       </header>

@@ -8,6 +8,7 @@ import {
   resolveNotificationPreview,
 } from "@/lib/phone/app-display";
 import type { AppType } from "@/lib/scenario/types";
+import { PhoneAppIcon } from "@/components/phone/shared/PhoneAppIcon";
 
 interface HomeScreenProps {
   /** 알림이 도착할 앱 (시나리오 entry 노드의 app_type) */
@@ -34,7 +35,10 @@ export function HomeScreen({
 
   useEffect(() => {
     if (showNotificationImmediately) return;
-    const notificationTimer = setTimeout(() => setIsNotificationVisible(true), 1800);
+    const notificationTimer = setTimeout(
+      () => setIsNotificationVisible(true),
+      1800,
+    );
     return () => clearTimeout(notificationTimer);
   }, [showNotificationImmediately]);
 
@@ -47,12 +51,7 @@ export function HomeScreen({
   );
 
   return (
-    <div
-      className="relative flex h-full flex-col justify-between bg-cover bg-center px-6 pb-8 pt-16"
-      style={{
-        backgroundImage: "linear-gradient(160deg, #1e293b 0%, #0f172a 55%, #020617 100%)",
-      }}
-    >
+    <div className="relative flex h-full flex-col justify-between bg-gray-600 px-6 pb-8 pt-16">
       {/* 실시간 알림 배너 */}
       <AnimatePresence>
         {isNotificationVisible && (
@@ -65,13 +64,17 @@ export function HomeScreen({
             className="absolute inset-x-3 top-12 z-30 flex items-center gap-3 rounded-2xl bg-white/95 p-3.5 text-left text-black shadow-xl backdrop-blur"
           >
             <span
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl ${notificationApp?.tileColor ?? "bg-neutral-300"}`}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white ${notificationApp?.tileColor ?? "bg-neutral-400"}`}
             >
-              {notificationApp?.iconGlyph ?? "🔔"}
+              <PhoneAppIcon
+                appType={notificationApp?.appType ?? "notification"}
+                size={20}
+              />
             </span>
             <span className="min-w-0">
               <span className="block text-sm font-semibold">
-                {resolveAppDisplayConfig(notificationAppType)?.appLabel ?? "알림"}
+                {resolveAppDisplayConfig(notificationAppType)?.appLabel ??
+                  "알림"}
               </span>
               <span className="block truncate text-sm text-black/60">
                 {notificationPreviewText}
@@ -94,16 +97,18 @@ export function HomeScreen({
               className="flex cursor-pointer flex-col items-center gap-1.5"
             >
               <span
-                className={`relative flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-lg ${iconItem.tileColor}`}
+                className={`relative flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg ${iconItem.tileColor}`}
               >
-                {iconItem.iconGlyph}
+                <PhoneAppIcon appType={iconItem.appType} size={28} />
                 {isNotificationVisible && isNotificationApp && (
                   <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                     1
                   </span>
                 )}
               </span>
-              <span className="text-[11px] text-white/90">{iconItem.appLabel}</span>
+              <span className="text-[11px] text-white/90">
+                {iconItem.appLabel}
+              </span>
             </button>
           );
         })}
@@ -116,10 +121,10 @@ export function HomeScreen({
             key={iconItem.appType}
             type="button"
             onClick={() => onAppOpen(iconItem.appType)}
-            className={`flex h-12 w-12 items-center justify-center rounded-2xl text-xl ${iconItem.tileColor}`}
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white ${iconItem.tileColor}`}
             aria-label={iconItem.appLabel}
           >
-            {iconItem.iconGlyph}
+            <PhoneAppIcon appType={iconItem.appType} size={24} />
           </button>
         ))}
       </div>

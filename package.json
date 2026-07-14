@@ -12,6 +12,7 @@
   "dependencies": {
     "@google/genai": "^2.11.0",
     "@hookform/resolvers": "latest",
+    "@remixicon/react": "^4.9.0",
     "framer-motion": "latest",
     "next": "latest",
     "react": "latest",
