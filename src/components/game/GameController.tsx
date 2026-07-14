@@ -15,6 +15,8 @@ import { HomeScreen } from "@/components/phone/HomeScreen";
 import { ScenarioAppRenderer } from "@/components/phone/ScenarioAppRenderer";
 import { HomeAppShell } from "@/components/phone/HomeAppShell";
 import { EndingReport } from "@/components/game/EndingReport";
+import { AppTransitionConfirm } from "@/components/phone/AppTransitionConfirm";
+import { resolveAppTransitionPrompt } from "@/lib/phone/app-transition-prompt";
 import { resolveStatusBarContentStyle } from "@/lib/phone/app-display";
 import { StatusBarOverrideProvider } from "@/lib/phone/status-bar-override";
 import { useGameStore } from "@/lib/stores/game-store";
@@ -81,6 +83,12 @@ export function GameController() {
     "scenario",
   );
   const [shellAppType, setShellAppType] = useState<AppType | null>(null);
+  const [pendingAppTransition, setPendingAppTransition] = useState<{
+    targetAppType: AppType;
+    promptText: string;
+  } | null>(null);
+  const [shouldRevealNotificationOnHome, setShouldRevealNotificationOnHome] =
+    useState(false);
 
   const lastAdvancedNodeIdRef = useRef<string | null>(null);
   const ttsQueueRef = useRef<SentenceTtsQueue | null>(null);
@@ -291,6 +299,8 @@ export function GameController() {
         lastAdvancedNodeIdRef.current = null;
         setIsInputTutorialVisible(true);
         setHasOpenedCurrentApp(false);
+        setPendingAppTransition(null);
+        setShouldRevealNotificationOnHome(false);
         setAppPlayMode("scenario");
         setShellAppType(null);
         startScenario(entryData);
@@ -336,7 +346,24 @@ export function GameController() {
           riskFlag: RiskFlag;
           nextNode: PublicNodeView;
         };
-        advanceToNode(judgeData.nextNode, judgeData.riskFlag);
+        const previousAppType = currentNode.app_type;
+        const nextNode = judgeData.nextNode;
+        advanceToNode(nextNode, judgeData.riskFlag);
+
+        if (
+          !nextNode.is_ending &&
+          nextNode.app_type !== previousAppType
+        ) {
+          setPendingAppTransition({
+            targetAppType: nextNode.app_type,
+            promptText: resolveAppTransitionPrompt(nextNode.app_type),
+          });
+          setShouldRevealNotificationOnHome(true);
+          setHasOpenedCurrentApp(false);
+          setAppPlayMode("scenario");
+          setShellAppType(null);
+          exitToHome();
+        }
       } catch {
         appendChatEntry({
           speaker: "system",
@@ -359,6 +386,7 @@ export function GameController() {
       isAwaitingResponse,
       appendChatEntry,
       advanceToNode,
+      exitToHome,
     ],
   );
 
@@ -381,6 +409,8 @@ export function GameController() {
   const handleAppOpen = useCallback(
     (selectedAppType: AppType) => {
       if (selectedAppType === currentNode?.app_type) {
+        setPendingAppTransition(null);
+        setShouldRevealNotificationOnHome(false);
         setAppPlayMode("scenario");
         setShellAppType(null);
         setHasOpenedCurrentApp(true);
@@ -394,6 +424,20 @@ export function GameController() {
     },
     [currentNode, enterCurrentApp],
   );
+
+  const handleConfirmAppTransition = useCallback(() => {
+    if (!pendingAppTransition) return;
+    setPendingAppTransition(null);
+    setShouldRevealNotificationOnHome(false);
+    setAppPlayMode("scenario");
+    setShellAppType(null);
+    setHasOpenedCurrentApp(true);
+    enterCurrentApp();
+  }, [pendingAppTransition, enterCurrentApp]);
+
+  const handleDismissAppTransition = useCallback(() => {
+    setPendingAppTransition(null);
+  }, []);
 
   const handleExitToHome = useCallback(() => {
     lastAdvancedNodeIdRef.current = null;
@@ -410,6 +454,8 @@ export function GameController() {
     setIsAwaitingResponse(false);
     setIsInputTutorialVisible(true);
     setHasOpenedCurrentApp(false);
+    setPendingAppTransition(null);
+    setShouldRevealNotificationOnHome(false);
     setAppPlayMode("scenario");
     setShellAppType(null);
     setIsEditingOnboardingProfile(false);
@@ -474,13 +520,24 @@ export function GameController() {
     <StatusBarOverrideProvider>
       <PhoneFrameShell statusBarContentStyle={statusBarContentStyle}>
       {gamePhase === "home" && currentNode && (
-        <div className="h-full">
+        <div className="relative h-full">
           <HomeScreen
             notificationAppType={currentNode.app_type}
             notificationSenderName={currentNode.sender_name}
             onAppOpen={handleAppOpen}
-            showNotificationImmediately={hasOpenedCurrentApp}
+            showNotificationWithoutDelay={
+              hasOpenedCurrentApp || shouldRevealNotificationOnHome
+            }
+            suppressIncomingCallAlert={hasOpenedCurrentApp}
           />
+          {pendingAppTransition && (
+            <AppTransitionConfirm
+              targetAppType={pendingAppTransition.targetAppType}
+              promptText={pendingAppTransition.promptText}
+              onConfirmOpen={handleConfirmAppTransition}
+              onDismiss={handleDismissAppTransition}
+            />
+          )}
         </div>
       )}
 

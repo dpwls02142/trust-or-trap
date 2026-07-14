@@ -16,8 +16,10 @@ interface HomeScreenProps {
   notificationAppType: AppType;
   notificationSenderName: string;
   onAppOpen: (appType: AppType) => void;
-  /** 앱을 한 번 열었다가 홈으로 돌아온 경우 알림을 즉시 표시 */
-  showNotificationImmediately?: boolean;
+  /** 1.8초 대기 없이 알림을 바로 표시 (스텝 전환·홈 복귀) */
+  showNotificationWithoutDelay?: boolean;
+  /** 통화 앱을 연 뒤 홈 복귀 시 수신 전화 알림·벨소리 억제 */
+  suppressIncomingCallAlert?: boolean;
 }
 
 /**
@@ -28,30 +30,34 @@ export function HomeScreen({
   notificationAppType,
   notificationSenderName,
   onAppOpen,
-  showNotificationImmediately = false,
+  showNotificationWithoutDelay = false,
+  suppressIncomingCallAlert = false,
 }: HomeScreenProps) {
   const [isNotificationVisible, setIsNotificationVisible] = useState(
-    showNotificationImmediately,
+    showNotificationWithoutDelay,
   );
 
   useEffect(() => {
-    if (showNotificationImmediately) return;
+    if (showNotificationWithoutDelay) {
+      setIsNotificationVisible(true);
+      return;
+    }
     const notificationTimer = setTimeout(
       () => setIsNotificationVisible(true),
       1800,
     );
     return () => clearTimeout(notificationTimer);
-  }, [showNotificationImmediately]);
+  }, [showNotificationWithoutDelay]);
 
   // 통화 중(앱을 한 번 연 뒤 홈 복귀)에는 수신 전화 알림·배지·벨소리를 표시하지 않는다.
   const shouldDisplayNotification =
     isNotificationVisible &&
-    !(notificationAppType === "call" && showNotificationImmediately);
+    !(notificationAppType === "call" && suppressIncomingCallAlert);
 
   useNotificationSound({
     isNotificationVisible: shouldDisplayNotification,
     notificationAppType,
-    suppressSound: showNotificationImmediately,
+    suppressSound: suppressIncomingCallAlert,
   });
 
   const notificationApp = homeAppIconList.find(

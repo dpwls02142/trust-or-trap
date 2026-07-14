@@ -69,15 +69,8 @@ export function detectTeenUnsafeContent(messageText: string): boolean {
   );
 }
 
-/** 카톡 단답형 상한 — LLM이 장문을 내도 화면에는 짧게 잘라 표시 */
-const dialogueMaxChars = 60;
+/** 선택지 라벨 상한 — UI 버튼에 맞게 짧게 유지 */
 const optionLabelMaxChars = 28;
-
-export function capDialogueLength(rawMessageText: string): string {
-  const trimmedText = rawMessageText.trim();
-  if (trimmedText.length <= dialogueMaxChars) return trimmedText;
-  return `${trimmedText.slice(0, dialogueMaxChars - 1)}…`;
-}
 
 export function capOptionLabelLength(rawLabelText: string): string {
   const trimmedLabel = rawLabelText.trim();
