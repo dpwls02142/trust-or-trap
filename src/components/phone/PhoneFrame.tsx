@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { resolveAppDisplayConfig } from "@/lib/phone/app-display";
 import { useCallSessionActive } from "@/lib/phone/use-call-session-active";
+import { PhoneAppIcon } from "@/components/phone/shared/PhoneAppIcon";
 
 interface PhoneFrameProps {
   children: React.ReactNode;
@@ -44,7 +45,7 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
               className="flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white"
               aria-label={callDisplayConfig.statusBarLabel}
             >
-              <span aria-hidden>{callDisplayConfig.iconGlyph}</span>
+              <PhoneAppIcon appType="call" size={12} />
               {callDisplayConfig.statusBarLabel}
             </span>
           )}
