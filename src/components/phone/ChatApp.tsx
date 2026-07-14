@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { MessageThread } from "./shared/MessageThread";
 import { ResponseComposer } from "./shared/ResponseComposer";
@@ -9,6 +9,7 @@ import { AppBackButton } from "./shared/AppBackButton";
 import { ChatProfileDetail } from "./shared/ChatProfileDetail";
 import { buildSenderProfileView } from "@/lib/scenario/sender-profile";
 import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
+import { useStatusBarOverride } from "@/lib/phone/status-bar-override";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: chat — 카카오톡류 메신저 (범용 렌더러, 페르소나 7종 공유) */
@@ -16,6 +17,16 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
   const { activeScenarioId, currentNode, chatHistory, streamingMessage } =
     sharedProps;
   const [isProfileDetailVisible, setIsProfileDetailVisible] = useState(false);
+  const { setStatusBarOverride } = useStatusBarOverride();
+
+  useEffect(() => {
+    if (!isProfileDetailVisible) {
+      return;
+    }
+
+    setStatusBarOverride("light-content");
+    return () => setStatusBarOverride(null);
+  }, [isProfileDetailVisible, setStatusBarOverride]);
 
   const senderProfileView = useMemo(
     () => buildSenderProfileView(activeScenarioId, currentNode.sender_name),

@@ -10,11 +10,13 @@ import {
 } from "react";
 import { OnboardingForm } from "@/components/onboarding/OnboardingForm";
 import { ScenarioRecommendation } from "@/components/onboarding/ScenarioRecommendation";
-import { PhoneFrame } from "@/components/phone/PhoneFrame";
+import { PhoneFrameShell } from "@/components/phone/PhoneFrameShell";
 import { HomeScreen } from "@/components/phone/HomeScreen";
 import { ScenarioAppRenderer } from "@/components/phone/ScenarioAppRenderer";
 import { HomeAppShell } from "@/components/phone/HomeAppShell";
 import { EndingReport } from "@/components/game/EndingReport";
+import { resolveStatusBarContentStyle } from "@/lib/phone/app-display";
+import { StatusBarOverrideProvider } from "@/lib/phone/status-bar-override";
 import { useGameStore } from "@/lib/stores/game-store";
 import { consumeAdvanceStream } from "@/lib/client/advance-stream";
 import { SentenceTtsQueue } from "@/lib/client/tts-queue";
@@ -428,6 +430,17 @@ export function GameController() {
     setIsEditingOnboardingProfile(true);
   }, []);
 
+  const activeAppTypeForStatusBar = useMemo((): AppType | null => {
+    if (gamePhase !== "playing") return null;
+    if (appPlayMode === "shell") return shellAppType;
+    return currentNode?.app_type ?? null;
+  }, [gamePhase, appPlayMode, shellAppType, currentNode?.app_type]);
+
+  const statusBarContentStyle = useMemo(
+    () => resolveStatusBarContentStyle(gamePhase, activeAppTypeForStatusBar),
+    [gamePhase, activeAppTypeForStatusBar],
+  );
+
   if (!isHydrated) {
     return <div className="h-dvh w-full max-w-[430px]" aria-hidden />;
   }
@@ -453,7 +466,8 @@ export function GameController() {
   }
 
   return (
-    <PhoneFrame>
+    <StatusBarOverrideProvider>
+      <PhoneFrameShell statusBarContentStyle={statusBarContentStyle}>
       {gamePhase === "home" && currentNode && (
         <div className="h-full">
           <HomeScreen
@@ -508,6 +522,7 @@ export function GameController() {
           />
         </div>
       )}
-    </PhoneFrame>
+      </PhoneFrameShell>
+    </StatusBarOverrideProvider>
   );
 }
