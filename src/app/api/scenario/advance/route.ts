@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { findScenarioNode } from "@/lib/scenario/graph-loader";
 import { advancePayloadSchema, advanceRequestSchema } from "@/lib/scenario/schemas";
-import { applySafetyFilter, capDialogueLength, capOptionLabelLength, detectTeenUnsafeContent } from "@/lib/scenario/safety-filter";
+import { applySafetyFilter, capOptionLabelLength, detectTeenUnsafeContent } from "@/lib/scenario/safety-filter";
 import {
   buildAdvanceSystemPrompt,
   buildAdvanceUserPrompt,
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
 
         emitEvent("payload", {
           ...parsedPayload,
-          message: capDialogueLength(applySafetyFilter(parsedPayload.message)),
+          message: applySafetyFilter(parsedPayload.message),
           options: parsedPayload.options.map((optionItem) => ({
             ...optionItem,
             label: capOptionLabelLength(applySafetyFilter(optionItem.label)),
