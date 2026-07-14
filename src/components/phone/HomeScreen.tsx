@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNotificationSound } from "@/lib/client/use-notification-sound";
 import {
   homeAppIconList,
   resolveAppDisplayConfig,
@@ -42,6 +43,17 @@ export function HomeScreen({
     return () => clearTimeout(notificationTimer);
   }, [showNotificationImmediately]);
 
+  // 통화 중(앱을 한 번 연 뒤 홈 복귀)에는 수신 전화 알림·배지·벨소리를 표시하지 않는다.
+  const shouldDisplayNotification =
+    isNotificationVisible &&
+    !(notificationAppType === "call" && showNotificationImmediately);
+
+  useNotificationSound({
+    isNotificationVisible: shouldDisplayNotification,
+    notificationAppType,
+    suppressSound: showNotificationImmediately,
+  });
+
   const notificationApp = homeAppIconList.find(
     (iconItem) => iconItem.appType === notificationAppType,
   );
@@ -54,7 +66,7 @@ export function HomeScreen({
     <div className="relative flex h-full flex-col justify-between bg-gray-600 px-6 pb-8 pt-16">
       {/* 실시간 알림 배너 */}
       <AnimatePresence>
-        {isNotificationVisible && (
+        {shouldDisplayNotification && (
           <motion.button
             initial={{ y: -90, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -100,7 +112,7 @@ export function HomeScreen({
                 className={`relative flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg ${iconItem.tileColor}`}
               >
                 <PhoneAppIcon appType={iconItem.appType} size={28} />
-                {isNotificationVisible && isNotificationApp && (
+                {shouldDisplayNotification && isNotificationApp && (
                   <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                     1
                   </span>

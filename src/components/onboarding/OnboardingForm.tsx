@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import type { UserProfile } from "@/lib/scenario/types";
+import { OnboardingCopyright } from "@/components/onboarding/OnboardingCopyright";
 
 const onboardingFormSchema = z.object({
   displayName: z
@@ -124,6 +125,10 @@ export function OnboardingForm({ onProfileSubmit, initialProfile }: OnboardingFo
       <p className="text-center text-xs text-white/40">
         입력한 정보는 시나리오 매칭에만 사용되며 이 기기에만 저장됩니다.
       </p>
+
+      <div className="flex justify-center">
+        <OnboardingCopyright />
+      </div>
     </motion.div>
   );
 }
