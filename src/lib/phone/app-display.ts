@@ -79,6 +79,7 @@ export function resolveAppDisplayConfig(
 export function resolveStatusBarContentStyle(
   gamePhase: "home" | "playing" | "ending" | "onboarding",
   activeAppType: AppType | null,
+  appPlayMode: "scenario" | "shell" = "scenario",
 ): StatusBarContentStyle {
   if (gamePhase === "home" || gamePhase === "ending") {
     return "light-content";
@@ -86,6 +87,11 @@ export function resolveStatusBarContentStyle(
 
   if (!activeAppType || activeAppType === "home") {
     return "light-content";
+  }
+
+  // 홈에서 진입한 쉘 화면은 상단 배경이 밝다 (CallShellContent 등)
+  if (appPlayMode === "shell") {
+    return "dark-content";
   }
 
   return resolveAppDisplayConfig(activeAppType)!.statusBarContentStyle;

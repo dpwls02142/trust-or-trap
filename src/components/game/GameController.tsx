@@ -437,8 +437,13 @@ export function GameController() {
   }, [gamePhase, appPlayMode, shellAppType, currentNode?.app_type]);
 
   const statusBarContentStyle = useMemo(
-    () => resolveStatusBarContentStyle(gamePhase, activeAppTypeForStatusBar),
-    [gamePhase, activeAppTypeForStatusBar],
+    () =>
+      resolveStatusBarContentStyle(
+        gamePhase,
+        activeAppTypeForStatusBar,
+        appPlayMode,
+      ),
+    [gamePhase, activeAppTypeForStatusBar, appPlayMode],
   );
 
   if (!isHydrated) {
