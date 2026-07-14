@@ -2,11 +2,16 @@ import type { AppType } from "@/lib/scenario/types";
 
 type PlayableAppType = Exclude<AppType, "home">;
 
+/** 상태바 글자·아이콘 색 — 앱 상단 배경 luminance 기준 */
+export type StatusBarContentStyle = "light-content" | "dark-content";
+
 export interface PhoneAppDisplayConfig {
   appLabel: string;
   tileColor: string;
   notificationPreview: (senderName: string) => string;
   statusBarLabel?: string;
+  /** light-content: 어두운 배경용 흰 글자, dark-content: 밝은 배경용 검정 글자 */
+  statusBarContentStyle: StatusBarContentStyle;
 }
 
 const phoneAppDisplayConfigMap: Record<PlayableAppType, PhoneAppDisplayConfig> =
@@ -16,34 +21,40 @@ const phoneAppDisplayConfigMap: Record<PlayableAppType, PhoneAppDisplayConfig> =
       tileColor: "bg-amber-400",
       notificationPreview: (senderName) =>
         `${senderName} — 새 메시지가 도착했습니다`,
+      statusBarContentStyle: "dark-content",
     },
     sms: {
       appLabel: "메시지",
       tileColor: "bg-green-500",
       notificationPreview: (senderName) =>
         `${senderName} — 새 메시지가 도착했습니다`,
+      statusBarContentStyle: "dark-content",
     },
     insta: {
       appLabel: "포토그램",
       tileColor: "bg-rose-500",
       notificationPreview: (senderName) =>
         `${senderName} — 새 DM이 도착했습니다`,
+      statusBarContentStyle: "dark-content",
     },
     call: {
       appLabel: "전화",
       tileColor: "bg-emerald-500",
       notificationPreview: (senderName) => `${senderName} — 수신 전화`,
       statusBarLabel: "통화 중",
+      statusBarContentStyle: "light-content",
     },
     bank: {
       appLabel: "한빛은행",
       tileColor: "bg-blue-600",
       notificationPreview: () => "한빛은행 — 새 알림이 도착했습니다",
+      statusBarContentStyle: "dark-content",
     },
     browser: {
       appLabel: "브라우저",
       tileColor: "bg-sky-600",
       notificationPreview: () => "브라우저 — 새 알림이 도착했습니다",
+      statusBarContentStyle: "dark-content",
     },
   };
 
@@ -63,6 +74,27 @@ export function resolveAppDisplayConfig(
 ): PhoneAppDisplayConfig | null {
   if (appType === "home") return null;
   return phoneAppDisplayConfigMap[appType];
+}
+
+export function resolveStatusBarContentStyle(
+  gamePhase: "home" | "playing" | "ending" | "onboarding",
+  activeAppType: AppType | null,
+  appPlayMode: "scenario" | "shell" = "scenario",
+): StatusBarContentStyle {
+  if (gamePhase === "home" || gamePhase === "ending") {
+    return "light-content";
+  }
+
+  if (!activeAppType || activeAppType === "home") {
+    return "light-content";
+  }
+
+  // 홈에서 진입한 쉘 화면은 상단 배경이 밝다 (CallShellContent 등)
+  if (appPlayMode === "shell") {
+    return "dark-content";
+  }
+
+  return resolveAppDisplayConfig(activeAppType)!.statusBarContentStyle;
 }
 
 export function resolveAppLabel(appType: AppType): string {

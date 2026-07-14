@@ -1,22 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { resolveAppDisplayConfig } from "@/lib/phone/app-display";
+import {
+  resolveAppDisplayConfig,
+  type StatusBarContentStyle,
+} from "@/lib/phone/app-display";
 import { useCallSessionActive } from "@/lib/phone/use-call-session-active";
 import { PhoneAppIcon } from "@/components/phone/shared/PhoneAppIcon";
 
 interface PhoneFrameProps {
   children: React.ReactNode;
+  statusBarContentStyle?: StatusBarContentStyle;
 }
 
 /**
  * 기기 프레임 — 베젤, 노치, 상태바(시계·배터리).
  * 뷰포트 390×844 기준. 내부 콘텐츠만 스크롤한다.
  */
-export function PhoneFrame({ children }: PhoneFrameProps) {
+export function PhoneFrame({
+  children,
+  statusBarContentStyle = "light-content",
+}: PhoneFrameProps) {
   const [clockText, setClockText] = useState("");
   const isCallSessionActive = useCallSessionActive();
   const callDisplayConfig = resolveAppDisplayConfig("call");
+  const statusBarTextClass =
+    statusBarContentStyle === "dark-content" ? "text-black" : "text-white";
 
   useEffect(() => {
     const updateClock = () => {
@@ -33,7 +42,9 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
   return (
     <div className="relative h-dvh w-full max-w-[430px] overflow-hidden bg-black sm:h-[844px] sm:max-h-[92dvh] sm:w-[390px] sm:rounded-[3rem] sm:border-[6px] sm:border-neutral-800 sm:shadow-2xl">
       {/* 상태바 */}
-      <div className="absolute inset-x-0 top-0 z-40 flex items-center justify-between px-7 pt-3 text-xs font-semibold text-white">
+      <div
+        className={`absolute inset-x-0 top-0 z-40 flex items-center justify-between px-7 pt-3 text-xs font-semibold ${statusBarTextClass}`}
+      >
         <span suppressHydrationWarning>{clockText}</span>
         <span
           aria-hidden
