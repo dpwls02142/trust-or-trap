@@ -50,14 +50,14 @@ export function AppTransitionConfirm({
             onClick={onDismiss}
             className="flex-1 py-3.5 text-sm font-medium text-black/55 transition-colors hover:bg-black/5"
           >
-            잠깐만
+            아니오
           </button>
           <button
             type="button"
             onClick={onConfirmOpen}
             className="flex-1 border-l border-black/10 py-3.5 text-sm font-semibold text-sky-600 transition-colors hover:bg-sky-50"
           >
-            열어볼게
+            네
           </button>
         </div>
       </motion.div>
