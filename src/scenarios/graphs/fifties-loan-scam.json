@@ -31,7 +31,7 @@
       "is_ending": false,
       "ending_type": null,
       "sender_name": "서민금융지원",
-      "outbound_dial_number": "1588-3302"
+      "outbound_dial_number": "1588-1588"
     },
     {
       "node_id": "trust-kind-agent",
@@ -44,9 +44,15 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        { "label": "내 정보를 어떻게 알았는지 따져 묻고 통화를 끊는다", "risk_flag": "safe" },
+        {
+          "label": "내 정보를 어떻게 알았는지 따져 묻고 통화를 끊는다",
+          "risk_flag": "safe"
+        },
         { "label": "일단 조건 설명만 들어본다", "risk_flag": "caution" },
-        { "label": "나를 잘 아는 것 같아 안심하고 상담한다", "risk_flag": "risky" }
+        {
+          "label": "나를 잘 아는 것 같아 안심하고 상담한다",
+          "risk_flag": "risky"
+        }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -58,7 +64,7 @@
       "is_ending": false,
       "ending_type": null,
       "sender_name": "박주임",
-      "outbound_dial_number": "1588-3302"
+      "outbound_dial_number": "1588-1588"
     },
     {
       "node_id": "risk-prepay-logic",
@@ -71,9 +77,18 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        { "label": "선상환 요구는 사기임을 알고 금감원(1332)에 실시간 확인한다", "risk_flag": "safe" },
-        { "label": "반신반의하며 상환 여력을 계산해 본다", "risk_flag": "caution" },
-        { "label": "신용점수를 올려야 하니 준비하겠다고 한다", "risk_flag": "risky" }
+        {
+          "label": "선상환 요구는 사기임을 알고 금감원(1332)에 실시간 확인한다",
+          "risk_flag": "safe"
+        },
+        {
+          "label": "반신반의하며 상환 여력을 계산해 본다",
+          "risk_flag": "caution"
+        },
+        {
+          "label": "신용점수를 올려야 하니 준비하겠다고 한다",
+          "risk_flag": "risky"
+        }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -98,7 +113,10 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        { "label": "상환은 반드시 원래 은행 창구·앱으로만 한다며 거절한다", "risk_flag": "safe" },
+        {
+          "label": "상환은 반드시 원래 은행 창구·앱으로만 한다며 거절한다",
+          "risk_flag": "safe"
+        },
         { "label": "보증보험료 소액만 먼저 입금한다", "risk_flag": "caution" },
         { "label": "지정 계좌로 상환금 전액을 이체한다", "risk_flag": "risky" }
       ],
@@ -125,9 +143,18 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        { "label": "즉시 은행·경찰(112)에 지급정지를 신청한다", "risk_flag": "safe" },
-        { "label": "마지막이라는 말을 믿고 한 번 더 입금한다", "risk_flag": "caution" },
-        { "label": "여기서 멈추면 다 잃는다는 생각에 계속 입금한다", "risk_flag": "risky" }
+        {
+          "label": "즉시 은행·경찰(112)에 지급정지를 신청한다",
+          "risk_flag": "safe"
+        },
+        {
+          "label": "마지막이라는 말을 믿고 한 번 더 입금한다",
+          "risk_flag": "caution"
+        },
+        {
+          "label": "여기서 멈추면 다 잃는다는 생각에 계속 입금한다",
+          "risk_flag": "risky"
+        }
       ],
       "allow_free_input": true,
       "next_node_map": {
