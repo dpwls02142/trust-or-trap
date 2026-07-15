@@ -5,7 +5,7 @@ import { BrowserHomeView } from "./BrowserHomeView";
 import { AppBackButton } from "./shared/AppBackButton";
 import { MessageAppThreadView } from "./shared/MessageAppThreadView";
 import { playDialKeyTone } from "@/lib/client/dial-key-tone";
-import { dialNumbersMatch } from "@/lib/phone/dial-number";
+import { dialNumbersMatch, formatDialDisplayNumber, resolveDialDigitLimit } from "@/lib/phone/dial-number";
 import { resolveAppLabel } from "@/lib/phone/app-display";
 import { buildScenarioMessageThread } from "@/lib/phone/message-thread-summary";
 import type { AppType, ChatHistoryEntry } from "@/lib/scenario/types";
@@ -267,29 +267,6 @@ const dialKeyRows: string[][] = [
   ["*", "0", "#"],
 ];
 
-function formatDialDisplay(rawDigits: string): string {
-  const digitOnly = rawDigits.replace(/\D/g, "");
-  if (digitOnly.length === 0) return "";
-
-  if (digitOnly.startsWith("02")) {
-    if (digitOnly.length <= 2) return digitOnly;
-    if (digitOnly.length <= 5)
-      return `${digitOnly.slice(0, 2)}-${digitOnly.slice(2)}`;
-    if (digitOnly.length <= 9) {
-      return `${digitOnly.slice(0, 2)}-${digitOnly.slice(2, 5)}-${digitOnly.slice(5)}`;
-    }
-    return `${digitOnly.slice(0, 2)}-${digitOnly.slice(2, 6)}-${digitOnly.slice(6, 10)}`;
-  }
-
-  if (digitOnly.length <= 3) return digitOnly;
-  if (digitOnly.length <= 7)
-    return `${digitOnly.slice(0, 3)}-${digitOnly.slice(3)}`;
-  if (digitOnly.length <= 11) {
-    return `${digitOnly.slice(0, 3)}-${digitOnly.slice(3, 7)}-${digitOnly.slice(7)}`;
-  }
-  return `${digitOnly.slice(0, 3)}-${digitOnly.slice(3, 7)}-${digitOnly.slice(7, 11)}`;
-}
-
 function CallShellContent({
   pendingOutboundDialNumber = null,
   onOutboundDialConnect,
@@ -305,15 +282,16 @@ function CallShellContent({
     null,
   );
 
-  const formattedDialNumber = formatDialDisplay(dialedDigits);
+  const formattedDialNumber = formatDialDisplayNumber(dialedDigits);
   const hasDialedDigits = dialedDigits.length > 0;
 
   const handleAppendDigit = (nextDigit: string) => {
     setDialFeedbackMessage(null);
     playDialKeyTone(nextDigit);
     setDialedDigits((previousDigits) => {
-      const digitCount = previousDigits.replace(/\D/g, "").length;
-      if (/\d/.test(nextDigit) && digitCount >= 11) return previousDigits;
+      const digitOnly = previousDigits.replace(/\D/g, "");
+      const digitLimit = resolveDialDigitLimit(digitOnly);
+      if (/\d/.test(nextDigit) && digitOnly.length >= digitLimit) return previousDigits;
       return `${previousDigits}${nextDigit}`;
     });
   };
