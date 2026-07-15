@@ -18,6 +18,8 @@ interface HomeAppShellProps {
   /** 시나리오에서 키패드로 직접 걸어야 하는 가상 번호 */
   pendingOutboundDialNumber?: string | null;
   onOutboundDialConnect?: () => void;
+  outboundDialDraft?: string;
+  onOutboundDialDraftChange?: (draftValue: string) => void;
 }
 
 type MessageShellAppType = Extract<AppType, "chat" | "sms" | "insta">;
@@ -33,6 +35,8 @@ export function HomeAppShell({
   scenarioSenderName = null,
   pendingOutboundDialNumber = null,
   onOutboundDialConnect,
+  outboundDialDraft = "",
+  onOutboundDialDraftChange,
 }: HomeAppShellProps) {
   const shellTitle = appType === "home" ? "앱" : resolveAppLabel(appType);
   const [openThreadSender, setOpenThreadSender] = useState<string | null>(null);
@@ -98,9 +102,10 @@ export function HomeAppShell({
         )}
         {appType === "call" && (
           <CallShellContent
-            key={pendingOutboundDialNumber ?? "call-shell-idle"}
             pendingOutboundDialNumber={pendingOutboundDialNumber}
             onOutboundDialConnect={onOutboundDialConnect}
+            outboundDialDraft={outboundDialDraft}
+            onOutboundDialDraftChange={onOutboundDialDraftChange}
           />
         )}
         {appType === "bank" && <BankShellContent />}
@@ -270,17 +275,28 @@ const dialKeyRows: string[][] = [
 function CallShellContent({
   pendingOutboundDialNumber = null,
   onOutboundDialConnect,
+  outboundDialDraft = "",
+  onOutboundDialDraftChange,
 }: {
   pendingOutboundDialNumber?: string | null;
   onOutboundDialConnect?: () => void;
+  outboundDialDraft?: string;
+  onOutboundDialDraftChange?: (draftValue: string) => void;
 }) {
   const [activeCallTab, setActiveCallTab] = useState<CallShellTab>(() =>
     pendingOutboundDialNumber ? "keypad" : "recents",
   );
-  const [dialedDigits, setDialedDigits] = useState("");
   const [dialFeedbackMessage, setDialFeedbackMessage] = useState<string | null>(
     null,
   );
+
+  const dialedDigits = outboundDialDraft;
+  const setDialedDigits = (nextValue: string | ((previous: string) => string)) => {
+    if (!onOutboundDialDraftChange) return;
+    const resolvedValue =
+      typeof nextValue === "function" ? nextValue(outboundDialDraft) : nextValue;
+    onOutboundDialDraftChange(resolvedValue);
+  };
 
   const formattedDialNumber = formatDialDisplayNumber(dialedDigits);
   const hasDialedDigits = dialedDigits.length > 0;

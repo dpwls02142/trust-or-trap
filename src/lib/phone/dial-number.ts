@@ -74,3 +74,8 @@ export function isAwaitingOutboundDial(
     !hasCompletedOutboundDial
   );
 }
+
+/** 다음 call 노드가 키패드 발신을 요구하는지 */
+export function nextNodeRequiresOutboundDial(node: PublicNodeView): boolean {
+  return node.app_type === "call" && !!node.outbound_dial_number;
+}

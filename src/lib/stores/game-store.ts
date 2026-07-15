@@ -30,6 +30,10 @@ interface GameStoreState {
   chatHistory: ChatHistoryEntry[];
   riskSignalRecords: RiskSignalRecord[];
   endingType: EndingType | null;
+  /** CallScreen에 실제 연결된 뒤에만 true — 키패드 대기 중에는 false */
+  isCallConnected: boolean;
+  /** 발신 키패드 입력 중인 번호 (앱 나갔다 와도 유지) */
+  outboundDialDraft: string;
 
   setUserProfile: (profileValue: UserProfile) => void;
   startScenario: (payload: {
@@ -42,6 +46,8 @@ interface GameStoreState {
   exitToHome: () => void;
   appendChatEntry: (entryValue: ChatHistoryEntry) => void;
   advanceToNode: (nextNode: PublicNodeView, judgedFlag: RiskFlag) => void;
+  setCallConnected: (isConnected: boolean) => void;
+  setOutboundDialDraft: (draftValue: string) => void;
   resetGame: () => void;
 }
 
@@ -57,6 +63,8 @@ export const useGameStore = create<GameStoreState>()(
       chatHistory: [],
       riskSignalRecords: [],
       endingType: null,
+      isCallConnected: false,
+      outboundDialDraft: "",
 
       setUserProfile: (profileValue) => setState({ userProfile: profileValue }),
 
@@ -70,6 +78,8 @@ export const useGameStore = create<GameStoreState>()(
           chatHistory: [],
           riskSignalRecords: [],
           endingType: null,
+          isCallConnected: false,
+          outboundDialDraft: "",
         }),
 
       enterCurrentApp: () => setState({ gamePhase: "playing" }),
@@ -100,6 +110,11 @@ export const useGameStore = create<GameStoreState>()(
         });
       },
 
+      setCallConnected: (isConnected) => setState({ isCallConnected: isConnected }),
+
+      setOutboundDialDraft: (draftValue) =>
+        setState({ outboundDialDraft: draftValue }),
+
       resetGame: () =>
         setState({
           gamePhase: "onboarding",
@@ -110,6 +125,8 @@ export const useGameStore = create<GameStoreState>()(
           chatHistory: [],
           riskSignalRecords: [],
           endingType: null,
+          isCallConnected: false,
+          outboundDialDraft: "",
         }),
     }),
     { name: "trust-or-trap-progress" },
