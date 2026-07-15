@@ -30,7 +30,8 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "서민금융지원"
+      "sender_name": "서민금융지원",
+      "outbound_dial_number": "1588-3302"
     },
     {
       "node_id": "trust-kind-agent",
@@ -56,7 +57,8 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "박주임"
+      "sender_name": "박주임",
+      "outbound_dial_number": "1588-3302"
     },
     {
       "node_id": "risk-prepay-logic",

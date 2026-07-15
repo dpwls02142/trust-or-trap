@@ -5,6 +5,7 @@ import { BrowserHomeView } from "./BrowserHomeView";
 import { AppBackButton } from "./shared/AppBackButton";
 import { MessageAppThreadView } from "./shared/MessageAppThreadView";
 import { playDialKeyTone } from "@/lib/client/dial-key-tone";
+import { dialNumbersMatch } from "@/lib/phone/dial-number";
 import { resolveAppLabel } from "@/lib/phone/app-display";
 import { buildScenarioMessageThread } from "@/lib/phone/message-thread-summary";
 import type { AppType, ChatHistoryEntry } from "@/lib/scenario/types";
@@ -328,7 +329,17 @@ function CallShellContent({
   };
 
   const handleStartDialCall = () => {
-    if (!hasDialedDigits) return;
+    if (!hasDialedDigits || !pendingOutboundDialNumber) return;
+
+    if (!dialNumbersMatch(dialedDigits, pendingOutboundDialNumber)) {
+      setDialFeedbackMessage(
+        "번호가 일치하지 않습니다. 문자에 안내된 번호를 확인하세요.",
+      );
+      return;
+    }
+
+    setDialFeedbackMessage(null);
+    onOutboundDialConnect?.();
   };
 
   return (

@@ -77,6 +77,11 @@ export interface ScenarioNode {
   /** 연출 힌트: 경과일 표시(teen 장기 그루밍 체감), 응답 제한시간(초) 등 */
   elapsed_days?: number;
   timer_seconds?: number;
+  /**
+   * 플레이어가 키패드로 직접 걸어야 하는 가상 번호.
+   * SMS 노드: LLM 대사에 포함할 상담 번호. call 노드: 연결 전 검증 대상.
+   */
+  outbound_dial_number?: string;
 }
 
 /** 시나리오 그래프 (그래프 메타 필드, glossary §3.5) */

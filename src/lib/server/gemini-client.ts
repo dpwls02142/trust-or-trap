@@ -132,6 +132,14 @@ export function buildAdvanceSystemPrompt(
     "- 아래 기본 선택지의 risk_flag(safe/caution/risky) 구성은 유지. label만 대화 흐름에 맞게 **짧게** 다듬는다.",
     `- 기본 선택지: ${JSON.stringify(currentNode.options)}`,
     "",
+    ...(currentNode.outbound_dial_number
+      ? [
+          "## 발신 번호 (필수)",
+          `- message 본문에 상담 문의 전화번호 "${currentNode.outbound_dial_number}"를 반드시 그대로 포함한다.`,
+          "- 번호 형식(하이픈 포함 여부)은 위 값과 동일하게 쓴다.",
+          "",
+        ]
+      : []),
     "## 좋은 message 예시 (이 정도 길이)",
     '- "야 ㅋㅋ 지금 통장 확인 가능?"',
     '- "진짜?? ㅠㅠ 나 급한데 도와줄 수 있어?"',

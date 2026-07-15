@@ -19,3 +19,8 @@ export function resolveAppTransitionPrompt(targetAppType: AppType): string {
     "이 앱을 열어볼까?"
   );
 }
+
+/** SMS 등에서 안내된 번호로 직접 걸어야 할 때 */
+export function resolveOutboundDialTransitionPrompt(): string {
+  return "문자에 적힌 번호로 전화해볼까?";
+}

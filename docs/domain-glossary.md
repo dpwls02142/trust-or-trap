@@ -53,6 +53,7 @@
 | `voice_enabled` | boolean | TTS/STT 사용 여부 (teen은 false) |
 | `is_ending` | boolean | 엔딩 노드 여부 |
 | `ending_type` | enum? | 엔딩 노드일 때 `safe`/`warning`/`harm` |
+| `outbound_dial_number` | string? | 플레이어가 키패드로 직접 걸어야 하는 가상 번호. SMS 노드는 LLM 대사에 포함, call 노드는 연결 전 검증 |
 
 ## 3.5 그래프 메타 필드 (시나리오 그래프 JSON 최상위)
 
