@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BrowserHomeView } from "./BrowserHomeView";
 import { AppBackButton } from "./shared/AppBackButton";
 import { MessageAppThreadView } from "./shared/MessageAppThreadView";
@@ -322,6 +322,11 @@ function CallShellContent({
     setDialedDigits((previousDigits) => previousDigits.slice(0, -1));
   };
 
+  const handleClearAllDigits = () => {
+    setDialFeedbackMessage(null);
+    setDialedDigits("");
+  };
+
   const handleStartDialCall = () => {
     if (!hasDialedDigits) return;
   };
@@ -339,6 +344,7 @@ function CallShellContent({
             hasDialedDigits={hasDialedDigits}
             onAppendDigit={handleAppendDigit}
             onDeleteDigit={handleDeleteDigit}
+            onClearAllDigits={handleClearAllDigits}
             onStartDialCall={handleStartDialCall}
           />
         )}
@@ -440,7 +446,90 @@ interface CallDialKeypadViewProps {
   hasDialedDigits: boolean;
   onAppendDigit: (digit: string) => void;
   onDeleteDigit: () => void;
+  onClearAllDigits: () => void;
   onStartDialCall: () => void;
+}
+
+const dialDeleteLongPressMs = 500;
+
+interface DialDeleteButtonProps {
+  hasDialedDigits: boolean;
+  onDeleteDigit: () => void;
+  onClearAllDigits: () => void;
+}
+
+function DialDeleteButton({
+  hasDialedDigits,
+  onDeleteDigit,
+  onClearAllDigits,
+}: DialDeleteButtonProps) {
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didLongPressRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    };
+  }, []);
+
+  const clearLongPressTimer = () => {
+    if (!longPressTimerRef.current) return;
+    clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+  };
+
+  const handlePointerDown = () => {
+    if (!hasDialedDigits) return;
+
+    didLongPressRef.current = false;
+    clearLongPressTimer();
+    longPressTimerRef.current = setTimeout(() => {
+      didLongPressRef.current = true;
+      onClearAllDigits();
+    }, dialDeleteLongPressMs);
+  };
+
+  const handlePointerUp = () => {
+    clearLongPressTimer();
+    if (didLongPressRef.current) {
+      didLongPressRef.current = false;
+      return;
+    }
+    if (hasDialedDigits) onDeleteDigit();
+  };
+
+  const handlePointerCancel = () => {
+    clearLongPressTimer();
+    didLongPressRef.current = false;
+  };
+
+  return (
+    <button
+      type="button"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerCancel}
+      onPointerCancel={handlePointerCancel}
+      onContextMenu={(event) => event.preventDefault()}
+      disabled={!hasDialedDigits}
+      aria-label="한 글자 지우기. 길게 누르면 전체 삭제"
+      className="flex h-14 w-14 select-none items-center justify-center rounded-full text-black/70 transition-colors hover:bg-neutral-100 active:bg-neutral-200 disabled:invisible touch-none"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        className="h-6 w-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M21 4H8L1 12l7 8h13a2 2 0 002-2V6a2 2 0 00-2-2z" />
+        <path d="M18 9l-6 6M12 9l6 6" />
+      </svg>
+    </button>
+  );
 }
 
 function CallDialKeypadView({
@@ -450,6 +539,7 @@ function CallDialKeypadView({
   hasDialedDigits,
   onAppendDigit,
   onDeleteDigit,
+  onClearAllDigits,
   onStartDialCall,
 }: CallDialKeypadViewProps) {
   return (
@@ -516,27 +606,11 @@ function CallDialKeypadView({
           </svg>
         </button>
 
-        <button
-          type="button"
-          onClick={onDeleteDigit}
-          disabled={!hasDialedDigits}
-          aria-label="한 글자 지우기"
-          className="flex h-14 w-14 items-center justify-center rounded-full text-black/70 transition-colors hover:bg-neutral-100 active:bg-neutral-200 disabled:invisible"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
-            <path d="M21 4H8L1 12l7 8h13a2 2 0 002-2V6a2 2 0 00-2-2z" />
-            <path d="M18 9l-6 6M12 9l6 6" />
-          </svg>
-        </button>
+        <DialDeleteButton
+          hasDialedDigits={hasDialedDigits}
+          onDeleteDigit={onDeleteDigit}
+          onClearAllDigits={onClearAllDigits}
+        />
       </div>
     </div>
   );
