@@ -465,6 +465,7 @@ function DialDeleteButton({
 }: DialDeleteButtonProps) {
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didLongPressRef = useRef(false);
+  const isPointerActiveRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -481,6 +482,7 @@ function DialDeleteButton({
   const handlePointerDown = () => {
     if (!hasDialedDigits) return;
 
+    isPointerActiveRef.current = true;
     didLongPressRef.current = false;
     clearLongPressTimer();
     longPressTimerRef.current = setTimeout(() => {
@@ -491,6 +493,11 @@ function DialDeleteButton({
 
   const handlePointerUp = () => {
     clearLongPressTimer();
+    const wasPointerActive = isPointerActiveRef.current;
+    isPointerActiveRef.current = false;
+
+    if (!wasPointerActive) return;
+
     if (didLongPressRef.current) {
       didLongPressRef.current = false;
       return;
@@ -500,7 +507,7 @@ function DialDeleteButton({
 
   const handlePointerCancel = () => {
     clearLongPressTimer();
-    didLongPressRef.current = false;
+    isPointerActiveRef.current = false;
   };
 
   return (
