@@ -24,6 +24,7 @@ export interface PublicNodeView {
   sender_name: string;
   elapsed_days: number | null;
   timer_seconds: number | null;
+  outbound_dial_number: string | null;
 }
 
 export function toPublicNodeView(scenarioNode: ScenarioNode): PublicNodeView {
@@ -40,5 +41,6 @@ export function toPublicNodeView(scenarioNode: ScenarioNode): PublicNodeView {
     sender_name: scenarioNode.sender_name,
     elapsed_days: scenarioNode.elapsed_days ?? null,
     timer_seconds: scenarioNode.timer_seconds ?? null,
+    outbound_dial_number: scenarioNode.outbound_dial_number ?? null,
   };
 }

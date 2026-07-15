@@ -6,16 +6,18 @@ interface CallSessionStateSlice {
   gamePhase: GamePhase;
   activeScenarioId: ScenarioId | null;
   currentNode: PublicNodeView | null;
+  isCallConnected: boolean;
 }
 
 /**
- * 시나리오 그래프의 call 노드가 활성인 동안 통화 세션을 유지한다.
- * 홈·다른 앱 셸로 나가도 currentNode는 그대로이므로 상태바 표시가 유지된다.
+ * CallScreen에 실제 연결된 뒤에만 통화 세션을 활성화한다.
+ * call 노드이지만 키패드 발신 대기 중이면 표시하지 않는다.
  */
 export function resolveIsCallSessionActive({
   gamePhase,
   activeScenarioId,
   currentNode,
+  isCallConnected,
 }: CallSessionStateSlice): boolean {
   return (
     gamePhase !== "onboarding" &&
@@ -23,6 +25,7 @@ export function resolveIsCallSessionActive({
     activeScenarioId != null &&
     currentNode != null &&
     currentNode.app_type === "call" &&
-    !currentNode.is_ending
+    !currentNode.is_ending &&
+    isCallConnected
   );
 }

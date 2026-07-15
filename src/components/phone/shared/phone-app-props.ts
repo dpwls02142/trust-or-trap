@@ -23,4 +23,6 @@ export interface PhoneAppSharedProps {
   onSubmitFreeInput: (inputText: string) => void;
   /** 홈 화면으로 복귀 (뒤로가기) */
   onExitToHome: () => void;
+  /** 통화 종료 — 연결을 끊고 홈으로 */
+  onHangUpCall: () => void;
 }

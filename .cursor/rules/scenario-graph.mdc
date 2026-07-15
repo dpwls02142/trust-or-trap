@@ -27,6 +27,7 @@ alwaysApply: false
   "voice_enabled": true,            // teen-* 시나리오는 반드시 false
   "is_ending": false,
   "ending_type": null               // is_ending일 때 safe|warning|harm
+  // "outbound_dial_number": "1588-0000"  // (선택) 플레이어 키패드 발신 번호
 }
 ```
 

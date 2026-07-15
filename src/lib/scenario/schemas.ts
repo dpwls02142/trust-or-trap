@@ -73,6 +73,10 @@ export const scenarioNodeSchema = z.object({
   sender_name: z.string().min(1),
   elapsed_days: z.number().int().nonnegative().optional(),
   timer_seconds: z.number().int().positive().optional(),
+  outbound_dial_number: z
+    .string()
+    .regex(/^[\d-]+$/, "outbound_dial_number는 숫자와 하이픈만 허용")
+    .optional(),
 });
 
 export const scenarioGraphSchema = z

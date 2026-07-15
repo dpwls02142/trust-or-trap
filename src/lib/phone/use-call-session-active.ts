@@ -10,6 +10,7 @@ export function useCallSessionActive(): boolean {
       gamePhase: storeState.gamePhase,
       activeScenarioId: storeState.activeScenarioId,
       currentNode: storeState.currentNode,
+      isCallConnected: storeState.isCallConnected,
     }),
   );
 }
