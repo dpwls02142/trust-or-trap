@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { BrowserHomeView } from "./BrowserHomeView";
 import { AppBackButton } from "./shared/AppBackButton";
 import { MessageAppThreadView } from "./shared/MessageAppThreadView";
+import { playDialKeyTone } from "@/lib/client/dial-key-tone";
 import { resolveAppLabel } from "@/lib/phone/app-display";
 import { buildScenarioMessageThread } from "@/lib/phone/message-thread-summary";
 import type { AppType, ChatHistoryEntry } from "@/lib/scenario/types";
@@ -308,6 +309,7 @@ function CallShellContent({
 
   const handleAppendDigit = (nextDigit: string) => {
     setDialFeedbackMessage(null);
+    playDialKeyTone(nextDigit);
     setDialedDigits((previousDigits) => {
       const digitCount = previousDigits.replace(/\D/g, "").length;
       if (/\d/.test(nextDigit) && digitCount >= 11) return previousDigits;
