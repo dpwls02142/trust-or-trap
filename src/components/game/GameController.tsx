@@ -16,7 +16,12 @@ import { ScenarioAppRenderer } from "@/components/phone/ScenarioAppRenderer";
 import { HomeAppShell } from "@/components/phone/HomeAppShell";
 import { EndingReport } from "@/components/game/EndingReport";
 import { AppTransitionConfirm } from "@/components/phone/AppTransitionConfirm";
-import { resolveAppTransitionPrompt, resolveOutboundDialTransitionPrompt, resolveOutboundRedialTransitionPrompt } from "@/lib/phone/app-transition-prompt";
+import {
+  appTransitionPromptMap,
+  defaultAppTransitionPrompt,
+  outboundDialTransitionPrompt,
+  outboundRedialTransitionPrompt,
+} from "@/lib/phone/app-transition-prompt";
 import {
   buildHangUpFollowUpMessage,
   isMessageAppType,
@@ -369,7 +374,7 @@ export function GameController() {
     (promptText?: string) => {
       setPendingAppTransition({
         targetAppType: "call",
-        promptText: promptText ?? resolveOutboundDialTransitionPrompt(),
+        promptText: promptText ?? outboundDialTransitionPrompt,
       });
       setShouldRevealNotificationOnHome(false);
       setHasOpenedCurrentApp(false);
@@ -445,7 +450,9 @@ export function GameController() {
         ) {
           setPendingAppTransition({
             targetAppType: nextNode.app_type,
-            promptText: resolveAppTransitionPrompt(nextNode.app_type),
+            promptText:
+              appTransitionPromptMap[nextNode.app_type] ??
+              defaultAppTransitionPrompt,
           });
           setShouldRevealNotificationOnHome(true);
           setHasOpenedCurrentApp(false);
@@ -636,7 +643,7 @@ export function GameController() {
       }
 
       setHasCompletedOutboundDial(false);
-      beginOutboundDialPrompt(resolveOutboundRedialTransitionPrompt());
+      beginOutboundDialPrompt(outboundRedialTransitionPrompt);
       return;
     }
 
