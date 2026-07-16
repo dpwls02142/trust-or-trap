@@ -12,6 +12,7 @@ import { OnboardingForm } from "@/components/onboarding/OnboardingForm";
 import { ScenarioRecommendation } from "@/components/onboarding/ScenarioRecommendation";
 import { PhoneFrameShell } from "@/components/phone/PhoneFrameShell";
 import { HomeScreen } from "@/components/phone/HomeScreen";
+import { PhoneNotificationOverlay } from "@/components/phone/PhoneNotificationOverlay";
 import { ScenarioAppRenderer } from "@/components/phone/ScenarioAppRenderer";
 import { HomeAppShell } from "@/components/phone/HomeAppShell";
 import { EndingReport } from "@/components/game/EndingReport";
@@ -32,6 +33,7 @@ import {
 } from "@/lib/phone/call-hang-up-follow-up";
 import { isAwaitingOutboundDial, nextNodeRequiresOutboundDial } from "@/lib/phone/dial-number";
 import { resolveStatusBarContentStyle } from "@/lib/phone/app-display";
+import { useScenarioNotification } from "@/lib/phone/use-scenario-notification";
 import { StatusBarOverrideProvider } from "@/lib/phone/status-bar-override";
 import { useGameStore } from "@/lib/stores/game-store";
 import { consumeAdvanceStream } from "@/lib/client/advance-stream";
@@ -112,8 +114,6 @@ export function GameController() {
     promptText: string;
     contextText?: string;
   } | null>(null);
-  const [shouldRevealNotificationOnHome, setShouldRevealNotificationOnHome] =
-    useState(false);
   const [hasCompletedOutboundDial, setHasCompletedOutboundDial] =
     useState(true);
   const [homeNotificationOverride, setHomeNotificationOverride] = useState<{
@@ -271,6 +271,26 @@ export function GameController() {
     ? (currentNode?.outbound_dial_number ?? null)
     : null;
 
+  const notificationAppType =
+    homeNotificationOverride?.appType ?? currentNode?.app_type ?? "chat";
+  const notificationSenderName =
+    homeNotificationOverride?.senderName ?? currentNode?.sender_name ?? "";
+
+  const suppressIncomingCallAlert =
+    hasOpenedCurrentApp || awaitingOutboundDial;
+
+  const {
+    shouldDisplayNotification,
+    isNotificationBannerVisible,
+    dismissNotificationBanner,
+    beginDelayedNotificationReveal,
+    revealNotificationImmediately,
+    resetScenarioNotification,
+  } = useScenarioNotification({
+    notificationAppType,
+    suppressIncomingCallAlert,
+  });
+
   const shouldShowInputTutorial =
     isInputTutorialVisible &&
     !hasPlayerResponse &&
@@ -349,7 +369,6 @@ export function GameController() {
         setIsInputTutorialVisible(true);
         setHasOpenedCurrentApp(false);
         setPendingAppTransition(null);
-        setShouldRevealNotificationOnHome(false);
         setHasCompletedOutboundDial(!entryData.entryNode.outbound_dial_number);
         lastMessageContactRef.current = isMessageAppType(entryData.entryNode.app_type)
           ? {
@@ -362,6 +381,7 @@ export function GameController() {
         setAppPlayMode("scenario");
         setShellAppType(null);
         startScenario(entryData);
+        beginDelayedNotificationReveal();
       } catch {
         if (selectGeneration !== scenarioSelectGenerationRef.current) return;
         setIsStartingScenario(false);
@@ -371,7 +391,7 @@ export function GameController() {
         setIsStartingScenario(false);
       }
     },
-    [startScenario],
+    [startScenario, beginDelayedNotificationReveal],
   );
 
   const stopActiveCall = useCallback(() => {
@@ -386,7 +406,6 @@ export function GameController() {
         targetAppType: "call",
         promptText: promptText ?? outboundDialTransitionPrompt,
       });
-      setShouldRevealNotificationOnHome(false);
       setHasOpenedCurrentApp(false);
       setAppPlayMode("scenario");
       setShellAppType(null);
@@ -477,10 +496,10 @@ export function GameController() {
                 }
               : {}),
           });
-          setShouldRevealNotificationOnHome(true);
           setHasOpenedCurrentApp(false);
           setAppPlayMode("scenario");
           setShellAppType(null);
+          revealNotificationImmediately();
           exitToHome();
         }
       } catch {
@@ -508,6 +527,7 @@ export function GameController() {
       exitToHome,
       stopActiveCall,
       beginOutboundDialPrompt,
+      revealNotificationImmediately,
     ],
   );
 
@@ -531,7 +551,6 @@ export function GameController() {
     if (isCallConnected) return;
 
     setPendingAppTransition(null);
-    setShouldRevealNotificationOnHome(false);
     setAppPlayMode("shell");
     setShellAppType("call");
     enterCurrentApp();
@@ -539,11 +558,20 @@ export function GameController() {
 
   const handleAppOpen = useCallback(
     (selectedAppType: AppType) => {
+      const notificationTargetAppType =
+        homeNotificationOverride?.appType ?? currentNode?.app_type;
+
+      if (
+        notificationTargetAppType &&
+        selectedAppType === notificationTargetAppType
+      ) {
+        resetScenarioNotification();
+      }
+
       setHomeNotificationOverride(null);
 
       if (selectedAppType === "call" && isCallConnected) {
         setPendingAppTransition(null);
-        setShouldRevealNotificationOnHome(false);
         setAppPlayMode("scenario");
         setShellAppType(null);
         enterCurrentApp();
@@ -560,7 +588,6 @@ export function GameController() {
 
       if (selectedAppType === currentNode?.app_type) {
         setPendingAppTransition(null);
-        setShouldRevealNotificationOnHome(false);
         setAppPlayMode("scenario");
         setShellAppType(null);
         setHasOpenedCurrentApp(true);
@@ -578,8 +605,10 @@ export function GameController() {
     [
       currentNode,
       hasCompletedOutboundDial,
+      homeNotificationOverride?.appType,
       isCallConnected,
       openOutboundDialShell,
+      resetScenarioNotification,
       setCallConnected,
       enterCurrentApp,
     ],
@@ -597,7 +626,9 @@ export function GameController() {
     }
 
     setPendingAppTransition(null);
-    setShouldRevealNotificationOnHome(false);
+    if (pendingAppTransition.targetAppType === notificationAppType) {
+      resetScenarioNotification();
+    }
     setAppPlayMode("scenario");
     setShellAppType(null);
     setHasOpenedCurrentApp(true);
@@ -609,7 +640,9 @@ export function GameController() {
     pendingAppTransition,
     currentNode,
     hasCompletedOutboundDial,
+    notificationAppType,
     openOutboundDialShell,
+    resetScenarioNotification,
     setCallConnected,
     enterCurrentApp,
   ]);
@@ -658,9 +691,9 @@ export function GameController() {
           senderName: priorMessageChannel.senderName,
         });
         setHasOpenedCurrentApp(false);
-        setShouldRevealNotificationOnHome(true);
         setAppPlayMode("scenario");
         setShellAppType(null);
+        revealNotificationImmediately();
         exitToHome();
         return;
       }
@@ -671,10 +704,10 @@ export function GameController() {
     }
 
     setHasOpenedCurrentApp(false);
-    setShouldRevealNotificationOnHome(true);
     setHomeNotificationOverride(null);
     setAppPlayMode("scenario");
     setShellAppType(null);
+    revealNotificationImmediately();
     exitToHome();
   }, [
     currentNode,
@@ -683,6 +716,7 @@ export function GameController() {
     appendChatEntry,
     beginOutboundDialPrompt,
     exitToHome,
+    revealNotificationImmediately,
   ]);
 
   const handleDismissAppTransition = useCallback(() => {
@@ -705,15 +739,15 @@ export function GameController() {
     setIsInputTutorialVisible(true);
     setHasOpenedCurrentApp(false);
     setPendingAppTransition(null);
-    setShouldRevealNotificationOnHome(false);
     setHasCompletedOutboundDial(true);
     setHomeNotificationOverride(null);
     lastMessageContactRef.current = null;
+    resetScenarioNotification();
     setAppPlayMode("scenario");
     setShellAppType(null);
     setIsEditingOnboardingProfile(false);
     resetGame();
-  }, [resetGame]);
+  }, [resetGame, resetScenarioNotification]);
 
   const handleProfileSubmit = useCallback(
     (profileValue: NonNullable<typeof userProfile>) => {
@@ -772,24 +806,13 @@ export function GameController() {
   return (
     <StatusBarOverrideProvider>
       <PhoneFrameShell statusBarContentStyle={statusBarContentStyle}>
+      <div className="relative h-full">
       {gamePhase === "home" && currentNode && (
         <div className="relative h-full">
           <HomeScreen
-            notificationAppType={
-              homeNotificationOverride?.appType ?? currentNode.app_type
-            }
-            notificationSenderName={
-              homeNotificationOverride?.senderName ?? currentNode.sender_name
-            }
+            notificationAppType={notificationAppType}
             onAppOpen={handleAppOpen}
-            showNotificationWithoutDelay={
-              !!homeNotificationOverride ||
-              ((hasOpenedCurrentApp || shouldRevealNotificationOnHome) &&
-                !awaitingOutboundDial)
-            }
-            suppressIncomingCallAlert={
-              hasOpenedCurrentApp || awaitingOutboundDial
-            }
+            shouldShowUnreadBadge={shouldDisplayNotification}
           />
           {pendingAppTransition && !isCallConnected && (
             <AppTransitionConfirm
@@ -856,6 +879,18 @@ export function GameController() {
           />
         </div>
       )}
+
+      {(gamePhase === "home" || gamePhase === "playing") && currentNode && (
+        <PhoneNotificationOverlay
+          notificationAppType={notificationAppType}
+          notificationSenderName={notificationSenderName}
+          isBannerVisible={isNotificationBannerVisible}
+          onAppOpen={handleAppOpen}
+          onDismissBanner={dismissNotificationBanner}
+          suppressIncomingCallAlert={suppressIncomingCallAlert}
+        />
+      )}
+      </div>
       </PhoneFrameShell>
     </StatusBarOverrideProvider>
   );
