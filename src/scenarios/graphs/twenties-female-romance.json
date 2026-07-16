@@ -32,8 +32,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "도현",
-      "elapsed_days": 1
+      "sender_name": "도현"
     },
     {
       "node_id": "trust-quick-affection",
@@ -60,8 +59,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "도현",
-      "elapsed_days": 5
+      "sender_name": "도현"
     },
     {
       "node_id": "trust-emotional-bond",
@@ -88,8 +86,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "도현",
-      "elapsed_days": 18
+      "sender_name": "도현"
     },
     {
       "node_id": "trust-move-private",
@@ -116,8 +113,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "도현",
-      "elapsed_days": 22
+      "sender_name": "도현"
     },
     {
       "node_id": "risk-crisis-story",
@@ -144,8 +140,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "도현",
-      "elapsed_days": 27
+      "sender_name": "도현"
     },
     {
       "node_id": "branch-verify-identity",
@@ -172,8 +167,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "도현",
-      "elapsed_days": 28
+      "sender_name": "도현"
     },
     {
       "node_id": "demand-money-transfer",
@@ -201,7 +195,6 @@
       "ending_type": null,
       "speaker_tone": "intimate_partner",
       "sender_name": "도현",
-      "elapsed_days": 30,
       "timer_seconds": 45
     },
     {

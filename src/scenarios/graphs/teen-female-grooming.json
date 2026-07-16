@@ -32,8 +32,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "hyun_98",
-      "elapsed_days": 1
+      "sender_name": "hyun_98"
     },
     {
       "node_id": "trust-light-chat",
@@ -61,8 +60,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "hyun_98",
-      "elapsed_days": 3
+      "sender_name": "hyun_98"
     },
     {
       "node_id": "trust-daily-pattern",
@@ -90,8 +88,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "hyun_98",
-      "elapsed_days": 7
+      "sender_name": "hyun_98"
     },
     {
       "node_id": "trust-daily-chat",
@@ -119,8 +116,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "hyun_98",
-      "elapsed_days": 12
+      "sender_name": "hyun_98"
     },
     {
       "node_id": "trust-nickname-shift",
@@ -149,8 +145,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "hyun_98",
-      "elapsed_days": 20
+      "sender_name": "hyun_98"
     },
     {
       "node_id": "risk-secret-request",
@@ -178,8 +173,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "현오빠",
-      "elapsed_days": 34
+      "sender_name": "현오빠"
     },
     {
       "node_id": "risk-isolation-hint",
@@ -207,8 +201,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "현오빠",
-      "elapsed_days": 45
+      "sender_name": "현오빠"
     },
     {
       "node_id": "demand-photo",
@@ -237,8 +230,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "현오빠",
-      "elapsed_days": 58
+      "sender_name": "현오빠"
     },
     {
       "node_id": "branch-threat",
@@ -268,7 +260,6 @@
       "ending_type": null,
       "speaker_tone": "intimate_partner",
       "sender_name": "현오빠",
-      "elapsed_days": 60,
       "timer_seconds": 30
     },
     {
