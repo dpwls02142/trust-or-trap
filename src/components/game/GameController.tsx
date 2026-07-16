@@ -826,6 +826,7 @@ export function GameController() {
           <EndingReport
             endingType={endingType}
             scenarioTitle={scenarioTitle}
+            endingConsequence={currentNode?.ending_consequence ?? null}
             riskSignalRecords={riskSignalRecords}
             onRestartGame={handleRestartGame}
           />

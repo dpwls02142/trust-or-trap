@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { EndingType, RiskSignalRecord } from "@/lib/scenario/types";
+import type { EndingConsequence, EndingType, RiskSignalRecord } from "@/lib/scenario/types";
 
 interface EndingReportProps {
   endingType: EndingType;
   scenarioTitle: string;
+  endingConsequence: EndingConsequence | null;
   riskSignalRecords: RiskSignalRecord[];
   onRestartGame: () => void;
 }
@@ -36,22 +37,52 @@ const endingPresentationMap: Record<
   },
 };
 
+const consequenceThemeMap: Record<
+  EndingType,
+  { cardClass: string; amountClass: string; markerClass: string }
+> = {
+  safe: {
+    cardClass: "border-emerald-500/30 bg-emerald-500/10",
+    amountClass: "text-emerald-300",
+    markerClass: "text-emerald-400",
+  },
+  warning: {
+    cardClass: "border-amber-500/30 bg-amber-500/10",
+    amountClass: "text-amber-300",
+    markerClass: "text-amber-400",
+  },
+  harm: {
+    cardClass: "border-red-500/40 bg-red-500/10",
+    amountClass: "text-red-300",
+    markerClass: "text-red-400",
+  },
+};
+
 const riskFlagLabelMap = {
   safe: { flagLabel: "잘 대응함", flagClass: "bg-emerald-500/20 text-emerald-300" },
   caution: { flagLabel: "아슬아슬", flagClass: "bg-amber-500/20 text-amber-300" },
   risky: { flagLabel: "놓침", flagClass: "bg-red-500/20 text-red-300" },
 } as const;
 
+const koreanWonFormatter = new Intl.NumberFormat("ko-KR");
+
 /**
- * 엔딩 리포트 — 결말 + "놓친 위험 신호" 리플레이.
+ * 엔딩 리포트 — "무엇을 했더니 무슨 일이 벌어졌는가"를 먼저 충격적으로 보여주고,
+ * 그다음 위험 신호 리플레이를 제공한다.
  */
 export function EndingReport({
   endingType,
   scenarioTitle,
+  endingConsequence,
   riskSignalRecords,
   onRestartGame,
 }: EndingReportProps) {
   const endingPresentation = endingPresentationMap[endingType];
+  const consequenceTheme = consequenceThemeMap[endingType];
+  const hasLostAmount =
+    !!endingConsequence &&
+    typeof endingConsequence.lost_amount_krw === "number" &&
+    endingConsequence.lost_amount_krw > 0;
 
   return (
     <motion.div
@@ -65,10 +96,45 @@ export function EndingReport({
           {endingPresentation.endingTitle}
         </h2>
         <p className="mt-1 text-xs text-white/50">{scenarioTitle}</p>
-        <p className="mt-3 text-sm leading-relaxed text-white/75">
-          {endingPresentation.endingDescription}
-        </p>
       </div>
+
+      {endingConsequence && (
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className={`rounded-2xl border p-4 ${consequenceTheme.cardClass}`}
+        >
+          {hasLostAmount && (
+            <div className="mb-3 text-center">
+              <p className="text-[11px] uppercase tracking-wide text-white/50">
+                {endingConsequence.lost_amount_label ?? "잃은 돈"}
+              </p>
+              <p className={`mt-0.5 text-3xl font-extrabold ${consequenceTheme.amountClass}`}>
+                {koreanWonFormatter.format(endingConsequence.lost_amount_krw!)}원
+              </p>
+            </div>
+          )}
+          <p className="text-[15px] font-bold leading-snug text-white">
+            {endingConsequence.consequence_headline}
+          </p>
+          <ul className="mt-2.5 flex flex-col gap-1.5">
+            {endingConsequence.consequence_details.map((detailText, detailIndex) => (
+              <li
+                key={detailIndex}
+                className="flex gap-2 text-[13px] leading-relaxed text-white/80"
+              >
+                <span className={consequenceTheme.markerClass}>•</span>
+                <span>{detailText}</span>
+              </li>
+            ))}
+          </ul>
+        </motion.section>
+      )}
+
+      <p className="text-sm leading-relaxed text-white/70">
+        {endingPresentation.endingDescription}
+      </p>
 
       <section>
         <h3 className="mb-2 text-sm font-semibold text-white/80">

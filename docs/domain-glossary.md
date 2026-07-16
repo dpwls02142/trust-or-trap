@@ -53,7 +53,33 @@
 | `voice_enabled` | boolean | TTS/STT 사용 여부 (teen은 false) |
 | `is_ending` | boolean | 엔딩 노드 여부 |
 | `ending_type` | enum? | 엔딩 노드일 때 `safe`/`warning`/`harm` |
+| `speaker_tone` | enum? | 화자(스캐머) 말투 프리셋 (§3.1). 플레이어 나이와 무관하게 화자 기준으로 고정 |
+| `ending_consequence` | object? | 엔딩 노드 필수. 플레이어 행동의 구체적 결과 (§3.2) |
 | `outbound_dial_number` | string? | 플레이어가 키패드로 직접 걸어야 하는 가상 번호. SMS 노드는 LLM 대사에 포함, call 노드는 연결 전 검증 |
+
+## 3.1 화자 말투 (`speaker_tone`)
+
+대사 생성 시 화자(스캐머) 말투는 **플레이어 나이대가 아니라 화자 정체성**으로 결정한다.
+상담원·수사관은 플레이어가 몇 살이든 항상 동일한 상담원 말투를 쓴다.
+
+| speaker_tone | 화자 | 사용 시나리오 예 |
+| --- | --- | --- |
+| `professional_agent` | 금융사 상담원·기관 수사관 사칭 | voicephishing, loan-scam, authority-scam |
+| `confident_expert` | 리딩방 '전문가' | invest-scam |
+| `intimate_partner` | 로맨스/그루밍 — 다정하고 사근사근 | romance, grooming |
+| `community_peer` | 게임 커뮤니티 또래 반말 | gameitem |
+| `family_casual` | 가족(실제·사칭 모두) 일상 문자 | 자녀 사칭, 배우자 걱정 메시지 |
+
+## 3.2 엔딩 결과 (`ending_consequence`)
+
+엔딩 노드에 필수. "경고문"이 아니라 **행동 → 결과**를 구체적 수치·사실로 보여줘 경각심을 만든다.
+
+| 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| `consequence_headline` | string | 결과 한 줄 (예: "'일부만' 보낸 1,200,000원은 10분 만에 인출됐습니다") |
+| `consequence_details` | string[] | 무슨 일이 벌어졌는지 2~4개 항목 |
+| `lost_amount_krw` | number? | 잃은 금액(원). 금전 피해가 없으면 생략 |
+| `lost_amount_label` | string? | 금액 라벨 커스텀 (기본 "잃은 돈", 예: "내 통장으로 세탁된 피해금") |
 
 ## 3.5 그래프 메타 필드 (시나리오 그래프 JSON 최상위)
 

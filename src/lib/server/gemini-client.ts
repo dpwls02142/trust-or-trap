@@ -2,7 +2,14 @@ import "server-only";
 
 import { GoogleGenAI, ThinkingLevel, type ThinkingConfig } from "@google/genai";
 import { resolveAgeBand } from "@/lib/scenario/persona-matching";
-import type { AppType, ChatHistoryEntry, ScenarioId, ScenarioNode, UserProfile } from "@/lib/scenario/types";
+import type {
+  AppType,
+  ChatHistoryEntry,
+  ScenarioId,
+  ScenarioNode,
+  SpeakerTone,
+  UserProfile,
+} from "@/lib/scenario/types";
 
 /**
  * Gemini API 클라이언트 (서버 전용).
@@ -58,15 +65,28 @@ export function resolveThinkingConfig(modelName: string): ThinkingConfig {
 }
 
 /**
+ * 화자(스캐머) 말투 프리셋별 톤 가이드.
+ * 핵심: 상담원·수사관은 **플레이어 나이와 무관하게** 항상 동일한 사무적 상담원 말투를 쓴다.
+ * speaker_tone이 없는 노드만 예외적으로 플레이어 프로필 기반 폴백을 쓴다.
+ */
+const speakerToneGuideMap: Record<SpeakerTone, string> = {
+  professional_agent:
+    "실제 금융사 상담원/기관 직원처럼 시종일관 정중한 존댓말. '고객님', '~도와드리겠습니다', '본인 확인 절차입니다' 같은 사무적 표현. 침착하고 또박또박, 급할 때도 예의는 유지. ㅋㅋ·ㅇㅇ·이모지·반말·인터넷 밈 절대 금지. 플레이어가 몇 살이든 말투는 동일하게 유지한다.",
+  confident_expert:
+    "리딩방 '전문가' 톤. 자신감 있고 단정적인 존댓말. '지금 안 들어가시면 후회하십니다', '제 말만 믿으세요'처럼 확신에 찬 부추김. 이모지·반말 금지.",
+  intimate_partner:
+    "다정하고 사근사근한 톤. 부드러운 말투로 친밀감을 표현. 감정에 호소('나 믿지?', '보고 싶었어'). 과한 이모지·선정적 표현 금지.",
+  community_peer:
+    "게임 커뮤니티 또래 반말. ㅋㅋ, ㅇㅇ, ㄹㅇ, 짧게 밀어붙임. 욕설·혐오·성적 비하 금지.",
+  family_casual:
+    "가족끼리 주고받는 일상 문자 톤. '엄마 나야', '아빠 잠깐만'처럼 짧고 급하게. 이모지 0~1개.",
+};
+
+/**
  * 앱·페르소나별 단답형 말투 가이드.
  * 실제 카톡/DM처럼 짧게 끊어 말하도록 LLM에 고정 주입한다.
  */
 function buildDialogueStyleGuide(currentNode: ScenarioNode, userProfile: UserProfile): string {
-  const ageBand = resolveAgeBand(userProfile.userAge);
-  const isTeenPersona = ageBand === "teen";
-  const isSeniorPersona = ageBand === "fifties" || ageBand === "senior";
-  const isMaleUser = userProfile.gender === "male";
-
   const appChannelGuide: Record<Exclude<AppType, "home">, string> = {
     chat: "메시지앱 1:1 채팅. 한 번에 보내는 말풍선 1개, 15~50자. 줄바꿈·장문·설명체 금지. 카카오톡·텔레그램 등 실제 앱명 언급 금지.",
     sms: "문자 메시지. 10~35자. 딱딱하거나 급한 톤. 한 줄.",
@@ -79,25 +99,27 @@ function buildDialogueStyleGuide(currentNode: ScenarioNode, userProfile: UserPro
   const appType = currentNode.app_type === "home" ? "chat" : currentNode.app_type;
   const channelLine = appChannelGuide[appType];
 
-  let communityToneLine: string;
-  if (isTeenPersona) {
-    communityToneLine =
-      "10대 메신저 단답(ㅋㅋ, ㅇㅇ, 진짜?, ㄹㅇ). 성인 커뮤니티 비속어·선정 표현 금지.";
-  } else if (isSeniorPersona) {
-    communityToneLine =
-      "50·60대가 실제 받는 문자/전화 톤. '여보세요', '지금 가능하세요?'처럼 짧고 단호. 인터넷 밈·ㅋㅋ 남용 금지.";
-  } else if (isMaleUser) {
-    communityToneLine =
-      "상대(스캐머) 말투는 디시인사이드식 남성 채팅 참고: ㅋㅋ, ㅇㅇ, ㄹㅇ, 야/형, 짧게 밀어붙임. 욕설·혐오·성적 비하 금지.";
+  let toneLine: string;
+  if (currentNode.speaker_tone) {
+    // 화자 정체성 기준 — 플레이어 나이·성별과 무관하게 고정
+    toneLine = speakerToneGuideMap[currentNode.speaker_tone];
   } else {
-    communityToneLine =
-      "상대(스캐머) 말투는 쭉빵·인스타 댓글/DM 참고: 헐, 진짜?, ㅠㅠ, 알겠어, 짧은 감탄·재촉. 과한 이모지·선정 표현 금지.";
+    // 폴백: speaker_tone 미지정 노드만 플레이어 프로필로 추정
+    const ageBand = resolveAgeBand(userProfile.userAge);
+    if (ageBand === "teen") {
+      toneLine = "10대 메신저 단답(ㅋㅋ, ㅇㅇ, 진짜?, ㄹㅇ). 성인 커뮤니티 비속어·선정 표현 금지.";
+    } else if (ageBand === "fifties" || ageBand === "senior") {
+      toneLine =
+        "실제 받는 문자/전화 톤. '여보세요', '지금 가능하세요?'처럼 짧고 단호. 인터넷 밈·ㅋㅋ 남용 금지.";
+    } else {
+      toneLine = "짧은 구어체 단답. 과한 이모지·선정 표현 금지.";
+    }
   }
 
   return [
     "## 말투·길이 (필수 — 현실감의 핵심)",
     `- 채널: ${channelLine}`,
-    `- 톤: ${communityToneLine}`,
+    `- 화자 말투: ${toneLine}`,
     "- message는 반드시 1개 말풍선 분량. 60자를 넘기지 않는다(공백 포함).",
     "- 한 메시지에 문장 2개 이상, 쉼표로 이어 붙인 장문, '안녕하세요 저는 ~' 같은 인사+설명 패턴 금지.",
     "- 위험 신호는 짧은 말 안에 자연스럽게 녹인다. 뜬금없는 장문 해설 금지.",

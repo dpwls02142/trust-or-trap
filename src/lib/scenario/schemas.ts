@@ -47,6 +47,21 @@ export const crimeCategorySchema = z.enum([
   "authority_voicephishing",
 ]);
 
+export const speakerToneSchema = z.enum([
+  "professional_agent",
+  "confident_expert",
+  "intimate_partner",
+  "community_peer",
+  "family_casual",
+]);
+
+export const endingConsequenceSchema = z.object({
+  consequence_headline: z.string().min(1),
+  consequence_details: z.array(z.string().min(1)).min(1),
+  lost_amount_krw: z.number().int().nonnegative().optional(),
+  lost_amount_label: z.string().min(1).optional(),
+});
+
 export const nodeOptionSchema = z.object({
   label: z.string().min(1),
   risk_flag: riskFlagSchema,
@@ -70,6 +85,8 @@ export const scenarioNodeSchema = z.object({
   voice_enabled: z.boolean(),
   is_ending: z.boolean(),
   ending_type: endingTypeSchema.nullable(),
+  ending_consequence: endingConsequenceSchema.optional(),
+  speaker_tone: speakerToneSchema.optional(),
   sender_name: z.string().min(1),
   elapsed_days: z.number().int().nonnegative().optional(),
   timer_seconds: z.number().int().positive().optional(),
@@ -118,6 +135,12 @@ export const scenarioGraphSchema = z
           refineContext.addIssue({
             code: "custom",
             message: `엔딩 노드 "${nodeItem.node_id}"에 ending_type 누락`,
+          });
+        }
+        if (!nodeItem.ending_consequence) {
+          refineContext.addIssue({
+            code: "custom",
+            message: `엔딩 노드 "${nodeItem.node_id}"에 ending_consequence 누락 (행동→결과 필수)`,
           });
         }
       } else {

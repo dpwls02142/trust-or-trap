@@ -30,6 +30,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "서민금융지원",
       "outbound_dial_number": "1588-1588"
     },
@@ -44,15 +45,37 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        {
-          "label": "내 정보를 어떻게 알았는지 따져 묻고 통화를 끊는다",
-          "risk_flag": "safe"
-        },
+        { "label": "내 정보를 어떻게 알았는지 따져 묻고 통화를 끊는다", "risk_flag": "safe" },
         { "label": "일단 조건 설명만 들어본다", "risk_flag": "caution" },
-        {
-          "label": "나를 잘 아는 것 같아 안심하고 상담한다",
-          "risk_flag": "risky"
-        }
+        { "label": "나를 잘 아는 것 같아 안심하고 상담한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "trust-rate-quote",
+        "caution": "trust-rate-quote",
+        "risky": "trust-rate-quote"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "speaker_tone": "professional_agent",
+      "sender_name": "박주임",
+      "outbound_dial_number": "1588-1588"
+    },
+    {
+      "node_id": "trust-rate-quote",
+      "stage": "trust_building",
+      "app_type": "call",
+      "required_risk_signal": "'연 3%대로 갈아탈 수 있다'며 파격 금리를 확정처럼 제시하고, '오늘 접수분만 가능하다'며 결정을 재촉한다. 조건을 미끼로 판단을 흐린다",
+      "forbidden_content": [
+        "실존 정부기관·은행 실명 사칭",
+        "실제 대출 상품명",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "좋은 조건일수록 공식 창구에서 확인하겠다고 한다", "risk_flag": "safe" },
+        { "label": "솔깃하지만 절차부터 더 물어본다", "risk_flag": "caution" },
+        { "label": "금리가 좋아 서둘러 진행하겠다고 한다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -63,8 +86,8 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "박주임",
-      "outbound_dial_number": "1588-1588"
+      "speaker_tone": "professional_agent",
+      "sender_name": "박주임"
     },
     {
       "node_id": "risk-prepay-logic",
@@ -77,18 +100,9 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        {
-          "label": "선상환 요구는 사기임을 알고 금감원(1332)에 실시간 확인한다",
-          "risk_flag": "safe"
-        },
-        {
-          "label": "반신반의하며 상환 여력을 계산해 본다",
-          "risk_flag": "caution"
-        },
-        {
-          "label": "신용점수를 올려야 하니 준비하겠다고 한다",
-          "risk_flag": "risky"
-        }
+        { "label": "선상환 요구는 사기임을 알고 금감원(1332)에 실시간 확인한다", "risk_flag": "safe" },
+        { "label": "반신반의하며 상환 여력을 계산해 본다", "risk_flag": "caution" },
+        { "label": "신용점수를 올려야 하니 준비하겠다고 한다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -99,6 +113,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "박주임",
       "timer_seconds": 45
     },
@@ -113,10 +128,7 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        {
-          "label": "상환은 반드시 원래 은행 창구·앱으로만 한다며 거절한다",
-          "risk_flag": "safe"
-        },
+        { "label": "상환은 반드시 원래 은행 창구·앱으로만 한다며 거절한다", "risk_flag": "safe" },
         { "label": "보증보험료 소액만 먼저 입금한다", "risk_flag": "caution" },
         { "label": "지정 계좌로 상환금 전액을 이체한다", "risk_flag": "risky" }
       ],
@@ -129,6 +141,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "박주임",
       "timer_seconds": 30
     },
@@ -143,18 +156,9 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        {
-          "label": "즉시 은행·경찰(112)에 지급정지를 신청한다",
-          "risk_flag": "safe"
-        },
-        {
-          "label": "마지막이라는 말을 믿고 한 번 더 입금한다",
-          "risk_flag": "caution"
-        },
-        {
-          "label": "여기서 멈추면 다 잃는다는 생각에 계속 입금한다",
-          "risk_flag": "risky"
-        }
+        { "label": "즉시 은행·경찰(112)에 지급정지를 신청한다", "risk_flag": "safe" },
+        { "label": "마지막이라는 말을 믿고 한 번 더 입금한다", "risk_flag": "caution" },
+        { "label": "여기서 멈추면 다 잃는다는 생각에 계속 입금한다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -165,6 +169,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "박주임",
       "timer_seconds": 30
     },
@@ -180,6 +185,14 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "safe",
+      "ending_consequence": {
+        "consequence_headline": "당신은 단 한 푼도 잃지 않았습니다.",
+        "consequence_details": [
+          "금감원(1332)에 확인하니 '기존 대출을 먼저 갚아야 승인되는' 정책자금은 세상에 없었습니다.",
+          "'서민금융지원'이라던 번호는 이미 다른 피해자들이 신고한 대포 번호였습니다.",
+          "'좋은 조건은 공식 창구에서 확인한다'는 습관 하나가 당신의 노후 자금을 지켰습니다."
+        ]
+      },
       "sender_name": "시스템"
     },
     {
@@ -194,6 +207,17 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "warning",
+      "ending_consequence": {
+        "consequence_headline": "'보증보험료'로 보낸 3,000,000원은 돌아오지 않았습니다.",
+        "lost_amount_krw": 3000000,
+        "lost_amount_label": "보증보험료 명목으로 보낸 돈",
+        "consequence_details": [
+          "'이것만 내면 대출이 나온다'던 말은 더 큰 입금을 끌어내기 위한 미끼였습니다.",
+          "추가 보증료를 요구받은 순간 이상함을 느끼고 은행 지급정지(1332)를 신청했습니다.",
+          "골든타임 안에 멈춘 덕분에 이미 보낸 300만 원 중 일부는 환급 신청이 가능합니다.",
+          "실제 대환대출은 지금 쓰는 은행 앱·창구에서 아무 비용 없이 상담할 수 있습니다."
+        ]
+      },
       "sender_name": "시스템"
     },
     {
@@ -208,6 +232,17 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "harm",
+      "ending_consequence": {
+        "consequence_headline": "'여기서 멈추면 다 잃는다'는 말에 34,000,000원을 보냈고, 상담원은 사라졌습니다.",
+        "lost_amount_krw": 34000000,
+        "lost_amount_label": "여러 번에 걸쳐 이체한 돈",
+        "consequence_details": [
+          "선상환금·보증료·전산오류 수수료… 명목이 바뀔 때마다 '마지막'이라며 입금을 유도했습니다.",
+          "결국 대출은 한 푼도 나오지 않았고, 지정 계좌는 그날 밤 텅 비었습니다.",
+          "모아둔 목돈에 더해 다른 곳에서 빌린 돈까지 사라져 빚만 남았습니다.",
+          "혼자 감당하지 마세요 — 서민금융통합지원센터 채무 상담과 경찰·금감원 신고로 회복을 시작할 수 있습니다."
+        ]
+      },
       "sender_name": "시스템"
     }
   ]

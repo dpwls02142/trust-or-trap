@@ -31,6 +31,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "confident_expert",
       "sender_name": "VIP투자연구소"
     },
     {
@@ -50,6 +51,33 @@
       ],
       "allow_free_input": true,
       "next_node_map": {
+        "safe": "trust-manager-assign",
+        "caution": "trust-manager-assign",
+        "risky": "trust-manager-assign"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "speaker_tone": "confident_expert",
+      "sender_name": "VIP투자연구소"
+    },
+    {
+      "node_id": "trust-manager-assign",
+      "stage": "trust_building",
+      "app_type": "chat",
+      "required_risk_signal": "'당신만 특별히' 1:1 전담 매니저를 배정하겠다며 개인 상담으로 끌어낸다. 개별 접촉으로 옮기는 것은 다른 회원 눈을 피해 압박하려는 수법이다",
+      "forbidden_content": [
+        "실존 증권사·기관 실명 사칭",
+        "실제 종목 매수 추천",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "1:1로 빼내는 건 전형적 수법이라 응하지 않는다", "risk_flag": "safe" },
+        { "label": "부담되지만 설명은 들어본다", "risk_flag": "caution" },
+        { "label": "특별 대우받는 것 같아 개인 상담을 받는다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
         "safe": "risk-fake-hts",
         "caution": "risk-fake-hts",
         "risky": "risk-fake-hts"
@@ -57,6 +85,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "confident_expert",
       "sender_name": "VIP투자연구소"
     },
     {
@@ -83,6 +112,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "confident_expert",
       "sender_name": "VIP투자연구소"
     },
     {
@@ -110,6 +140,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "confident_expert",
       "sender_name": "VIP투자연구소",
       "timer_seconds": 45
     },
@@ -137,6 +168,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "confident_expert",
       "sender_name": "VIP투자연구소",
       "timer_seconds": 30
     },
@@ -152,6 +184,14 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "safe",
+      "ending_consequence": {
+        "consequence_headline": "당신은 단 한 푼도 잃지 않았습니다.",
+        "consequence_details": [
+          "금감원에 조회하니 'VIP투자연구소'는 등록된 제도권 자문업체가 아니었습니다.",
+          "화면 속 수익은 진짜 시장이 아니라, 당신을 안심시키려 조작된 가짜 앱 숫자였습니다.",
+          "'원금·고수익 보장'이라는 말이 나온 순간 등을 돌린 판단이 당신을 지켰습니다."
+        ]
+      },
       "sender_name": "시스템"
     },
     {
@@ -166,6 +206,17 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "warning",
+      "ending_consequence": {
+        "consequence_headline": "출금하려고 낸 '수수료' 3,300,000원은 영영 돌아오지 않았습니다.",
+        "lost_amount_krw": 3300000,
+        "lost_amount_label": "출금 수수료 명목으로 보낸 돈",
+        "consequence_details": [
+          "화면 속 수익은 컸지만, 정작 출금하려 하자 세금·수수료를 먼저 내라고 했습니다.",
+          "수수료를 보내니 이번엔 '보증금'을 요구했고, 그제야 사기임을 확신했습니다.",
+          "더 이상 입금하지 않고 증거를 캡처해 경찰·금감원(1332)에 신고했습니다.",
+          "합법적인 투자에는 '출금하려면 먼저 돈을 넣어라'는 절차가 존재하지 않습니다."
+        ]
+      },
       "sender_name": "시스템"
     },
     {
@@ -180,6 +231,17 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "harm",
+      "ending_consequence": {
+        "consequence_headline": "대출까지 끌어 넣은 48,000,000원과 함께 리딩방이 통째로 사라졌습니다.",
+        "lost_amount_krw": 48000000,
+        "lost_amount_label": "투자금 + 대출로 넣은 돈",
+        "consequence_details": [
+          "'오늘이 마지막 기회'라는 말에 신용대출까지 받아 고액을 입금했습니다.",
+          "출금 요청에 수수료·보증금이 끝없이 붙더니, 어느 날 오픈채팅방이 폭파됐습니다.",
+          "전담 매니저도 전문가도 모두 연락이 끊겼고, 남은 건 갚아야 할 대출뿐입니다.",
+          "같은 방 피해자들과 집단 고소가 가능합니다 — 채무 상담과 지급정지부터 시작하세요."
+        ]
+      },
       "sender_name": "시스템"
     }
   ]
