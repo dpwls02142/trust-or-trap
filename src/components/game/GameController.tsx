@@ -558,6 +558,16 @@ export function GameController() {
 
   const handleAppOpen = useCallback(
     (selectedAppType: AppType) => {
+      const notificationTargetAppType =
+        homeNotificationOverride?.appType ?? currentNode?.app_type;
+
+      if (
+        notificationTargetAppType &&
+        selectedAppType === notificationTargetAppType
+      ) {
+        resetScenarioNotification();
+      }
+
       setHomeNotificationOverride(null);
 
       if (selectedAppType === "call" && isCallConnected) {
@@ -595,8 +605,10 @@ export function GameController() {
     [
       currentNode,
       hasCompletedOutboundDial,
+      homeNotificationOverride?.appType,
       isCallConnected,
       openOutboundDialShell,
+      resetScenarioNotification,
       setCallConnected,
       enterCurrentApp,
     ],
@@ -614,6 +626,9 @@ export function GameController() {
     }
 
     setPendingAppTransition(null);
+    if (pendingAppTransition.targetAppType === notificationAppType) {
+      resetScenarioNotification();
+    }
     setAppPlayMode("scenario");
     setShellAppType(null);
     setHasOpenedCurrentApp(true);
@@ -625,7 +640,9 @@ export function GameController() {
     pendingAppTransition,
     currentNode,
     hasCompletedOutboundDial,
+    notificationAppType,
     openOutboundDialShell,
+    resetScenarioNotification,
     setCallConnected,
     enterCurrentApp,
   ]);
