@@ -210,9 +210,7 @@
       "is_ending": true,
       "ending_type": "warning",
       "ending_consequence": {
-        "consequence_headline": "'일부만' 보낸 1,200,000원은 3분 만에 인출됐습니다.",
-        "lost_amount_krw": 1200000,
-        "lost_amount_label": "선상환 명목으로 보낸 돈",
+        "consequence_headline": "'일부만' 보낸 돈은 3분 만에 인출됐습니다.",
         "consequence_details": [
           "'먼저 조금만 보내면 승인된다'던 상담원은 입금 직후 전화를 받지 않았습니다.",
           "설치한 원격제어 앱이 당신의 문자·공동인증서를 그대로 넘겨보고 있었습니다.",
@@ -235,9 +233,7 @@
       "is_ending": true,
       "ending_type": "harm",
       "ending_consequence": {
-        "consequence_headline": "당신 통장으로 8,700,000원의 피해금이 세탁됐고, 당신은 '공범'이 됐습니다.",
-        "lost_amount_krw": 8700000,
-        "lost_amount_label": "내 통장을 거쳐 세탁된 피해금",
+        "consequence_headline": "당신 통장이 대포통장으로 쓰였고, 당신은 '공범'이 됐습니다.",
         "consequence_details": [
           "'쉬운 알바'라던 체크카드는 다른 피해자들의 돈을 옮기는 대포통장이 됐습니다.",
           "계좌는 즉시 지급정지되고, 당신 명의의 모든 은행 거래가 막혔습니다.",

@@ -239,9 +239,7 @@
       "is_ending": true,
       "ending_type": "warning",
       "ending_consequence": {
-        "consequence_headline": "'금방 갚을게'라며 받아간 1,500,000원은 돌아오지 않았습니다.",
-        "lost_amount_krw": 1500000,
-        "lost_amount_label": "도와주려 보낸 돈",
+        "consequence_headline": "'금방 갚을게'라며 받아간 돈은 돌아오지 않았습니다.",
         "consequence_details": [
           "'부담되지 않는 만큼만'이라던 첫 송금 뒤, 곧 더 큰 금액을 요구해 왔습니다.",
           "요청이 반복되자 이상함을 느끼고 송금을 멈춘 뒤 대화를 캡처했습니다.",
@@ -264,9 +262,7 @@
       "is_ending": true,
       "ending_type": "harm",
       "ending_consequence": {
-        "consequence_headline": "'사랑을 증명하라'는 말에 15,000,000원을 보냈고, 그는 사라졌습니다.",
-        "lost_amount_krw": 15000000,
-        "lost_amount_label": "여러 번에 걸쳐 송금한 돈",
+        "consequence_headline": "'사랑을 증명하라'는 말에 계속 송금했고, 그는 사라졌습니다.",
         "consequence_details": [
           "세관 수수료, 관세, 벌금… 명목이 바뀔 때마다 '이번이 마지막'이라며 송금을 요구했습니다.",
           "'못 믿느냐'는 말에 흔들려 모아둔 돈까지 계속 보냈습니다.",

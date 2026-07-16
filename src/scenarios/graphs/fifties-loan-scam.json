@@ -208,13 +208,11 @@
       "is_ending": true,
       "ending_type": "warning",
       "ending_consequence": {
-        "consequence_headline": "'보증보험료'로 보낸 3,000,000원은 돌아오지 않았습니다.",
-        "lost_amount_krw": 3000000,
-        "lost_amount_label": "보증보험료 명목으로 보낸 돈",
+        "consequence_headline": "'보증보험료'로 보낸 돈은 돌아오지 않았습니다.",
         "consequence_details": [
           "'이것만 내면 대출이 나온다'던 말은 더 큰 입금을 끌어내기 위한 미끼였습니다.",
           "추가 보증료를 요구받은 순간 이상함을 느끼고 은행 지급정지(1332)를 신청했습니다.",
-          "골든타임 안에 멈춘 덕분에 이미 보낸 300만 원 중 일부는 환급 신청이 가능합니다.",
+          "골든타임 안에 멈춘 덕분에 이미 보낸 돈 중 일부는 환급 신청이 가능합니다.",
           "실제 대환대출은 지금 쓰는 은행 앱·창구에서 아무 비용 없이 상담할 수 있습니다."
         ]
       },
@@ -233,9 +231,7 @@
       "is_ending": true,
       "ending_type": "harm",
       "ending_consequence": {
-        "consequence_headline": "'여기서 멈추면 다 잃는다'는 말에 34,000,000원을 보냈고, 상담원은 사라졌습니다.",
-        "lost_amount_krw": 34000000,
-        "lost_amount_label": "여러 번에 걸쳐 이체한 돈",
+        "consequence_headline": "'여기서 멈추면 다 잃는다'는 말에 목돈을 보냈고, 상담원은 사라졌습니다.",
         "consequence_details": [
           "선상환금·보증료·전산오류 수수료… 명목이 바뀔 때마다 '마지막'이라며 입금을 유도했습니다.",
           "결국 대출은 한 푼도 나오지 않았고, 지정 계좌는 그날 밤 텅 비었습니다.",

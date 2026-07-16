@@ -39,21 +39,18 @@ const endingPresentationMap: Record<
 
 const consequenceThemeMap: Record<
   EndingType,
-  { cardClass: string; amountClass: string; markerClass: string }
+  { cardClass: string; markerClass: string }
 > = {
   safe: {
     cardClass: "border-emerald-500/30 bg-emerald-500/10",
-    amountClass: "text-emerald-300",
     markerClass: "text-emerald-400",
   },
   warning: {
     cardClass: "border-amber-500/30 bg-amber-500/10",
-    amountClass: "text-amber-300",
     markerClass: "text-amber-400",
   },
   harm: {
     cardClass: "border-red-500/40 bg-red-500/10",
-    amountClass: "text-red-300",
     markerClass: "text-red-400",
   },
 };
@@ -63,8 +60,6 @@ const riskFlagLabelMap = {
   caution: { flagLabel: "아슬아슬", flagClass: "bg-amber-500/20 text-amber-300" },
   risky: { flagLabel: "놓침", flagClass: "bg-red-500/20 text-red-300" },
 } as const;
-
-const koreanWonFormatter = new Intl.NumberFormat("ko-KR");
 
 /**
  * 엔딩 리포트 — "무엇을 했더니 무슨 일이 벌어졌는가"를 먼저 충격적으로 보여주고,
@@ -79,10 +74,6 @@ export function EndingReport({
 }: EndingReportProps) {
   const endingPresentation = endingPresentationMap[endingType];
   const consequenceTheme = consequenceThemeMap[endingType];
-  const hasLostAmount =
-    !!endingConsequence &&
-    typeof endingConsequence.lost_amount_krw === "number" &&
-    endingConsequence.lost_amount_krw > 0;
 
   return (
     <motion.div
@@ -105,16 +96,6 @@ export function EndingReport({
           transition={{ delay: 0.15 }}
           className={`rounded-2xl border p-4 ${consequenceTheme.cardClass}`}
         >
-          {hasLostAmount && (
-            <div className="mb-3 text-center">
-              <p className="text-[11px] uppercase tracking-wide text-white/50">
-                {endingConsequence.lost_amount_label ?? "잃은 돈"}
-              </p>
-              <p className={`mt-0.5 text-3xl font-extrabold ${consequenceTheme.amountClass}`}>
-                {koreanWonFormatter.format(endingConsequence.lost_amount_krw!)}원
-              </p>
-            </div>
-          )}
           <p className="text-[15px] font-bold leading-snug text-white">
             {endingConsequence.consequence_headline}
           </p>

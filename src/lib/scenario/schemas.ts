@@ -58,8 +58,6 @@ export const speakerToneSchema = z.enum([
 export const endingConsequenceSchema = z.object({
   consequence_headline: z.string().min(1),
   consequence_details: z.array(z.string().min(1)).min(1),
-  lost_amount_krw: z.number().int().nonnegative().optional(),
-  lost_amount_label: z.string().min(1).optional(),
 });
 
 export const nodeOptionSchema = z.object({

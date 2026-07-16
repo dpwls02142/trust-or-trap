@@ -62,13 +62,12 @@ export type SpeakerTone =
 
 /**
  * 엔딩 결과 (glossary §3.2) — "경고문"이 아니라 행동→결과를 구체적으로 보여준다.
- * 경각심을 만드는 것이 목적이므로 잃은 금액·벌어진 일을 사실적으로 제시한다.
+ * 경각심을 만드는 것이 목적이므로 무슨 일이 벌어졌는지 사실적으로 제시한다.
+ * (구체 금액은 실제 이체값이 아니어서 허구적으로 느껴지므로 제외한다.)
  */
 export interface EndingConsequence {
   consequence_headline: string;
   consequence_details: string[];
-  lost_amount_krw?: number;
-  lost_amount_label?: string;
 }
 
 /** 노드 선택지 */

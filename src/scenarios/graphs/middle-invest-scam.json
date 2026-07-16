@@ -207,9 +207,7 @@
       "is_ending": true,
       "ending_type": "warning",
       "ending_consequence": {
-        "consequence_headline": "출금하려고 낸 '수수료' 3,300,000원은 영영 돌아오지 않았습니다.",
-        "lost_amount_krw": 3300000,
-        "lost_amount_label": "출금 수수료 명목으로 보낸 돈",
+        "consequence_headline": "출금하려고 낸 '수수료'는 영영 돌아오지 않았습니다.",
         "consequence_details": [
           "화면 속 수익은 컸지만, 정작 출금하려 하자 세금·수수료를 먼저 내라고 했습니다.",
           "수수료를 보내니 이번엔 '보증금'을 요구했고, 그제야 사기임을 확신했습니다.",
@@ -232,9 +230,7 @@
       "is_ending": true,
       "ending_type": "harm",
       "ending_consequence": {
-        "consequence_headline": "대출까지 끌어 넣은 48,000,000원과 함께 리딩방이 통째로 사라졌습니다.",
-        "lost_amount_krw": 48000000,
-        "lost_amount_label": "투자금 + 대출로 넣은 돈",
+        "consequence_headline": "대출까지 끌어 넣은 투자금과 함께 리딩방이 통째로 사라졌습니다.",
         "consequence_details": [
           "'오늘이 마지막 기회'라는 말에 신용대출까지 받아 고액을 입금했습니다.",
           "출금 요청에 수수료·보증금이 끝없이 붙더니, 어느 날 오픈채팅방이 폭파됐습니다.",

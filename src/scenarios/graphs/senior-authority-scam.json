@@ -208,9 +208,7 @@
       "is_ending": true,
       "ending_type": "warning",
       "ending_consequence": {
-        "consequence_headline": "'우선 확인용'이라며 보낸 5,000,000원이 순식간에 빠져나갔습니다.",
-        "lost_amount_krw": 5000000,
-        "lost_amount_label": "안전계좌로 이체한 돈",
+        "consequence_headline": "'우선 확인용'이라며 보낸 돈이 순식간에 빠져나갔습니다.",
         "consequence_details": [
           "'일부만 보내 확인하면 나머지는 지켜준다'던 말은 첫 이체를 끌어내기 위한 함정이었습니다.",
           "곧바로 이상함을 느끼고 112 신고와 은행 지급정지를 요청했습니다.",
@@ -233,9 +231,7 @@
       "is_ending": true,
       "ending_type": "harm",
       "ending_consequence": {
-        "consequence_headline": "'자산을 지켜준다'는 말에 62,000,000원을 이체했고, 계좌는 텅 비었습니다.",
-        "lost_amount_krw": 62000000,
-        "lost_amount_label": "안전계좌로 이체한 전 재산",
+        "consequence_headline": "'자산을 지켜준다'는 말에 전 재산을 이체했고, 계좌는 텅 비었습니다.",
         "consequence_details": [
           "'수사에 협조하면 곧 돌려준다'던 돈은 이체 즉시 여러 계좌로 쪼개져 인출됐습니다.",
           "이어 자녀를 사칭한 문자에도 응하며 추가 금액까지 보냈습니다.",
