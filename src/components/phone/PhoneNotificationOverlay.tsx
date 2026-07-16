@@ -25,7 +25,7 @@ const swipeDismissVelocityThreshold = 280;
 
 /**
  * 홈·앱 플레이 중 상단에 표시되는 시나리오 알림 배너.
- * 아래로 스와이프하면 배너만 닫히고, 홈 아이콘 배지는 유지된다.
+ * 위로 스와이프하면 배너만 닫히고, 홈 아이콘 배지는 유지된다.
  */
 export function PhoneNotificationOverlay({
   notificationAppType,
@@ -78,16 +78,16 @@ export function PhoneNotificationOverlay({
           exit={{ y: -90, opacity: 0 }}
           transition={{ type: "spring", damping: 20 }}
           drag="y"
-          dragConstraints={{ top: 0, bottom: 120 }}
-          dragElastic={{ top: 0, bottom: 0.35 }}
+          dragConstraints={{ top: -120, bottom: 0 }}
+          dragElastic={{ top: 0.35, bottom: 0 }}
           onDragStart={() => {
             didDragBannerRef.current = true;
           }}
           onDragEnd={(_, dragInfo) => {
-            const didSwipeDown =
-              dragInfo.offset.y > swipeDismissOffsetThreshold ||
-              dragInfo.velocity.y > swipeDismissVelocityThreshold;
-            if (didSwipeDown) {
+            const didSwipeUp =
+              dragInfo.offset.y < -swipeDismissOffsetThreshold ||
+              dragInfo.velocity.y < -swipeDismissVelocityThreshold;
+            if (didSwipeUp) {
               onDismissBanner();
             }
           }}
