@@ -198,6 +198,8 @@ export const advanceRequestSchema = z.object({
   nodeId: z.string().min(1),
   chatHistory: z.array(chatHistoryEntrySchema).max(60),
   userProfile: userProfileSchema,
+  /** 직전 플레이어 응답에 대한 judge 판정 — 대사가 플레이어 태도에 반응하도록 프롬프트에 주입 */
+  lastPlayerRiskFlag: riskFlagSchema.optional(),
 });
 
 export const judgeRequestSchema = z.object({

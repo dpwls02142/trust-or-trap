@@ -5,6 +5,7 @@ import { resolveAgeBand } from "@/lib/scenario/persona-matching";
 import type {
   AppType,
   ChatHistoryEntry,
+  RiskFlag,
   ScenarioId,
   ScenarioNode,
   SpeakerTone,
@@ -147,6 +148,14 @@ export function buildAdvanceSystemPrompt(
     ...currentNode.forbidden_content.map((forbiddenItem) => `   - ${forbiddenItem}`),
     "4. 응답은 반드시 아래 JSON 형식만 출력한다. JSON 외 텍스트(마크다운, 설명) 금지.",
     "",
+    "## 직전 반응 규칙 (대화가 살아있게 — 중요)",
+    "- 히스토리의 마지막 '플레이어' 말과 그 태도에 **먼저 짧게 반응**한 뒤, 이 노드의 위험 신호를 이어간다.",
+    "- 플레이어가 거절/의심/따지면: 화내지 말고 회유·안심·서운함·부드러운 압박으로 되받으며 설득한다.",
+    "- 플레이어가 적극적/호의적이면: 신뢰를 확인하듯 한 발 더 밀어붙인다.",
+    "- 플레이어가 미온적/짧게 답하면: 관심을 끌어 자연스럽게 대화를 잇는다.",
+    "- 같은 노드라도 플레이어 말에 따라 **표현·말투는 매번 달라져야** 한다. 스크립트를 읽듯 똑같이 말하지 않는다.",
+    "- 단, 반응이 달라져도 위 위험 신호(사건 자체)는 반드시 드러낸다 — 전개 순서는 바뀌지 않는다.",
+    "",
     "## 출력 JSON 형식",
     `{"message":"${currentNode.sender_name}의 단답 대사(60자 이내). '${userProfile.displayName}' 이름은 자연스럽게 0~1회만","sender":"${currentNode.sender_name}","options":[{"label":"8~25자 짧은 선택지","risk_flag":"safe|caution|risky"}],"risk_flags":["위험 신호 한 줄 요약"]}`,
     "",
@@ -174,11 +183,19 @@ export function buildAdvanceSystemPrompt(
   ].join("\n");
 }
 
+/** judge가 낸 risk_flag를 화자 반응 지침으로 번역 */
+const playerStanceGuideMap: Record<RiskFlag, string> = {
+  safe: "경계하거나 거절/의심하는 태도 → 화내지 말고 회유·안심·서운함으로 되받아 설득한다",
+  caution: "망설이거나 미온적인 태도 → 부드럽게 밀어붙이며 결정을 유도한다",
+  risky: "호의적이거나 적극적으로 응하는 태도 → 신뢰를 확인하듯 한 발 더 밀어붙인다",
+};
+
 export function buildAdvanceUserPrompt(
   scenarioId: ScenarioId,
   currentNode: ScenarioNode,
   chatHistory: ChatHistoryEntry[],
   userProfile: UserProfile,
+  lastPlayerRiskFlag?: RiskFlag,
 ): string {
   const historyText =
     chatHistory.length === 0
@@ -186,6 +203,17 @@ export function buildAdvanceUserPrompt(
       : chatHistory
           .map((entryItem) => `[${entryItem.speaker}] ${entryItem.messageText}`)
           .join("\n");
+
+  const lastPlayerEntry = [...chatHistory]
+    .reverse()
+    .find((entryItem) => entryItem.speaker === "player");
+
+  const reactionNote =
+    lastPlayerEntry && lastPlayerRiskFlag
+      ? `플레이어 직전 반응: "${lastPlayerEntry.messageText}" → ${playerStanceGuideMap[lastPlayerRiskFlag]}`
+      : lastPlayerEntry
+        ? `플레이어 직전 반응: "${lastPlayerEntry.messageText}" → 이 말에 먼저 반응한 뒤 위험 신호를 이어간다`
+        : null;
 
   const usesEmailContact =
     currentNode.app_type === "sms" && scenarioId === "teen-female-grooming";
@@ -200,8 +228,9 @@ export function buildAdvanceUserPrompt(
     "",
     "지금까지 대화:",
     historyText,
+    ...(reactionNote ? ["", reactionNote] : []),
     "",
-    "위 노드에 맞는 **다음 말풍선 1개**를 JSON으로 생성. 60자 이내 단답만.",
+    "플레이어의 직전 반응에 먼저 반응한 뒤, 위 노드의 위험 신호를 담은 **다음 말풍선 1개**를 JSON으로 생성. 60자 이내 단답만.",
   ].join("\n");
 }
 

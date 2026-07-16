@@ -24,6 +24,34 @@
       ],
       "allow_free_input": true,
       "next_node_map": {
+        "safe": "trust-quick-affection",
+        "caution": "trust-quick-affection",
+        "risky": "trust-quick-affection"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "speaker_tone": "intimate_partner",
+      "sender_name": "도현",
+      "elapsed_days": 1
+    },
+    {
+      "node_id": "trust-quick-affection",
+      "stage": "trust_building",
+      "app_type": "chat",
+      "required_risk_signal": "매칭 며칠 만에 하루 종일 다정한 연락을 퍼부으며 '운명 같다·이런 느낌 처음'이라고 관계를 급진전시킨다. 만난 적 없는 상대에게 과몰입을 유도하는 것 자체가 신호다",
+      "forbidden_content": [
+        "실존 인물·기관 사칭",
+        "실제 개인정보 패턴",
+        "노골적 성적 표현"
+      ],
+      "options": [
+        { "label": "너무 빠른 진도가 부담스러워 속도를 늦추자고 한다", "risk_flag": "safe" },
+        { "label": "설레지만 아직은 조심스럽다고 말한다", "risk_flag": "caution" },
+        { "label": "나도 운명 같다며 푹 빠져든다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
         "safe": "trust-emotional-bond",
         "caution": "trust-emotional-bond",
         "risky": "trust-emotional-bond"
@@ -33,7 +61,7 @@
       "ending_type": null,
       "speaker_tone": "intimate_partner",
       "sender_name": "도현",
-      "elapsed_days": 1
+      "elapsed_days": 5
     },
     {
       "node_id": "trust-emotional-bond",
@@ -61,7 +89,7 @@
       "ending_type": null,
       "speaker_tone": "intimate_partner",
       "sender_name": "도현",
-      "elapsed_days": 21
+      "elapsed_days": 18
     },
     {
       "node_id": "trust-move-private",
@@ -89,7 +117,7 @@
       "ending_type": null,
       "speaker_tone": "intimate_partner",
       "sender_name": "도현",
-      "elapsed_days": 24
+      "elapsed_days": 22
     },
     {
       "node_id": "risk-crisis-story",
@@ -117,7 +145,7 @@
       "ending_type": null,
       "speaker_tone": "intimate_partner",
       "sender_name": "도현",
-      "elapsed_days": 28
+      "elapsed_days": 27
     },
     {
       "node_id": "branch-verify-identity",
@@ -145,7 +173,7 @@
       "ending_type": null,
       "speaker_tone": "intimate_partner",
       "sender_name": "도현",
-      "elapsed_days": 29
+      "elapsed_days": 28
     },
     {
       "node_id": "demand-money-transfer",

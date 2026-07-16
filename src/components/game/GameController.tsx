@@ -154,12 +154,20 @@ export function GameController() {
         previousSentence: string;
       }[] = [];
 
+      // 직전 플레이어 응답에 대한 judge 판정 — 대사가 플레이어 태도에 반응하도록 전달
+      const priorRiskRecords = useGameStore.getState().riskSignalRecords;
+      const lastPlayerRiskFlag =
+        priorRiskRecords.length > 0
+          ? priorRiskRecords[priorRiskRecords.length - 1].userRiskFlag
+          : undefined;
+
       await consumeAdvanceStream(
         {
           scenarioId: activeScenarioId,
           nodeId: targetNode.node_id,
           chatHistory: useGameStore.getState().chatHistory,
           userProfile,
+          lastPlayerRiskFlag,
         },
         {
           onDeltaText: (deltaText) =>
