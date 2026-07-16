@@ -17,17 +17,17 @@ const senderAvatarByScenario: Record<ScenarioId, Record<string, string>> = {
   },
   "twenties-male-voicephishing": {
     "김상담 대리": "/leading.jpg",
-    한빛캐피탈: "/leading.jpg",
+    한빛캐피탈: "",
   },
   "middle-invest-scam": {
-    VIP투자연구소: "/leading.jpg",
+    VIP투자연구소: "",
   },
   "fifties-loan-scam": {
     박주임: "/leading.jpg",
-    서민금융지원: "/leading.jpg",
+    서민금융지원: "",
   },
   "senior-authority-scam": {
-    김수사관: "/leading.jpg",
+    김수사관: "",
     딸: "/twenties_female.jpg",
   },
 };
