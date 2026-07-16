@@ -55,7 +55,7 @@ export function HomeAppShell({
 
   if (openThreadSummary && isMessageShellApp(appType)) {
     return (
-      <div className="flex h-full flex-col pt-10">
+      <div className="flex h-full flex-col bg-white pt-10">
         <MessageAppThreadView
           appType={appType}
           senderName={openThreadSummary.senderName}
