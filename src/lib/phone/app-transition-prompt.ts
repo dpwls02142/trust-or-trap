@@ -10,7 +10,7 @@ export const appTransitionPromptMap: Partial<Record<AppType, string>> = {
   call: "전화하는 게 좋을까?",
   insta: "DM을 확인해볼까?",
   bank: "은행 앱을 열어볼까?",
-  browser: "링크를 눌러볼까?",
+  browser: "링크를 열어볼까?",
 };
 
 export const defaultAppTransitionPrompt = "이 앱을 열어볼까?";

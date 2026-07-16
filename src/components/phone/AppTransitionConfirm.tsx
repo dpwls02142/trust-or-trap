@@ -7,6 +7,7 @@ import type { AppType } from "@/lib/scenario/types";
 interface AppTransitionConfirmProps {
   targetAppType: AppType;
   promptText: string;
+  contextText?: string;
   onConfirmOpen: () => void;
   onDismiss: () => void;
 }
@@ -17,6 +18,7 @@ interface AppTransitionConfirmProps {
 export function AppTransitionConfirm({
   targetAppType,
   promptText,
+  contextText,
   onConfirmOpen,
   onDismiss,
 }: AppTransitionConfirmProps) {
@@ -43,6 +45,9 @@ export function AppTransitionConfirm({
           >
             {promptText}
           </p>
+          {contextText && (
+            <p className="mt-2 text-xs leading-relaxed text-black/50">{contextText}</p>
+          )}
         </div>
         <div className="flex border-t border-black/10">
           <button

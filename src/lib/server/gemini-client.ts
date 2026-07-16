@@ -2,6 +2,10 @@ import "server-only";
 
 import { GoogleGenAI, ThinkingLevel, type ThinkingConfig } from "@google/genai";
 import { resolveAgeBand } from "@/lib/scenario/persona-matching";
+import {
+  resolveBrowserPageConfig,
+  shouldShowBrowserPageNotice,
+} from "@/lib/phone/browser-scenario-page";
 import type {
   AppType,
   ChatHistoryEntry,
@@ -94,7 +98,7 @@ function buildDialogueStyleGuide(currentNode: ScenarioNode, userProfile: UserPro
     insta: "인스타 DM/댓글 톤. 10~40자. 가볍고 짧게. 이모지 0~1개만(과다 금지).",
     call: "통화 자막. 구어체 단편 10~45자. '어 그게', '지금요?'처럼 끊어 말함.",
     bank: "은행/송금 앱 알림·상담. 15~45자. 짧은 안내·재촉. 공문체 장문 금지.",
-    browser: "가짜 사이트 팝업/안내. 15~40자. 짧고 긴박하게.",
+    browser: "가짜 웹페이지 본문·팝업·배너 문구. 대화체·말풍선·'~님이' 형태 금지. 20~50자. 사이트 UI에 들어갈 짧은 유도·경고 문구.",
   };
 
   const appType = currentNode.app_type === "home" ? "chat" : currentNode.app_type;
@@ -135,9 +139,46 @@ export function buildAdvanceSystemPrompt(
   currentNode: ScenarioNode,
   userProfile: UserProfile,
 ): string {
+  const isBrowserNode = currentNode.app_type === "browser";
+  const browserPageConfig = isBrowserNode
+    ? resolveBrowserPageConfig(currentNode.node_id)
+    : null;
+  const showBrowserPageNotice =
+    browserPageConfig &&
+    shouldShowBrowserPageNotice(browserPageConfig.pageVariant);
+
+  const roleLine = isBrowserNode
+    ? "역할: 아래 노드 스펙의 사건을 **가짜 웹페이지 안내 문구** 1개로 표현. 상대방 대화·말풍선이 아니다."
+    : "역할: 아래 노드 스펙의 사건을 **실제 한국인이 메시지앱·DM·문자로 주고받는 것처럼** 짧은 한국어 대사 1개로 표현.";
+
+  const reactionSection = isBrowserNode
+    ? [
+        "## 페이지 문구 규칙",
+        "- message는 웹사이트 팝업·배너·안내 박스에 들어갈 문구다. 1인칭 대화·상대 이름 호칭 금지.",
+        "- 플레이어 직전 반응을 반영하되, 사이트가 보여주는 유도·압박 문구 형태로 쓴다.",
+        ...(showBrowserPageNotice
+          ? []
+          : [
+              "- 이 노드는 역이미지 검색 결과 화면이다. message는 짧은 검색 요약(20자 내외)으로만 쓰고, 대화체는 쓰지 않는다.",
+            ]),
+      ]
+    : [
+        "## 직전 반응 규칙 (대화가 살아있게 — 중요)",
+        "- 히스토리의 마지막 '플레이어' 말과 그 태도에 **먼저 짧게 반응**한 뒤, 이 노드의 위험 신호를 이어간다.",
+        "- 플레이어가 거절/의심/따지면: 화내지 말고 회유·안심·서운함·부드러운 압박으로 되받으며 설득한다.",
+        "- 플레이어가 적극적/호의적이면: 신뢰를 확인하듯 한 발 더 밀어붙인다.",
+        "- 플레이어가 미온적/짧게 답하면: 관심을 끌어 자연스럽게 대화를 잇는다.",
+        "- 같은 노드라도 플레이어 말에 따라 **표현·말투는 매번 달라져야** 한다. 스크립트를 읽듯 똑같이 말하지 않는다.",
+        "- 단, 반응이 달라져도 위 위험 신호(사건 자체)는 반드시 드러낸다 — 전개 순서는 바뀌지 않는다.",
+      ];
+
+  const messageFormatLine = isBrowserNode
+    ? `{"message":"웹페이지 안내 문구(50자 이내). 대화체 금지","sender":"${currentNode.sender_name}","options":[{"label":"8~25자 짧은 선택지","risk_flag":"safe|caution|risky"}],"risk_flags":["위험 신호 한 줄 요약"]}`
+    : `{"message":"${currentNode.sender_name}의 단답 대사(60자 이내). '${userProfile.displayName}' 이름은 자연스럽게 0~1회만","sender":"${currentNode.sender_name}","options":[{"label":"8~25자 짧은 선택지","risk_flag":"safe|caution|risky"}],"risk_flags":["위험 신호 한 줄 요약"]}`;
+
   return [
     "당신은 피싱/디지털 스캠 '예방 교육 시뮬레이션'의 대사 생성기다.",
-    "역할: 아래 노드 스펙의 사건을 **실제 한국인이 메시지앱·DM·문자로 주고받는 것처럼** 짧은 한국어 대사 1개로 표현.",
+    roleLine,
     "",
     buildDialogueStyleGuide(currentNode, userProfile),
     "",
@@ -148,16 +189,10 @@ export function buildAdvanceSystemPrompt(
     ...currentNode.forbidden_content.map((forbiddenItem) => `   - ${forbiddenItem}`),
     "4. 응답은 반드시 아래 JSON 형식만 출력한다. JSON 외 텍스트(마크다운, 설명) 금지.",
     "",
-    "## 직전 반응 규칙 (대화가 살아있게 — 중요)",
-    "- 히스토리의 마지막 '플레이어' 말과 그 태도에 **먼저 짧게 반응**한 뒤, 이 노드의 위험 신호를 이어간다.",
-    "- 플레이어가 거절/의심/따지면: 화내지 말고 회유·안심·서운함·부드러운 압박으로 되받으며 설득한다.",
-    "- 플레이어가 적극적/호의적이면: 신뢰를 확인하듯 한 발 더 밀어붙인다.",
-    "- 플레이어가 미온적/짧게 답하면: 관심을 끌어 자연스럽게 대화를 잇는다.",
-    "- 같은 노드라도 플레이어 말에 따라 **표현·말투는 매번 달라져야** 한다. 스크립트를 읽듯 똑같이 말하지 않는다.",
-    "- 단, 반응이 달라져도 위 위험 신호(사건 자체)는 반드시 드러낸다 — 전개 순서는 바뀌지 않는다.",
+    ...reactionSection,
     "",
     "## 출력 JSON 형식",
-    `{"message":"${currentNode.sender_name}의 단답 대사(60자 이내). '${userProfile.displayName}' 이름은 자연스럽게 0~1회만","sender":"${currentNode.sender_name}","options":[{"label":"8~25자 짧은 선택지","risk_flag":"safe|caution|risky"}],"risk_flags":["위험 신호 한 줄 요약"]}`,
+    messageFormatLine,
     "",
     "## options 규칙",
     "- 아래 기본 선택지의 risk_flag(safe/caution/risky) 구성은 유지. label만 대화 흐름에 맞게 **짧게** 다듬는다.",
@@ -221,16 +256,24 @@ export function buildAdvanceUserPrompt(
     ? "연락처 맥락: 상대는 휴대전화 번호가 없고 이메일로만 연락한다. '메시지앱'으로 옮기자고 하되 텔레그램·카카오톡 등 실제 앱명은 쓰지 않는다."
     : null;
 
+  const browserEntryNote =
+    currentNode.app_type === "browser"
+      ? `맥락: ${resolveBrowserPageConfig(currentNode.node_id).entryContextText}`
+      : null;
+
   return [
     `사용자: ${userProfile.displayName}, ${userProfile.userAge}, ${userProfile.gender}`,
     `앱: ${currentNode.app_type}, 상대: ${currentNode.sender_name}`,
     ...(emailContactNote ? [emailContactNote] : []),
+    ...(browserEntryNote ? [browserEntryNote] : []),
     "",
     "지금까지 대화:",
     historyText,
     ...(reactionNote ? ["", reactionNote] : []),
     "",
-    "플레이어의 직전 반응에 먼저 반응한 뒤, 위 노드의 위험 신호를 담은 **다음 말풍선 1개**를 JSON으로 생성. 60자 이내 단답만.",
+    currentNode.app_type === "browser"
+      ? "플레이어가 열어본 가짜 웹페이지에 표시할 **안내 문구 1개**를 JSON으로 생성. 대화체·말풍선 금지. 50자 이내."
+      : "플레이어의 직전 반응에 먼저 반응한 뒤, 위 노드의 위험 신호를 담은 **다음 말풍선 1개**를 JSON으로 생성. 60자 이내 단답만.",
   ].join("\n");
 }
 
