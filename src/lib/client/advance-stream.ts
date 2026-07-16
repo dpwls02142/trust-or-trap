@@ -1,6 +1,12 @@
 "use client";
 
-import type { AdvancePayload, ChatHistoryEntry, ScenarioId, UserProfile } from "@/lib/scenario/types";
+import type {
+  AdvancePayload,
+  ChatHistoryEntry,
+  RiskFlag,
+  ScenarioId,
+  UserProfile,
+} from "@/lib/scenario/types";
 
 /**
  * /api/scenario/advance SSE 소비 유틸.
@@ -24,6 +30,7 @@ export async function consumeAdvanceStream(
     nodeId: string;
     chatHistory: ChatHistoryEntry[];
     userProfile: UserProfile;
+    lastPlayerRiskFlag?: RiskFlag;
   },
   streamCallbacks: AdvanceStreamCallbacks,
 ): Promise<void> {

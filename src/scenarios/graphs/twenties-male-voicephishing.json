@@ -17,10 +17,7 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        {
-          "label": "공식 앱·지점에서 직접 확인하고 문자는 무시한다",
-          "risk_flag": "safe"
-        },
+        { "label": "공식 앱·지점에서 직접 확인하고 문자는 무시한다", "risk_flag": "safe" },
         { "label": "조건만 들어보려고 전화를 건다", "risk_flag": "caution" },
         { "label": "금리가 좋아 바로 상담을 신청한다", "risk_flag": "risky" }
       ],
@@ -33,6 +30,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "한빛캐피탈",
       "outbound_dial_number": "1588-1588"
     },
@@ -47,15 +45,37 @@
         "실제 대출 상품명"
       ],
       "options": [
-        {
-          "label": "기관 대표번호로 직접 재확인하겠다고 한다",
-          "risk_flag": "safe"
-        },
-        {
-          "label": "기본 정보만 알려주고 상담을 이어간다",
-          "risk_flag": "caution"
-        },
+        { "label": "기관 대표번호로 직접 재확인하겠다고 한다", "risk_flag": "safe" },
+        { "label": "기본 정보만 알려주고 상담을 이어간다", "risk_flag": "caution" },
         { "label": "요구하는 정보를 모두 알려준다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "trust-approval-bait",
+        "caution": "trust-approval-bait",
+        "risky": "trust-approval-bait"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "speaker_tone": "professional_agent",
+      "sender_name": "김상담 대리",
+      "outbound_dial_number": "1588-1588"
+    },
+    {
+      "node_id": "trust-approval-bait",
+      "stage": "trust_building",
+      "app_type": "call",
+      "required_risk_signal": "'심사 결과 저금리 대상으로 사전 승인됐다'며 확정된 것처럼 말해 안심시키고, 상담을 계속 이어가게 만든다. 조회만으로 금리를 확정 통보하는 것은 비정상이다",
+      "forbidden_content": [
+        "실존 금융기관 실명 사칭",
+        "실제 대출 상품명",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "승인 문자를 공식 앱에서 대조해 보겠다고 한다", "risk_flag": "safe" },
+        { "label": "반신반의하며 다음 절차를 물어본다", "risk_flag": "caution" },
+        { "label": "승인됐다니 안심하고 절차를 따른다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -66,8 +86,8 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "김상담 대리",
-      "outbound_dial_number": "1588-1588"
+      "speaker_tone": "professional_agent",
+      "sender_name": "김상담 대리"
     },
     {
       "node_id": "risk-app-install",
@@ -81,14 +101,8 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        {
-          "label": "원격제어 앱 요구는 사기 신호이므로 즉시 끊는다",
-          "risk_flag": "safe"
-        },
-        {
-          "label": "찜찜해서 설치를 미루고 시간을 번다",
-          "risk_flag": "caution"
-        },
+        { "label": "원격제어 앱 요구는 사기 신호이므로 즉시 끊는다", "risk_flag": "safe" },
+        { "label": "찜찜해서 설치를 미루고 시간을 번다", "risk_flag": "caution" },
         { "label": "심사에 필요하다니 설치한다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
@@ -100,6 +114,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "김상담 대리",
       "timer_seconds": 45
     },
@@ -114,10 +129,7 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        {
-          "label": "선입금 요구는 비정상이므로 거절하고 금감원(1332)에 확인한다",
-          "risk_flag": "safe"
-        },
+        { "label": "선입금 요구는 비정상이므로 거절하고 금감원(1332)에 확인한다", "risk_flag": "safe" },
         { "label": "일부 금액만 먼저 보내본다", "risk_flag": "caution" },
         { "label": "대출 승인을 위해 전액 입금한다", "risk_flag": "risky" }
       ],
@@ -130,6 +142,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "김상담 대리",
       "timer_seconds": 30
     },
@@ -145,18 +158,9 @@
         "실제 개인정보 패턴"
       ],
       "options": [
-        {
-          "label": "통장 양도는 범죄임을 인지하고 거절 후 경찰에 신고한다",
-          "risk_flag": "safe"
-        },
-        {
-          "label": "불안하지만 알바비가 급해 고민한다",
-          "risk_flag": "caution"
-        },
-        {
-          "label": "쉬운 알바라 생각하고 체크카드를 보낸다",
-          "risk_flag": "risky"
-        }
+        { "label": "통장 양도는 범죄임을 인지하고 거절 후 경찰에 신고한다", "risk_flag": "safe" },
+        { "label": "불안하지만 알바비가 급해 고민한다", "risk_flag": "caution" },
+        { "label": "쉬운 알바라 생각하고 체크카드를 보낸다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -167,6 +171,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "김상담 대리",
       "timer_seconds": 30
     },
@@ -182,6 +187,14 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "safe",
+      "ending_consequence": {
+        "consequence_headline": "당신은 단 한 푼도 잃지 않았습니다.",
+        "consequence_details": [
+          "금감원(1332)에 확인하니 '한빛캐피탈'이라는 등록 대부업체는 존재하지 않았습니다.",
+          "당신이 끊은 그 번호로는 이미 같은 수법에 당한 피해 신고가 접수돼 있었습니다.",
+          "정식 금융기관은 전화로 앱 설치나 선입금을 요구하지 않습니다 — 그 원칙 하나가 당신을 지켰습니다."
+        ]
+      },
       "sender_name": "시스템"
     },
     {
@@ -196,6 +209,15 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "warning",
+      "ending_consequence": {
+        "consequence_headline": "'일부만' 보낸 돈은 3분 만에 인출됐습니다.",
+        "consequence_details": [
+          "'먼저 조금만 보내면 승인된다'던 상담원은 입금 직후 전화를 받지 않았습니다.",
+          "설치한 원격제어 앱이 당신의 문자·공동인증서를 그대로 넘겨보고 있었습니다.",
+          "다행히 곧바로 이상함을 느끼고 은행 지급정지(1332)를 신청해 추가 피해는 막았습니다.",
+          "악성앱 제거를 위해 휴대폰 공장초기화가 필요합니다."
+        ]
+      },
       "sender_name": "시스템"
     },
     {
@@ -210,6 +232,15 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "harm",
+      "ending_consequence": {
+        "consequence_headline": "당신 통장이 대포통장으로 쓰였고, 당신은 '공범'이 됐습니다.",
+        "consequence_details": [
+          "'쉬운 알바'라던 체크카드는 다른 피해자들의 돈을 옮기는 대포통장이 됐습니다.",
+          "계좌는 즉시 지급정지되고, 당신 명의의 모든 은행 거래가 막혔습니다.",
+          "경찰에서 전자금융거래법 위반(통장 양도) 피의자로 출석 요구서가 왔습니다.",
+          "돈을 벌기는커녕 벌금·전과 위험까지 떠안았습니다. 지금이라도 자진 신고가 유일한 감경 방법입니다."
+        ]
+      },
       "sender_name": "시스템"
     }
   ]

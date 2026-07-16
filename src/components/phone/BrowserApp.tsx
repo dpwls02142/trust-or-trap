@@ -2,10 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { BrowserAddressBar } from "./shared/BrowserAddressBar";
-import { BrowserSearchResultPanel } from "./shared/BrowserSearchResultPanel";
+import { BrowserScenarioPagePanel } from "./shared/BrowserScenarioPagePanel";
 import { BrowserPageView } from "./shared/BrowserPageView";
 import { ScenarioActionPanel } from "./shared/ScenarioActionPanel";
-import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
+import { findLatestSpeakerMessage } from "@/lib/phone/chat-history-view";
+import {
+  resolveBrowserPageConfig,
+  shouldShowBrowserPageNotice,
+} from "@/lib/phone/browser-scenario-page";
 import {
   getScenarioSiteSecurityWarning,
   resolveBrowserNavigationUrl,
@@ -27,10 +31,20 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
   const [addressInputValue, setAddressInputValue] = useState(SCENARIO_FAKE_SITE_URL);
   const [activeNavigationUrl, setActiveNavigationUrl] = useState<string | null>(null);
 
-  const nodeChatHistory = useMemo(
-    () => filterChatHistoryForAppView(chatHistory, currentNode),
-    [chatHistory, currentNode],
+  const browserPageConfig = useMemo(
+    () => resolveBrowserPageConfig(currentNode.node_id),
+    [currentNode.node_id],
   );
+
+  const pageNoticeText = useMemo(() => {
+    const nodeScammerLine = findLatestSpeakerMessage(
+      chatHistory.filter((entryItem) => entryItem.nodeId === currentNode.node_id),
+      "scammer",
+    );
+    return streamingMessage || nodeScammerLine;
+  }, [chatHistory, currentNode.node_id, streamingMessage]);
+
+  const showPageNotice = shouldShowBrowserPageNotice(browserPageConfig.pageVariant);
 
   const securityWarning = getScenarioSiteSecurityWarning(
     activeNavigationUrl ?? addressInputValue,
@@ -70,18 +84,20 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
       {activeNavigationUrl ? (
         <BrowserPageView pageUrl={activeNavigationUrl} />
       ) : (
-        <BrowserSearchResultPanel
-          nodeChatHistory={nodeChatHistory}
-          streamingMessage={streamingMessage}
-          senderName={currentNode.sender_name}
+        <BrowserScenarioPagePanel
+          pageVariant={browserPageConfig.pageVariant}
+          entryContextText={browserPageConfig.entryContextText}
+          pageNoticeText={pageNoticeText}
           isAwaitingResponse={sharedProps.isAwaitingResponse}
+          isStreamingNotice={!!streamingMessage}
+          showPageNotice={showPageNotice}
         />
       )}
 
       <ScenarioActionPanel
         composerResetKey={currentNode.node_id}
-        panelTitle="검색 결과를 보고 다음 행동을 선택하세요"
-        panelHint="의심이 들면 메시지 앱에서 대화를 확인한 뒤 결정해도 됩니다."
+        panelTitle={browserPageConfig.actionPanelTitle}
+        panelHint={browserPageConfig.actionPanelHint}
         availableOptions={sharedProps.availableOptions}
         allowFreeInput={currentNode.allow_free_input}
         freeInputPlaceholder="직접 판단을 입력..."

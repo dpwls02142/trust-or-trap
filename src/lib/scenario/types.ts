@@ -48,6 +48,28 @@ export type RiskFlag = "safe" | "caution" | "risky";
 /** 엔딩 3갈래 (glossary §7) */
 export type EndingType = "safe" | "warning" | "harm";
 
+/**
+ * 화자(스캐머) 말투 프리셋 (glossary §3.1).
+ * 플레이어 나이대가 아니라 화자 정체성으로 말투를 고정한다.
+ * 상담원/수사관은 플레이어가 몇 살이든 항상 professional_agent.
+ */
+export type SpeakerTone =
+  | "professional_agent"
+  | "confident_expert"
+  | "intimate_partner"
+  | "community_peer"
+  | "family_casual";
+
+/**
+ * 엔딩 결과 (glossary §3.2) — "경고문"이 아니라 행동→결과를 구체적으로 보여준다.
+ * 경각심을 만드는 것이 목적이므로 무슨 일이 벌어졌는지 사실적으로 제시한다.
+ * (구체 금액은 실제 이체값이 아니어서 허구적으로 느껴지므로 제외한다.)
+ */
+export interface EndingConsequence {
+  consequence_headline: string;
+  consequence_details: string[];
+}
+
 /** 노드 선택지 */
 export interface NodeOption {
   label: string;
@@ -72,6 +94,10 @@ export interface ScenarioNode {
   voice_enabled: boolean;
   is_ending: boolean;
   ending_type: EndingType | null;
+  /** 엔딩 노드의 구체적 결과 — is_ending일 때만 사용 */
+  ending_consequence?: EndingConsequence;
+  /** 화자 말투 프리셋 — 플레이어 나이와 무관하게 화자 기준으로 고정 */
+  speaker_tone?: SpeakerTone;
   /** 상대(스캐머) 표시 이름 — 앱 UI 헤더/발신자 라벨 */
   sender_name: string;
   /** 연출 힌트: 경과일 표시(teen 장기 그루밍 체감), 응답 제한시간(초) 등 */

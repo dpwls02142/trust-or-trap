@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { EndingType, RiskSignalRecord } from "@/lib/scenario/types";
+import type { EndingConsequence, EndingType, RiskSignalRecord } from "@/lib/scenario/types";
 
 interface EndingReportProps {
   endingType: EndingType;
   scenarioTitle: string;
+  endingConsequence: EndingConsequence | null;
   riskSignalRecords: RiskSignalRecord[];
   onRestartGame: () => void;
 }
@@ -36,6 +37,24 @@ const endingPresentationMap: Record<
   },
 };
 
+const consequenceThemeMap: Record<
+  EndingType,
+  { cardClass: string; markerClass: string }
+> = {
+  safe: {
+    cardClass: "border-emerald-500/30 bg-emerald-500/10",
+    markerClass: "text-emerald-400",
+  },
+  warning: {
+    cardClass: "border-amber-500/30 bg-amber-500/10",
+    markerClass: "text-amber-400",
+  },
+  harm: {
+    cardClass: "border-red-500/40 bg-red-500/10",
+    markerClass: "text-red-400",
+  },
+};
+
 const riskFlagLabelMap = {
   safe: { flagLabel: "잘 대응함", flagClass: "bg-emerald-500/20 text-emerald-300" },
   caution: { flagLabel: "아슬아슬", flagClass: "bg-amber-500/20 text-amber-300" },
@@ -43,15 +62,18 @@ const riskFlagLabelMap = {
 } as const;
 
 /**
- * 엔딩 리포트 — 결말 + "놓친 위험 신호" 리플레이.
+ * 엔딩 리포트 — "무엇을 했더니 무슨 일이 벌어졌는가"를 먼저 충격적으로 보여주고,
+ * 그다음 위험 신호 리플레이를 제공한다.
  */
 export function EndingReport({
   endingType,
   scenarioTitle,
+  endingConsequence,
   riskSignalRecords,
   onRestartGame,
 }: EndingReportProps) {
   const endingPresentation = endingPresentationMap[endingType];
+  const consequenceTheme = consequenceThemeMap[endingType];
 
   return (
     <motion.div
@@ -65,10 +87,35 @@ export function EndingReport({
           {endingPresentation.endingTitle}
         </h2>
         <p className="mt-1 text-xs text-white/50">{scenarioTitle}</p>
-        <p className="mt-3 text-sm leading-relaxed text-white/75">
-          {endingPresentation.endingDescription}
-        </p>
       </div>
+
+      {endingConsequence && (
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className={`rounded-2xl border p-4 ${consequenceTheme.cardClass}`}
+        >
+          <p className="text-[15px] font-bold leading-snug text-white">
+            {endingConsequence.consequence_headline}
+          </p>
+          <ul className="mt-2.5 flex flex-col gap-1.5">
+            {endingConsequence.consequence_details.map((detailText, detailIndex) => (
+              <li
+                key={detailIndex}
+                className="flex gap-2 text-[13px] leading-relaxed text-white/80"
+              >
+                <span className={consequenceTheme.markerClass}>•</span>
+                <span>{detailText}</span>
+              </li>
+            ))}
+          </ul>
+        </motion.section>
+      )}
+
+      <p className="text-sm leading-relaxed text-white/70">
+        {endingPresentation.endingDescription}
+      </p>
 
       <section>
         <h3 className="mb-2 text-sm font-semibold text-white/80">

@@ -22,6 +22,7 @@ import {
   outboundDialTransitionPrompt,
   outboundRedialTransitionPrompt,
 } from "@/lib/phone/app-transition-prompt";
+import { resolveAppTransitionPrompt, resolveBrowserPageConfig } from "@/lib/phone/browser-scenario-page";
 import {
   buildHangUpFollowUpMessage,
   isMessageAppType,
@@ -109,6 +110,7 @@ export function GameController() {
   const [pendingAppTransition, setPendingAppTransition] = useState<{
     targetAppType: AppType;
     promptText: string;
+    contextText?: string;
   } | null>(null);
   const [shouldRevealNotificationOnHome, setShouldRevealNotificationOnHome] =
     useState(false);
@@ -154,12 +156,20 @@ export function GameController() {
         previousSentence: string;
       }[] = [];
 
+      // 직전 플레이어 응답에 대한 judge 판정 — 대사가 플레이어 태도에 반응하도록 전달
+      const priorRiskRecords = useGameStore.getState().riskSignalRecords;
+      const lastPlayerRiskFlag =
+        priorRiskRecords.length > 0
+          ? priorRiskRecords[priorRiskRecords.length - 1].userRiskFlag
+          : undefined;
+
       await consumeAdvanceStream(
         {
           scenarioId: activeScenarioId,
           nodeId: targetNode.node_id,
           chatHistory: useGameStore.getState().chatHistory,
           userProfile,
+          lastPlayerRiskFlag,
         },
         {
           onDeltaText: (deltaText) =>
@@ -450,9 +460,22 @@ export function GameController() {
         ) {
           setPendingAppTransition({
             targetAppType: nextNode.app_type,
-            promptText:
-              appTransitionPromptMap[nextNode.app_type] ??
+            promptText: resolveAppTransitionPrompt(
+              {
+                nodeId: nextNode.node_id,
+                appType: nextNode.app_type,
+                requiredRiskSignal: nextNode.required_risk_signal,
+                previousAppType,
+              },
+              appTransitionPromptMap,
               defaultAppTransitionPrompt,
+            ),
+            ...(nextNode.app_type === "browser"
+              ? {
+                  contextText: resolveBrowserPageConfig(nextNode.node_id)
+                    .entryContextText,
+                }
+              : {}),
           });
           setShouldRevealNotificationOnHome(true);
           setHasOpenedCurrentApp(false);
@@ -772,6 +795,7 @@ export function GameController() {
             <AppTransitionConfirm
               targetAppType={pendingAppTransition.targetAppType}
               promptText={pendingAppTransition.promptText}
+              contextText={pendingAppTransition.contextText}
               onConfirmOpen={handleConfirmAppTransition}
               onDismiss={handleDismissAppTransition}
             />
@@ -826,6 +850,7 @@ export function GameController() {
           <EndingReport
             endingType={endingType}
             scenarioTitle={scenarioTitle}
+            endingConsequence={currentNode?.ending_consequence ?? null}
             riskSignalRecords={riskSignalRecords}
             onRestartGame={handleRestartGame}
           />

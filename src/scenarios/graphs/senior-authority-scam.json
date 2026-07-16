@@ -30,6 +30,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "김수사관"
     },
     {
@@ -49,14 +50,44 @@
       ],
       "allow_free_input": true,
       "next_node_map": {
-        "safe": "risk-fake-site",
+        "safe": "risk-case-number",
+        "caution": "risk-case-number",
+        "risky": "risk-case-number"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "speaker_tone": "professional_agent",
+      "sender_name": "김수사관"
+    },
+    {
+      "node_id": "risk-case-number",
+      "stage": "risk_signal",
+      "app_type": "call",
+      "required_risk_signal": "'당신 명의 계좌가 대포통장으로 쓰여 구속영장이 청구됐다'며 사건번호를 들이대 공포를 극대화한다. 수사기관은 전화로 구속·처벌을 협박하지 않는다",
+      "forbidden_content": [
+        "실존 수사기관 부서·실명 사칭",
+        "실제 사건번호 형식",
+        "과도한 공포 조성 표현",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "진짜 수사라면 전화로 협박하지 않는다는 걸 알고 끊는다", "risk_flag": "safe" },
+        { "label": "겁이 나 사건번호를 받아 적으며 더 듣는다", "risk_flag": "caution" },
+        { "label": "구속된다는 말에 시키는 대로 하겠다고 한다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-family-check",
         "caution": "risk-fake-site",
         "risky": "risk-fake-site"
       },
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
-      "sender_name": "김수사관"
+      "speaker_tone": "professional_agent",
+      "sender_name": "김수사관",
+      "timer_seconds": 45
     },
     {
       "node_id": "risk-fake-site",
@@ -82,6 +113,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "김수사관",
       "timer_seconds": 45
     },
@@ -109,6 +141,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "professional_agent",
       "sender_name": "김수사관",
       "timer_seconds": 30
     },
@@ -136,6 +169,7 @@
       "voice_enabled": true,
       "is_ending": false,
       "ending_type": null,
+      "speaker_tone": "family_casual",
       "sender_name": "딸",
       "timer_seconds": 30
     },
@@ -151,6 +185,14 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "safe",
+      "ending_consequence": {
+        "consequence_headline": "당신은 단 한 푼도 잃지 않았습니다.",
+        "consequence_details": [
+          "전화를 끊고 검찰(1301)에 직접 확인하니 그런 사건도, '김수사관'이라는 사람도 없었습니다.",
+          "'국가 안전계좌'는 세상에 존재하지 않는, 사기범이 만든 말이었습니다.",
+          "'수사기관은 전화로 돈을 요구하지 않는다' — 이 사실 하나가 평생 모은 자산을 지켰습니다."
+        ]
+      },
       "sender_name": "시스템"
     },
     {
@@ -165,6 +207,15 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "warning",
+      "ending_consequence": {
+        "consequence_headline": "'우선 확인용'이라며 보낸 돈이 순식간에 빠져나갔습니다.",
+        "consequence_details": [
+          "'일부만 보내 확인하면 나머지는 지켜준다'던 말은 첫 이체를 끌어내기 위한 함정이었습니다.",
+          "곧바로 이상함을 느끼고 112 신고와 은행 지급정지를 요청했습니다.",
+          "이체 후 30분 이내에 지급정지를 걸어 피해금 환급 신청의 길이 열렸습니다.",
+          "다음엔 '자녀가 급하다'는 문자가 와도, 반드시 원래 번호로 직접 전화해 확인하세요."
+        ]
+      },
       "sender_name": "시스템"
     },
     {
@@ -179,6 +230,15 @@
       "voice_enabled": true,
       "is_ending": true,
       "ending_type": "harm",
+      "ending_consequence": {
+        "consequence_headline": "'자산을 지켜준다'는 말에 전 재산을 이체했고, 계좌는 텅 비었습니다.",
+        "consequence_details": [
+          "'수사에 협조하면 곧 돌려준다'던 돈은 이체 즉시 여러 계좌로 쪼개져 인출됐습니다.",
+          "이어 자녀를 사칭한 문자에도 응하며 추가 금액까지 보냈습니다.",
+          "전화가 끊긴 뒤에야 사기임을 알았지만, 통장에는 잔액이 남지 않았습니다.",
+          "혼자 자책하지 마세요 — 즉시 112 신고, 엠세이퍼 명의도용 확인, 그리고 가족과 함께 대응하는 것이 회복의 시작입니다."
+        ]
+      },
       "sender_name": "시스템"
     }
   ]

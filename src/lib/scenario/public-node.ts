@@ -1,5 +1,6 @@
 import type {
   AppType,
+  EndingConsequence,
   EndingType,
   NodeOption,
   ScenarioNode,
@@ -10,6 +11,7 @@ import type {
  * 클라이언트로 내려보내는 노드 공개 뷰.
  * forbidden_content(LLM 내부 정책)와 next_node_map(분기 스포일러)은 제외한다.
  * required_risk_signal은 리플레이 리포트("놓친 위험 신호")에 필요해 포함.
+ * speaker_tone은 서버 프롬프트 전용이라 내려보내지 않는다.
  */
 export interface PublicNodeView {
   node_id: string;
@@ -21,6 +23,7 @@ export interface PublicNodeView {
   voice_enabled: boolean;
   is_ending: boolean;
   ending_type: EndingType | null;
+  ending_consequence: EndingConsequence | null;
   sender_name: string;
   elapsed_days: number | null;
   timer_seconds: number | null;
@@ -38,6 +41,7 @@ export function toPublicNodeView(scenarioNode: ScenarioNode): PublicNodeView {
     voice_enabled: scenarioNode.voice_enabled,
     is_ending: scenarioNode.is_ending,
     ending_type: scenarioNode.ending_type,
+    ending_consequence: scenarioNode.ending_consequence ?? null,
     sender_name: scenarioNode.sender_name,
     elapsed_days: scenarioNode.elapsed_days ?? null,
     timer_seconds: scenarioNode.timer_seconds ?? null,
