@@ -15,6 +15,39 @@ const dialKeyFrequencies: Record<string, [number, number]> = {
 };
 
 let sharedAudioContext: AudioContext | null = null;
+let restoreSessionTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
+type NavigatorWithAudioSession = Navigator & {
+  audioSession?: { type: string };
+};
+
+function setAudioSessionType(sessionType: string): void {
+  const navigatorWithSession = navigator as NavigatorWithAudioSession;
+  if (!navigatorWithSession.audioSession) return;
+
+  try {
+    navigatorWithSession.audioSession.type = sessionType;
+  } catch {
+    // Safari 외·구버전 — 무시
+  }
+}
+
+/** iOS Safari: Web Audio 기본 세션(ambient)은 무음 스위치를 따른다. playback으로 전환한다. */
+function ensurePlaybackAudioSession(): void {
+  setAudioSessionType("playback");
+}
+
+/** 톤 재생 후 마이크(getUserMedia) 호환을 위해 세션을 기본값으로 되돌린다. */
+function scheduleRestoreDefaultAudioSession(delayMs: number): void {
+  if (restoreSessionTimeoutId !== null) {
+    clearTimeout(restoreSessionTimeoutId);
+  }
+
+  restoreSessionTimeoutId = setTimeout(() => {
+    restoreSessionTimeoutId = null;
+    setAudioSessionType("auto");
+  }, delayMs);
+}
 
 function getSharedAudioContext(): AudioContext {
   if (!sharedAudioContext) {
@@ -30,6 +63,8 @@ function getSharedAudioContext(): AudioContext {
 export function playDialKeyTone(keyDigit: string): void {
   const frequencyPair = dialKeyFrequencies[keyDigit];
   if (!frequencyPair) return;
+
+  ensurePlaybackAudioSession();
 
   const audioContext = getSharedAudioContext();
   if (audioContext.state === "suspended") {
@@ -55,4 +90,6 @@ export function playDialKeyTone(keyDigit: string): void {
     toneOscillator.start(startTime);
     toneOscillator.stop(startTime + toneDurationSeconds);
   }
+
+  scheduleRestoreDefaultAudioSession(toneDurationSeconds * 1000 + 50);
 }
