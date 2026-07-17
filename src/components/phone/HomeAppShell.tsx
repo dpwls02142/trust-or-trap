@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import { BrowserHomeView } from "./BrowserHomeView";
 import { AppBackButton } from "./shared/AppBackButton";
+import { InstaPostDetail } from "./shared/InstaPostDetail";
 import { MessageAppThreadView } from "./shared/MessageAppThreadView";
+import { findPhotogramHomePost, photogramHomeFeed } from "@/lib/phone/photogram-home-feed";
 import { playDialKeyTone } from "@/lib/client/dial-key-tone";
 import { dialNumbersMatch, formatDialDisplayNumber, resolveDialDigitLimit } from "@/lib/phone/dial-number";
 import { resolveAppLabel } from "@/lib/phone/app-display";
@@ -40,6 +43,14 @@ export function HomeAppShell({
 }: HomeAppShellProps) {
   const shellTitle = appType === "home" ? "앱" : resolveAppLabel(appType);
   const [openThreadSender, setOpenThreadSender] = useState<string | null>(null);
+  const [openPhotogramPostId, setOpenPhotogramPostId] = useState<string | null>(
+    null,
+  );
+
+  const openPhotogramPost = useMemo(
+    () => findPhotogramHomePost(openPhotogramPostId),
+    [openPhotogramPostId],
+  );
 
   const scenarioThread = useMemo(() => {
     if (!scenarioSenderName) return null;
@@ -75,7 +86,7 @@ export function HomeAppShell({
   }
 
   return (
-    <div className="flex h-full flex-col bg-white pt-10">
+    <div className="relative flex h-full flex-col bg-white pt-10">
       <header className="flex items-center gap-2 border-b border-black/10 px-3 py-2.5">
         <AppBackButton onBack={onExitToHome} />
         <h2 className="text-sm font-semibold text-black">{shellTitle}</h2>
@@ -98,6 +109,7 @@ export function HomeAppShell({
           <InstaShellContent
             scenarioThread={scenarioThread}
             onOpenThread={setOpenThreadSender}
+            onOpenPost={setOpenPhotogramPostId}
           />
         )}
         {appType === "call" && (
@@ -110,6 +122,16 @@ export function HomeAppShell({
         )}
         {appType === "bank" && <BankShellContent />}
       </div>
+
+      <AnimatePresence>
+        {appType === "insta" && openPhotogramPost && (
+          <InstaPostDetail
+            key={openPhotogramPost.postId}
+            postView={openPhotogramPost}
+            onClosePost={() => setOpenPhotogramPostId(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -226,10 +248,15 @@ function SmsShellContent({
   );
 }
 
+interface InstaShellContentProps extends MessageShellContentProps {
+  onOpenPost: (postId: string) => void;
+}
+
 function InstaShellContent({
   scenarioThread,
   onOpenThread,
-}: MessageShellContentProps) {
+  onOpenPost,
+}: InstaShellContentProps) {
   return (
     <div>
       {scenarioThread && (
@@ -251,12 +278,24 @@ function InstaShellContent({
           </div>
         </button>
       )}
-      <div className="grid grid-cols-3 gap-0.5 opacity-80">
-        {Array.from({ length: 12 }, (_, tileIndex) => (
-          <div
-            key={`insta-tile-${tileIndex}`}
-            className="aspect-square bg-gradient-to-br from-purple-100 to-pink-100"
-          />
+      <div className="grid w-full min-w-0 grid-cols-3 gap-0.5">
+        {photogramHomeFeed.map((postItem) => (
+          <button
+            key={postItem.postId}
+            type="button"
+            onClick={() => onOpenPost(postItem.postId)}
+            className="group relative aspect-square min-w-0 overflow-hidden bg-neutral-100"
+            aria-label={`게시물: ${postItem.captionText}`}
+          >
+            <img
+              src={postItem.imagePath}
+              alt=""
+              className="absolute inset-0 block h-full w-full max-w-none object-cover object-center transition group-hover:scale-105"
+            />
+            <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent px-1.5 py-1 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
+              ♥ {postItem.likeCount}
+            </span>
+          </button>
         ))}
       </div>
     </div>
