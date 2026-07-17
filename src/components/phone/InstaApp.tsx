@@ -3,12 +3,13 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { MessageThread } from "./shared/MessageThread";
-import { ResponseComposer } from "./shared/ResponseComposer";
+import { MessagingResponseArea } from "./shared/MessagingResponseArea";
 import { SenderAvatar } from "./shared/SenderAvatar";
 import { AppBackButton } from "./shared/AppBackButton";
 import { InstaProfileFeed } from "./shared/InstaProfileFeed";
 import { buildSenderProfileView } from "@/lib/scenario/sender-profile";
 import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
+import { useMessageAttachmentLightbox } from "./shared/use-message-attachment-lightbox";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: insta — SNS DM (범용 렌더러) */
@@ -25,6 +26,9 @@ export function InstaApp(sharedProps: PhoneAppSharedProps) {
     () => filterChatHistoryForAppView(chatHistory, currentNode),
     [chatHistory, currentNode],
   );
+
+  const { openAttachmentLightbox, attachmentLightboxOverlay } =
+    useMessageAttachmentLightbox();
 
   return (
     <div className="relative flex h-full flex-col bg-white pt-10">
@@ -56,6 +60,7 @@ export function InstaApp(sharedProps: PhoneAppSharedProps) {
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}
         currentElapsedDays={currentNode.elapsed_days}
+        onOpenAttachmentLightbox={openAttachmentLightbox}
         bubbleTheme={{
           threadBackgroundClass: "bg-white",
           incomingBubbleClass: "bg-neutral-100 text-black",
@@ -63,21 +68,23 @@ export function InstaApp(sharedProps: PhoneAppSharedProps) {
         }}
       />
 
-      <div className="bg-white">
-        <ResponseComposer
-          composerResetKey={currentNode.node_id}
-          availableOptions={sharedProps.availableOptions}
-          allowFreeInput={currentNode.allow_free_input}
-          voiceEnabled={false}
-          isAwaitingResponse={sharedProps.isAwaitingResponse}
-          onSelectOption={sharedProps.onSelectOption}
-          onSubmitFreeInput={sharedProps.onSubmitFreeInput}
-          inputTutorialMode={sharedProps.inputTutorialMode}
-          isInputTutorialVisible={sharedProps.isInputTutorialVisible}
-          onDismissInputTutorial={sharedProps.onDismissInputTutorial}
-          composerTheme="light"
-        />
-      </div>
+      <MessagingResponseArea
+        nodeId={currentNode.node_id}
+        chatHistory={chatHistory}
+        availableOptions={sharedProps.availableOptions}
+        allowFreeInput={currentNode.allow_free_input}
+        voiceEnabled={false}
+        isAwaitingResponse={sharedProps.isAwaitingResponse}
+        streamingMessage={streamingMessage}
+        onSelectOption={sharedProps.onSelectOption}
+        onSubmitFreeInput={sharedProps.onSubmitFreeInput}
+        onPhotoSendSubmit={sharedProps.onPhotoSendSubmit}
+        inputTutorialMode={sharedProps.inputTutorialMode}
+        isInputTutorialVisible={sharedProps.isInputTutorialVisible}
+        onDismissInputTutorial={sharedProps.onDismissInputTutorial}
+        composerTheme="light"
+        composerBackgroundClass="bg-white"
+      />
 
       <AnimatePresence>
         {isProfileFeedVisible && (
@@ -87,6 +94,8 @@ export function InstaApp(sharedProps: PhoneAppSharedProps) {
           />
         )}
       </AnimatePresence>
+
+      {attachmentLightboxOverlay}
     </div>
   );
 }

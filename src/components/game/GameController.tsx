@@ -414,13 +414,20 @@ export function GameController() {
     [exitToHome],
   );
 
-  const handleUserResponse = useCallback(
-    async (responseText: string) => {
+  const submitScenarioResponse = useCallback(
+    async (
+      responseText: string,
+      playerEntryOverride?: {
+        messageText: string;
+        attachmentImagePath?: string;
+      },
+    ) => {
       if (!activeScenarioId || !currentNode || isAwaitingResponse) return;
 
       appendChatEntry({
         speaker: "player",
-        messageText: responseText,
+        messageText: playerEntryOverride?.messageText ?? responseText,
+        attachmentImagePath: playerEntryOverride?.attachmentImagePath,
         nodeId: currentNode.node_id,
         elapsedDays: currentNode.elapsed_days ?? undefined,
         appType: currentNode.app_type,
@@ -473,10 +480,7 @@ export function GameController() {
           return;
         }
 
-        if (
-          !nextNode.is_ending &&
-          nextNode.app_type !== previousAppType
-        ) {
+        if (!nextNode.is_ending && nextNode.app_type !== previousAppType) {
           setPendingAppTransition({
             targetAppType: nextNode.app_type,
             promptText: resolveAppTransitionPrompt(
@@ -529,6 +533,23 @@ export function GameController() {
       beginOutboundDialPrompt,
       revealNotificationImmediately,
     ],
+  );
+
+  const handleUserResponse = useCallback(
+    async (responseText: string) => {
+      await submitScenarioResponse(responseText);
+    },
+    [submitScenarioResponse],
+  );
+
+  const handlePhotoSendSubmit = useCallback(
+    async (imagePath: string, optionLabel: string) => {
+      await submitScenarioResponse(optionLabel, {
+        messageText: "",
+        attachmentImagePath: imagePath,
+      });
+    },
+    [submitScenarioResponse],
   );
 
   // 타이머 만료 → 머뭇거린 것으로 간주 (caution 선택지를 자동 선택, 없으면 첫 선택지)
@@ -861,6 +882,7 @@ export function GameController() {
               isAwaitingResponse={isAwaitingResponse}
               onSelectOption={handleUserResponse}
               onSubmitFreeInput={handleUserResponse}
+              onPhotoSendSubmit={handlePhotoSendSubmit}
               onExitToHome={handleExitToHome}
               onHangUpCall={handleHangUpCall}
               onTimerExpire={handleTimerExpire}
