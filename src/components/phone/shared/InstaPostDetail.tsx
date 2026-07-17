@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { RiChat3Line, RiHeartFill, RiHeartLine } from "@remixicon/react";
-import type { PhotogramHomePost } from "@/lib/phone/photogram-home-feed";
+import type { PhotogramPost } from "@/lib/phone/photogram-post";
 import { AppBackButton } from "./AppBackButton";
 
 interface InstaPostDetailProps {
-  postView: PhotogramHomePost;
+  postView: PhotogramPost;
   onClosePost: () => void;
 }
 
@@ -44,7 +44,7 @@ export function InstaPostDetail({
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: "spring", damping: 28, stiffness: 320 }}
-      className="absolute inset-0 z-20 flex w-full min-w-0 flex-col bg-white pt-10"
+      className="absolute inset-0 z-30 flex w-full min-w-0 flex-col bg-white pt-10"
     >
       <header className="flex min-w-0 items-center gap-3 border-b border-black/10 px-3 py-2.5">
         <AppBackButton onBack={onClosePost} ariaLabel="게시물 닫기" />

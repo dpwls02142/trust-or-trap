@@ -1,24 +1,7 @@
-export interface PhotogramPostComment {
-  commentId: string;
-  authorHandle: string;
-  commentText: string;
-}
+import type { PhotogramPost } from "@/lib/phone/photogram-post";
+import { buildPhotogramImagePath } from "@/lib/phone/photogram-post";
 
-export interface PhotogramHomePost {
-  postId: string;
-  imagePath: string;
-  captionText: string;
-  likeCount: number;
-  postedAtLabel: string;
-  authorHandle: string;
-  comments: PhotogramPostComment[];
-}
-
-const photogramHomeDirectory = "/photogram";
-
-function buildPhotogramImagePath(fileName: string): string {
-  return `${photogramHomeDirectory}/${encodeURIComponent(fileName)}`;
-}
+export type PhotogramHomePost = PhotogramPost;
 
 /** 홈 인스타(포토그램) 탐색 — 플레이어 본인 프로필 그리드 게시물 */
 export const photogramHomeFeed: PhotogramHomePost[] = [
