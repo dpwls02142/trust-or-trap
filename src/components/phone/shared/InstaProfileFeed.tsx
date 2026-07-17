@@ -1,8 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { SenderProfileView } from "@/lib/scenario/sender-profile";
+import { findPhotogramPostById } from "@/lib/phone/photogram-post";
 import { AppBackButton } from "./AppBackButton";
+import { InstaPostDetail } from "./InstaPostDetail";
 
 interface InstaProfileFeedProps {
   profileView: SenderProfileView;
@@ -17,13 +20,20 @@ export function InstaProfileFeed({
   profileView,
   onCloseProfile,
 }: InstaProfileFeedProps) {
+  const [openPostId, setOpenPostId] = useState<string | null>(null);
+
+  const openPostView = useMemo(
+    () => findPhotogramPostById(profileView.feedPosts, openPostId),
+    [profileView.feedPosts, openPostId],
+  );
+
   return (
     <motion.div
       initial={{ x: "100%" }}
       animate={{ x: 0 }}
       exit={{ x: "100%" }}
       transition={{ type: "spring", damping: 28, stiffness: 320 }}
-      className="absolute inset-0 z-20 flex flex-col bg-white pt-10"
+      className="absolute inset-0 z-20 flex w-full min-w-0 flex-col bg-white pt-10"
     >
       <header className="flex items-center gap-3 border-b border-black/10 px-3 py-2.5">
         <AppBackButton onBack={onCloseProfile} />
@@ -32,7 +42,7 @@ export function InstaProfileFeed({
         </h2>
       </header>
 
-      <div className="phone-scroll flex-1 overflow-y-auto">
+      <div className="phone-scroll min-w-0 flex-1 overflow-y-auto">
         <div className="flex items-center gap-4 px-4 py-4">
           {profileView.avatarPath ? (
             <img
@@ -74,19 +84,26 @@ export function InstaProfileFeed({
           <p className="mt-1 text-sm text-black/70">{profileView.bioText}</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-0.5">
+        <div className="grid w-full min-w-0 grid-cols-3 gap-0.5">
           {profileView.feedPosts.map((postItem) => (
             <button
               key={postItem.postId}
               type="button"
-              className="group relative aspect-square overflow-hidden bg-neutral-100"
+              onClick={() => setOpenPostId(postItem.postId)}
+              className="group relative aspect-square min-w-0 overflow-hidden bg-neutral-100"
               aria-label={`게시물: ${postItem.captionText}`}
             >
-              {profileView.avatarPath ? (
+              {postItem.imagePath ? (
+                <img
+                  src={postItem.imagePath}
+                  alt=""
+                  className="absolute inset-0 block h-full w-full max-w-none object-cover object-center transition group-hover:scale-105"
+                />
+              ) : profileView.avatarPath ? (
                 <img
                   src={profileView.avatarPath}
                   alt=""
-                  className="h-full w-full object-cover transition group-hover:scale-105"
+                  className="absolute inset-0 block h-full w-full max-w-none object-cover object-center transition group-hover:scale-105"
                 />
               ) : (
                 <span className="flex h-full w-full items-center justify-center text-2xl text-black/30">
@@ -100,6 +117,16 @@ export function InstaProfileFeed({
           ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {openPostView && (
+          <InstaPostDetail
+            key={openPostView.postId}
+            postView={openPostView}
+            onClosePost={() => setOpenPostId(null)}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

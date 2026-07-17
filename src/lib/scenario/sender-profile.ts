@@ -1,11 +1,9 @@
 import { resolveSenderAvatarPath } from "@/lib/scenario/sender-avatar";
+import { resolveSenderPhotogramFeed } from "@/lib/phone/photogram-sender-feed";
+import type { PhotogramPost } from "@/lib/phone/photogram-post";
 import type { AppType, ScenarioId } from "@/lib/scenario/types";
 
-export interface SenderFeedPost {
-  postId: string;
-  captionText: string;
-  likeCount: number;
-}
+export type SenderFeedPost = PhotogramPost;
 
 export interface SenderProfileView {
   displayName: string;
@@ -68,14 +66,22 @@ export function buildSenderProfileView(
   const seedValue = hashSenderSeed(senderName);
   const followerCount = 120 + (seedValue % 900);
   const followingCount = 80 + ((seedValue >> 4) % 1200);
-  const postCount = 6 + (seedValue % 24);
   const handleName = senderName.includes(" ") ? senderName.replace(/\s+/g, "_").toLowerCase() : senderName;
 
-  const feedPosts: SenderFeedPost[] = Array.from({ length: 9 }, (_, postIndex) => ({
-    postId: `${handleName}-post-${postIndex}`,
-    captionText: feedCaptionPool[(seedValue + postIndex) % feedCaptionPool.length]!,
-    likeCount: 12 + ((seedValue + postIndex * 7) % 480),
-  }));
+  const customFeedPosts = resolveSenderPhotogramFeed(scenarioId, senderName);
+  const feedPosts: SenderFeedPost[] = customFeedPosts ?? Array.from(
+    { length: 9 },
+    (_, postIndex) => ({
+      postId: `${handleName}-post-${postIndex}`,
+      imagePath: resolveSenderAvatarPath(scenarioId, senderName) ?? "",
+      captionText: feedCaptionPool[(seedValue + postIndex) % feedCaptionPool.length]!,
+      likeCount: 12 + ((seedValue + postIndex * 7) % 480),
+      postedAtLabel: `${1 + (postIndex % 4)}주 전`,
+      authorHandle: handleName,
+      comments: [],
+    }),
+  );
+  const postCount = customFeedPosts?.length ?? 6 + (seedValue % 24);
 
   return {
     displayName: senderName,
