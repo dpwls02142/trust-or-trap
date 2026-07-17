@@ -144,6 +144,8 @@ export interface ChatHistoryEntry {
   elapsedDays?: number;
   /** 메시지가 생성된 앱 — 앱 전환 시 스레드 분리용 */
   appType?: AppType;
+  /** 플레이어가 보낸 사진 첨부 (시뮬레이션 갤러리 경로) */
+  attachmentImagePath?: string;
 }
 
 /** LLM 대사 생성 결과 — 구조화 JSON 강제 (자유 텍스트 금지) */

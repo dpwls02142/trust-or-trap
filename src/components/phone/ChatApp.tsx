@@ -3,13 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { MessageThread } from "./shared/MessageThread";
-import { ResponseComposer } from "./shared/ResponseComposer";
+import { MessagingResponseArea } from "./shared/MessagingResponseArea";
 import { SenderAvatar } from "./shared/SenderAvatar";
 import { AppBackButton } from "./shared/AppBackButton";
 import { ChatProfileDetail } from "./shared/ChatProfileDetail";
 import { buildSenderProfileView } from "@/lib/scenario/sender-profile";
 import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
 import { useStatusBarOverride } from "@/lib/phone/status-bar-override";
+import { useMessageAttachmentLightbox } from "./shared/use-message-attachment-lightbox";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
 
 /** app_type: chat — 카카오톡류 메신저 (범용 렌더러, 페르소나 7종 공유) */
@@ -37,6 +38,9 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
     () => filterChatHistoryForAppView(chatHistory, currentNode),
     [chatHistory, currentNode],
   );
+
+  const { openAttachmentLightbox, attachmentLightboxOverlay } =
+    useMessageAttachmentLightbox();
 
   return (
     <div className="relative flex h-full flex-col bg-[#bacee0] pt-10">
@@ -69,6 +73,7 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}
         currentElapsedDays={currentNode.elapsed_days}
+        onOpenAttachmentLightbox={openAttachmentLightbox}
         bubbleTheme={{
           threadBackgroundClass: "bg-[#bacee0]",
           incomingBubbleClass: "bg-white text-black",
@@ -76,21 +81,23 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
         }}
       />
 
-      <div className="bg-white">
-        <ResponseComposer
-          composerResetKey={currentNode.node_id}
-          availableOptions={sharedProps.availableOptions}
-          allowFreeInput={currentNode.allow_free_input}
-          voiceEnabled={false}
-          isAwaitingResponse={sharedProps.isAwaitingResponse}
-          onSelectOption={sharedProps.onSelectOption}
-          onSubmitFreeInput={sharedProps.onSubmitFreeInput}
-          inputTutorialMode={sharedProps.inputTutorialMode}
-          isInputTutorialVisible={sharedProps.isInputTutorialVisible}
-          onDismissInputTutorial={sharedProps.onDismissInputTutorial}
-          composerTheme="light"
-        />
-      </div>
+      <MessagingResponseArea
+        nodeId={currentNode.node_id}
+        chatHistory={chatHistory}
+        availableOptions={sharedProps.availableOptions}
+        allowFreeInput={currentNode.allow_free_input}
+        voiceEnabled={false}
+        isAwaitingResponse={sharedProps.isAwaitingResponse}
+        streamingMessage={streamingMessage}
+        onSelectOption={sharedProps.onSelectOption}
+        onSubmitFreeInput={sharedProps.onSubmitFreeInput}
+        onPhotoSendSubmit={sharedProps.onPhotoSendSubmit}
+        inputTutorialMode={sharedProps.inputTutorialMode}
+        isInputTutorialVisible={sharedProps.isInputTutorialVisible}
+        onDismissInputTutorial={sharedProps.onDismissInputTutorial}
+        composerTheme="light"
+        composerBackgroundClass="bg-white"
+      />
 
       <AnimatePresence>
         {isProfileDetailVisible && (
@@ -100,6 +107,8 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
           />
         )}
       </AnimatePresence>
+
+      {attachmentLightboxOverlay}
     </div>
   );
 }

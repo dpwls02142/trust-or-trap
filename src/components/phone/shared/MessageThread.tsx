@@ -9,6 +9,8 @@ interface MessageThreadProps {
   chatHistory: ChatHistoryEntry[];
   streamingMessage: string;
   senderName: string;
+  /** 첨부 사진 탭 시 확대 뷰 */
+  onOpenAttachmentLightbox?: (imagePath: string) => void;
   /** 대사 생성/판정 대기 중 여부 — 첫 토큰 도착 전 "입력 중..." 말풍선 표시 */
   isAwaitingResponse?: boolean;
   /** 말풍선 색상 테마 (앱별 차별화) */
@@ -72,6 +74,7 @@ export function MessageThread({
   isAwaitingResponse = false,
   bubbleTheme,
   currentElapsedDays,
+  onOpenAttachmentLightbox,
 }: MessageThreadProps) {
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
 
@@ -130,15 +133,41 @@ export function MessageThread({
                   {senderName}
                 </span>
               )}
-              <p
-                className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-sm leading-relaxed ${
+              <div
+                className={`overflow-hidden rounded-2xl ${
                   isIncoming
                     ? bubbleTheme.incomingBubbleClass
                     : bubbleTheme.outgoingBubbleClass
-                }`}
+                } ${entryItem.attachmentImagePath ? "p-1" : "px-3.5 py-2"}`}
               >
-                {entryItem.messageText}
-              </p>
+                {entryItem.attachmentImagePath && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onOpenAttachmentLightbox?.(entryItem.attachmentImagePath!)
+                    }
+                    disabled={!onOpenAttachmentLightbox}
+                    className="block w-full cursor-zoom-in transition active:opacity-90 disabled:cursor-default"
+                    aria-label="보낸 사진 확대 보기"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={entryItem.attachmentImagePath}
+                      alt="보낸 사진"
+                      className="max-h-48 w-full rounded-xl object-cover"
+                    />
+                  </button>
+                )}
+                {entryItem.messageText && (
+                  <p
+                    className={`whitespace-pre-wrap break-words text-sm leading-relaxed ${
+                      entryItem.attachmentImagePath ? "px-2.5 py-2" : ""
+                    }`}
+                  >
+                    {entryItem.messageText}
+                  </p>
+                )}
+              </div>
             </div>
           </motion.div>
         );

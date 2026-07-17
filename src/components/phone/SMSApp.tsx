@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 import { MessageThread } from "./shared/MessageThread";
-import { ResponseComposer } from "./shared/ResponseComposer";
+import { MessagingResponseArea } from "./shared/MessagingResponseArea";
+import { useMessageAttachmentLightbox } from "./shared/use-message-attachment-lightbox";
 import { SenderAvatar } from "./shared/SenderAvatar";
 import { AppBackButton } from "./shared/AppBackButton";
 import { resolveSenderContactLabel } from "@/lib/scenario/sender-profile";
@@ -29,8 +30,11 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
     [chatHistory, currentNode],
   );
 
+  const { openAttachmentLightbox, attachmentLightboxOverlay } =
+    useMessageAttachmentLightbox();
+
   return (
-    <div className="flex h-full flex-col bg-white pt-10">
+    <div className="relative flex h-full flex-col bg-white pt-10">
       <header className="relative flex flex-col items-center gap-1.5 border-b border-black/10 bg-neutral-50 px-4 py-2.5">
         <div className="absolute left-2 top-1/2 -translate-y-1/2">
           <AppBackButton onBack={sharedProps.onExitToHome} />
@@ -49,6 +53,7 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}
         currentElapsedDays={currentNode.elapsed_days}
+        onOpenAttachmentLightbox={openAttachmentLightbox}
         bubbleTheme={{
           threadBackgroundClass: "bg-white",
           incomingBubbleClass: "bg-neutral-200 text-black",
@@ -56,21 +61,25 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
         }}
       />
 
-      <div className="bg-neutral-50">
-        <ResponseComposer
-          composerResetKey={currentNode.node_id}
-          availableOptions={sharedProps.availableOptions}
-          allowFreeInput={currentNode.allow_free_input}
-          voiceEnabled={false}
-          isAwaitingResponse={sharedProps.isAwaitingResponse}
-          onSelectOption={sharedProps.onSelectOption}
-          onSubmitFreeInput={sharedProps.onSubmitFreeInput}
-          inputTutorialMode={sharedProps.inputTutorialMode}
-          isInputTutorialVisible={sharedProps.isInputTutorialVisible}
-          onDismissInputTutorial={sharedProps.onDismissInputTutorial}
-          composerTheme="light"
-        />
-      </div>
+      <MessagingResponseArea
+        nodeId={currentNode.node_id}
+        chatHistory={chatHistory}
+        availableOptions={sharedProps.availableOptions}
+        allowFreeInput={currentNode.allow_free_input}
+        voiceEnabled={false}
+        isAwaitingResponse={sharedProps.isAwaitingResponse}
+        streamingMessage={streamingMessage}
+        onSelectOption={sharedProps.onSelectOption}
+        onSubmitFreeInput={sharedProps.onSubmitFreeInput}
+        onPhotoSendSubmit={sharedProps.onPhotoSendSubmit}
+        inputTutorialMode={sharedProps.inputTutorialMode}
+        isInputTutorialVisible={sharedProps.isInputTutorialVisible}
+        onDismissInputTutorial={sharedProps.onDismissInputTutorial}
+        composerTheme="light"
+        composerBackgroundClass="bg-neutral-50"
+      />
+
+      {attachmentLightboxOverlay}
     </div>
   );
 }

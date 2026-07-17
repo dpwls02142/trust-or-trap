@@ -21,6 +21,8 @@ export interface PhoneAppSharedProps {
   isAwaitingResponse: boolean;
   onSelectOption: (optionLabel: string) => void;
   onSubmitFreeInput: (inputText: string) => void;
+  /** 사진 요구 노드 — 갤러리 선택 후 judge 제출 */
+  onPhotoSendSubmit: (imagePath: string, optionLabel: string) => void;
   /** 홈 화면으로 복귀 (뒤로가기) */
   onExitToHome: () => void;
   /** 통화 종료 — 연결을 끊고 홈으로 */
