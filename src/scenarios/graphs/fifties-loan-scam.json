@@ -142,8 +142,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "professional_agent",
-      "sender_name": "박주임",
-      "timer_seconds": 30
+      "sender_name": "박주임"
     },
     {
       "node_id": "branch-more-fees",

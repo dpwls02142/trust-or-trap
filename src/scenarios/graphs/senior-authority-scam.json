@@ -142,8 +142,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "professional_agent",
-      "sender_name": "김수사관",
-      "timer_seconds": 30
+      "sender_name": "김수사관"
     },
     {
       "node_id": "branch-child-impersonation",
