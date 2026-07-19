@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BrowserAddressBar } from "./shared/BrowserAddressBar";
 import { BrowserScenarioPagePanel } from "./shared/BrowserScenarioPagePanel";
 import { BrowserPageView } from "./shared/BrowserPageView";
@@ -8,7 +8,9 @@ import { ScenarioActionPanel } from "./shared/ScenarioActionPanel";
 import { findLatestSpeakerMessage } from "@/lib/phone/chat-history-view";
 import {
   resolveBrowserPageConfig,
+  resolveReverseImageSearchProfile,
   shouldShowBrowserPageNotice,
+  type BrowserPageRevealPhase,
 } from "@/lib/phone/browser-scenario-page";
 import {
   getScenarioSiteSecurityWarning,
@@ -27,14 +29,37 @@ export function BrowserApp(sharedProps: PhoneAppSharedProps) {
 }
 
 function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
-  const { currentNode, chatHistory, streamingMessage } = sharedProps;
+  const { activeScenarioId, currentNode, chatHistory, streamingMessage } = sharedProps;
   const [addressInputValue, setAddressInputValue] = useState(SCENARIO_FAKE_SITE_URL);
   const [activeNavigationUrl, setActiveNavigationUrl] = useState<string | null>(null);
+  const [pageRevealPhase, setPageRevealPhase] =
+    useState<BrowserPageRevealPhase>("awaiting_action");
+  const pageRevealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const browserPageConfig = useMemo(
     () => resolveBrowserPageConfig(currentNode.node_id),
     [currentNode.node_id],
   );
+
+  useEffect(() => {
+    return () => {
+      if (pageRevealTimerRef.current) {
+        clearTimeout(pageRevealTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handlePrimaryPageAction = useCallback(() => {
+    if (pageRevealPhase !== "awaiting_action") {
+      return;
+    }
+
+    setPageRevealPhase("loading");
+    pageRevealTimerRef.current = setTimeout(() => {
+      setPageRevealPhase("revealed");
+      pageRevealTimerRef.current = null;
+    }, 1400);
+  }, [pageRevealPhase]);
 
   const pageNoticeText = useMemo(() => {
     const nodeScammerLine = findLatestSpeakerMessage(
@@ -45,6 +70,12 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
   }, [chatHistory, currentNode.node_id, streamingMessage]);
 
   const showPageNotice = shouldShowBrowserPageNotice(browserPageConfig.pageVariant);
+  const reverseImageSearchProfile = useMemo(
+    () =>
+      resolveReverseImageSearchProfile(activeScenarioId, currentNode.sender_name),
+    [activeScenarioId, currentNode.sender_name],
+  );
+  const isPageRevealed = pageRevealPhase === "revealed";
 
   const securityWarning = getScenarioSiteSecurityWarning(
     activeNavigationUrl ?? addressInputValue,
@@ -87,24 +118,33 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
         <BrowserScenarioPagePanel
           pageVariant={browserPageConfig.pageVariant}
           entryContextText={browserPageConfig.entryContextText}
+          primaryActionLabel={browserPageConfig.primaryActionLabel}
+          preRevealHint={browserPageConfig.preRevealHint}
+          loadingLabel={browserPageConfig.loadingLabel}
+          reverseImageProfilePath={reverseImageSearchProfile.profileImagePath}
+          reverseImageProfileName={reverseImageSearchProfile.profileDisplayName}
           pageNoticeText={pageNoticeText}
           isAwaitingResponse={sharedProps.isAwaitingResponse}
           isStreamingNotice={!!streamingMessage}
           showPageNotice={showPageNotice}
+          pageRevealPhase={pageRevealPhase}
+          onPrimaryPageAction={handlePrimaryPageAction}
         />
       )}
 
-      <ScenarioActionPanel
-        composerResetKey={currentNode.node_id}
-        panelTitle={browserPageConfig.actionPanelTitle}
-        panelHint={browserPageConfig.actionPanelHint}
-        availableOptions={sharedProps.availableOptions}
-        allowFreeInput={currentNode.allow_free_input}
-        freeInputPlaceholder="직접 판단을 입력..."
-        isAwaitingResponse={sharedProps.isAwaitingResponse}
-        onSelectOption={sharedProps.onSelectOption}
-        onSubmitFreeInput={sharedProps.onSubmitFreeInput}
-      />
+      {isPageRevealed && (
+        <ScenarioActionPanel
+          composerResetKey={currentNode.node_id}
+          panelTitle={browserPageConfig.actionPanelTitle}
+          panelHint={browserPageConfig.actionPanelHint}
+          availableOptions={sharedProps.availableOptions}
+          allowFreeInput={false}
+          freeInputPlaceholder="직접 판단을 입력..."
+          isAwaitingResponse={sharedProps.isAwaitingResponse}
+          onSelectOption={sharedProps.onSelectOption}
+          onSubmitFreeInput={sharedProps.onSubmitFreeInput}
+        />
+      )}
     </div>
   );
 }
