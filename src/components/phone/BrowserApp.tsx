@@ -8,12 +8,14 @@ import { ScenarioActionPanel } from "./shared/ScenarioActionPanel";
 import { findLatestSpeakerMessage } from "@/lib/phone/chat-history-view";
 import {
   resolveBrowserPageConfig,
+  resolveBrowserDefaultAddress,
   resolveReverseImageSearchProfile,
   shouldShowBrowserPageNotice,
   type BrowserPageRevealPhase,
 } from "@/lib/phone/browser-scenario-page";
 import {
   getScenarioSiteSecurityWarning,
+  OPEN_CHAT_INVITE_URL,
   resolveBrowserNavigationUrl,
   SCENARIO_FAKE_SITE_URL,
 } from "@/lib/phone/browser-navigation";
@@ -30,7 +32,11 @@ export function BrowserApp(sharedProps: PhoneAppSharedProps) {
 
 function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
   const { activeScenarioId, currentNode, chatHistory, streamingMessage } = sharedProps;
-  const [addressInputValue, setAddressInputValue] = useState(SCENARIO_FAKE_SITE_URL);
+  const defaultBrowserAddress = useMemo(
+    () => resolveBrowserDefaultAddress(currentNode.node_id),
+    [currentNode.node_id],
+  );
+  const [addressInputValue, setAddressInputValue] = useState(defaultBrowserAddress);
   const [activeNavigationUrl, setActiveNavigationUrl] = useState<string | null>(null);
   const [pageRevealPhase, setPageRevealPhase] =
     useState<BrowserPageRevealPhase>("awaiting_action");
@@ -89,7 +95,10 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
 
     setAddressInputValue(resolvedUrl);
 
-    if (resolvedUrl === SCENARIO_FAKE_SITE_URL) {
+    if (
+      resolvedUrl === SCENARIO_FAKE_SITE_URL ||
+      resolvedUrl === OPEN_CHAT_INVITE_URL
+    ) {
       setActiveNavigationUrl(null);
       return;
     }

@@ -148,12 +148,17 @@ function buildDialogueStyleGuide(currentNode: ScenarioNode, userProfile: UserPro
     sms: "문자 메시지. 10~35자. 딱딱하거나 급한 톤. 한 줄.",
     insta: "인스타 DM/댓글 톤. 10~40자. 가볍고 짧게. 이모지 0~1개만(과다 금지).",
     call: "통화 자막. 구어체 단편 10~45자. '어 그게', '지금요?'처럼 끊어 말함.",
-    bank: "은행/송금 앱 알림·상담. 15~45자. 짧은 안내·재촉. 공문체 장문 금지.",
+    bank: "은행/송금 앱 알림·상담. 15~45자. 송금·입금 재촉만 짧게. 통화 대사처럼 쓰지 않는다.",
     browser: "가짜 웹페이지 본문·팝업·배너 문구. 대화체·말풍선·'~님이' 형태 금지. 20~50자. 사이트 UI에 들어갈 짧은 유도·경고 문구.",
   };
 
   const appType = currentNode.app_type === "home" ? "chat" : currentNode.app_type;
-  const channelLine = appChannelGuide[appType];
+  const openGroupChatLine =
+    "메시지앱 오픈채팅(단톡). 방장·전문가가 방 전체에게 말하는 공지/대화. '회원님들', '방 안', '248명' 등 단체 맥락. 15~50자.";
+  const channelLine =
+    appType === "chat" && currentNode.chat_room_kind === "open_group"
+      ? openGroupChatLine
+      : appChannelGuide[appType];
 
   let toneLine: string;
   if (currentNode.speaker_tone) {
@@ -314,10 +319,28 @@ export function buildAdvanceUserPrompt(
       ? `맥락: ${resolveBrowserPageConfig(currentNode.node_id).entryContextText}`
       : null;
 
+  const inviteSmsNote =
+    currentNode.node_id === "approach-invite-sms"
+      ? "초대 문자: message 본문에 'open-room.vip-invest.link/join' URL을 반드시 포함한다."
+      : null;
+
+  const openGroupChatNote =
+    currentNode.chat_room_kind === "open_group"
+      ? "오픈채팅(단톡) 맥락: 1:1이 아니라 방 전체에게 말한다. 방장·전문가 톤으로 단체 공지처럼 쓴다."
+      : null;
+
+  const bankChatPressureNote =
+    currentNode.app_type === "bank"
+      ? "은행 앱 맥락: 플레이어는 송금 화면에 있다. 같은 재촉은 토크(오픈채팅) 알림으로도 전달된다. 통화 중이 아니므로 전화 통화 대사처럼 쓰지 않는다."
+      : null;
+
   return [
     `사용자: ${userProfile.displayName}, ${userProfile.userAge}, ${userProfile.gender}`,
     `앱: ${currentNode.app_type}, 상대: ${currentNode.sender_name}`,
     ...(emailContactNote ? [emailContactNote] : []),
+    ...(inviteSmsNote ? [inviteSmsNote] : []),
+    ...(openGroupChatNote ? [openGroupChatNote] : []),
+    ...(bankChatPressureNote ? [bankChatPressureNote] : []),
     ...(browserEntryNote ? [browserEntryNote] : []),
     "",
     buildSpeechLevelConsistencyRule(currentNode, chatHistory),

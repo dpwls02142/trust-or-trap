@@ -80,6 +80,9 @@ export function BrowserScenarioPagePanel({
         {pageVariant === "fake_hts_portal" && (
           <FakeHtsPortalPage {...sharedPageProps} />
         )}
+        {pageVariant === "open_chat_invite" && (
+          <OpenChatInvitePage {...sharedPageProps} />
+        )}
         {pageVariant === "generic_fake_site" && (
           <GenericFakeSitePage {...sharedPageProps} />
         )}
@@ -385,6 +388,76 @@ function FakeHtsPortalPage({
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function OpenChatInvitePage({
+  primaryActionLabel,
+  preRevealHint,
+  loadingLabel,
+  pageRevealPhase,
+  onPrimaryPageAction,
+}: InteractivePageProps) {
+  const isPageRevealed = pageRevealPhase === "revealed";
+  const isPageLoading = pageRevealPhase === "loading";
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-black/10">
+      <div className="bg-gradient-to-r from-amber-400 to-yellow-400 px-4 py-3 text-black">
+        <p className="text-[10px] font-medium text-black/60">오픈채팅 초대</p>
+        <h3 className="text-sm font-bold">VIP투자연구소 💰 무료 리딩방</h3>
+      </div>
+
+      <div className="space-y-3 bg-white p-4">
+        {!isPageRevealed && (
+          <p className="text-[11px] leading-relaxed text-black/45">{preRevealHint}</p>
+        )}
+
+        <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-relaxed text-amber-950">
+          <p className="font-semibold">open-room.vip-invest.link/join</p>
+          <p className="mt-1 text-[11px] text-amber-900/70">
+            수익률 300% · 무료 VIP · 248명 참여 중
+          </p>
+        </div>
+
+        <AnimatePresence mode="wait">
+          {isPageLoading && (
+            <BrowserPageLoadingBlock
+              key="loading"
+              loadingLabel={loadingLabel}
+              toneClassName="text-amber-800/70"
+              compact
+            />
+          )}
+
+          {isPageRevealed && (
+            <motion.div
+              key="joined"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs leading-relaxed text-emerald-900"
+            >
+              <p className="font-semibold">채팅방 입장 완료</p>
+              <p className="mt-1">토크 앱 오픈채팅방으로 연결되었습니다.</p>
+            </motion.div>
+          )}
+
+          {!isPageRevealed && !isPageLoading && (
+            <motion.div key="enter" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <BrowserPrimaryActionButton
+                actionLabel={primaryActionLabel}
+                onActionClick={onPrimaryPageAction}
+                toneClassName="bg-amber-500 hover:bg-amber-600"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <p className="border-t border-black/5 bg-neutral-50 px-4 py-2 text-center text-[10px] text-black/35">
+        공식 증권·금융 앱이 아닌 외부 초대 링크입니다
+      </p>
     </div>
   );
 }

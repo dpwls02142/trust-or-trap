@@ -1,5 +1,6 @@
 import type {
   AppType,
+  ChatRoomKind,
   EndingConsequence,
   EndingType,
   NodeOption,
@@ -28,6 +29,7 @@ export interface PublicNodeView {
   elapsed_days: number | null;
   timer_seconds: number | null;
   outbound_dial_number: string | null;
+  chat_room_kind: ChatRoomKind | null;
 }
 
 export function toPublicNodeView(scenarioNode: ScenarioNode): PublicNodeView {
@@ -46,5 +48,6 @@ export function toPublicNodeView(scenarioNode: ScenarioNode): PublicNodeView {
     elapsed_days: scenarioNode.elapsed_days ?? null,
     timer_seconds: scenarioNode.timer_seconds ?? null,
     outbound_dial_number: scenarioNode.outbound_dial_number ?? null,
+    chat_room_kind: scenarioNode.chat_room_kind ?? null,
   };
 }

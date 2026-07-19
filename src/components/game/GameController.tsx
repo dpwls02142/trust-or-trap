@@ -23,7 +23,14 @@ import {
   outboundDialTransitionPrompt,
   outboundRedialTransitionPrompt,
 } from "@/lib/phone/app-transition-prompt";
-import { resolveAppTransitionPrompt, resolveBrowserPageConfig } from "@/lib/phone/browser-scenario-page";
+import {
+  buildOpenGroupChatPreambleEntries,
+  hasOpenGroupChatPreamble,
+} from "@/lib/scenario/open-group-chat-preamble";
+import {
+  resolveAppTransitionPrompt,
+  resolveBrowserPageConfig,
+} from "@/lib/phone/browser-scenario-page";
 import {
   buildHangUpFollowUpMessage,
   isMessageAppType,
@@ -144,11 +151,13 @@ export function GameController() {
       setPayloadOptionsEntry(null);
       setIsAwaitingResponse(true);
 
-      // TTS는 통화(call) 앱에서만 사용 — 메시지형 앱은 텍스트만으로 충분
+      // TTS는 통화(call) 앱, 또는 통화 중 송금(bank)에서만 사용
       const useTtsForNode =
         scenarioVoiceEnabled &&
         targetNode.voice_enabled &&
-        (targetNode.app_type === "call" || targetNode.app_type === "bank");
+        (targetNode.app_type === "call" ||
+          (targetNode.app_type === "bank" &&
+            useGameStore.getState().isCallConnected));
       // 생성 중에는 대기 인디케이터가 떠 있으므로 Typecast를 호출하지 않고,
       // 문장을 모아뒀다가 생성 완료(payload) 후 한 번에 큐로 넘긴다 (429 버스트 방지)
       const collectedSentences: {
@@ -162,6 +171,20 @@ export function GameController() {
         priorRiskRecords.length > 0
           ? priorRiskRecords[priorRiskRecords.length - 1].userRiskFlag
           : undefined;
+
+      if (
+        targetNode.chat_room_kind === "open_group" &&
+        targetNode.app_type === "chat" &&
+        !hasOpenGroupChatPreamble(useGameStore.getState().chatHistory)
+      ) {
+        for (const preambleEntry of buildOpenGroupChatPreambleEntries(
+          activeScenarioId,
+          targetNode.node_id,
+          targetNode.app_type,
+        )) {
+          appendChatEntry(preambleEntry);
+        }
+      }
 
       await consumeAdvanceStream(
         {

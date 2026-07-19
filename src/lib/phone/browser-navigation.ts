@@ -5,6 +5,9 @@ const IPV4_PATTERN = /^\d{1,3}(\.\d{1,3}){3}(:\d+)?(\/[^\s]*)?$/;
 /** 시나리오 browser 노드 기본 가짜 피싱 URL */
 export const SCENARIO_FAKE_SITE_URL = "http://secure-check.info-portal.xyz";
 
+/** 리딩방 오픈채팅 초대 링크 (가상) */
+export const OPEN_CHAT_INVITE_URL = "http://open-room.vip-invest.link/join";
+
 /**
  * 주소창 입력을 iframe에 로드할 URL로 변환한다.
  * URL 형태면 https를 보완하고, 그 외는 Google 검색으로 연결한다.

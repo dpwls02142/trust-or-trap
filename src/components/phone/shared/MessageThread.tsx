@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { TypingIndicator } from "./TypingIndicator";
-import type { ChatHistoryEntry } from "@/lib/scenario/types";
+import type { ChatHistoryEntry, ChatRoomKind } from "@/lib/scenario/types";
+import { resolveGroupChatReadCount } from "@/lib/phone/open-group-chat-view";
 
 interface MessageThreadProps {
   chatHistory: ChatHistoryEntry[];
@@ -21,6 +22,8 @@ interface MessageThreadProps {
   };
   /** 현재 노드 경과일 — 스트리밍/입력 중 말풍선 앞 구분선용 */
   currentElapsedDays?: number | null;
+  /** 오픈채팅(단톡) — 플레이어 말풍선 읽음 수 표시 */
+  chatRoomKind?: ChatRoomKind | null;
 }
 
 type ThreadRenderItem =
@@ -74,8 +77,10 @@ export function MessageThread({
   isAwaitingResponse = false,
   bubbleTheme,
   currentElapsedDays,
+  chatRoomKind,
   onOpenAttachmentLightbox,
 }: MessageThreadProps) {
+  const isOpenGroupChat = chatRoomKind === "open_group";
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
 
   const { renderItems, lastShownElapsedDays } = useMemo(
@@ -113,6 +118,27 @@ export function MessageThread({
         const entryIndex = renderItem.entryIndex;
 
         if (entryItem.speaker === "system") {
+          if (
+            isOpenGroupChat &&
+            entryItem.messageText.includes(":") &&
+            !entryItem.messageText.includes("들어왔습니다")
+          ) {
+            const [memberLabel, ...messageParts] = entryItem.messageText.split(":");
+            const memberMessageText = messageParts.join(":").trim();
+            return (
+              <div key={entryIndex} className="flex justify-start">
+                <div className="max-w-[78%]">
+                  <span className="mb-0.5 block pl-1 text-[11px] text-black/50">
+                    {memberLabel?.trim()}
+                  </span>
+                  <p className="whitespace-pre-wrap break-words rounded-2xl bg-white px-3.5 py-2 text-sm leading-relaxed text-black">
+                    {memberMessageText}
+                  </p>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <p key={entryIndex} className="py-1 text-center text-[11px] text-black/40">
               {entryItem.messageText}
@@ -127,10 +153,10 @@ export function MessageThread({
             animate={{ opacity: 1, y: 0 }}
             className={`flex ${isIncoming ? "justify-start" : "justify-end"}`}
           >
-            <div className="max-w-[78%]">
+            <div className={`max-w-[78%] ${isIncoming ? "" : "flex flex-col items-end"}`}>
               {isIncoming && (
                 <span className="mb-0.5 block pl-1 text-[11px] text-black/50">
-                  {senderName}
+                  {isOpenGroupChat ? `${senderName} · 방장` : senderName}
                 </span>
               )}
               <div
@@ -168,6 +194,11 @@ export function MessageThread({
                   </p>
                 )}
               </div>
+              {!isIncoming && isOpenGroupChat && (
+                <span className="mt-0.5 pr-1 text-[10px] font-medium text-black/35">
+                  {resolveGroupChatReadCount(entryIndex)}
+                </span>
+              )}
             </div>
           </motion.div>
         );

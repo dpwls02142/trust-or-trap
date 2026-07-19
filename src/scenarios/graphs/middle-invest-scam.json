@@ -4,13 +4,13 @@
   "title": "수익 인증이 넘치는 리딩방",
   "synopsis": "지인 추천으로 들어간 오픈채팅방에서 '전문가'가 종목을 찍어주고, 다들 수익 인증을 올린다.",
   "voice_enabled": true,
-  "entry_node_id": "approach-openchat-invite",
+  "entry_node_id": "approach-invite-sms",
   "nodes": [
     {
-      "node_id": "approach-openchat-invite",
+      "node_id": "approach-invite-sms",
       "stage": "approach",
-      "app_type": "chat",
-      "required_risk_signal": "모르는 번호가 '수익률 300% 무료 리딩방' 초대 링크를 보낸다. 원금·고수익 보장 문구 자체가 위험 신호다",
+      "app_type": "sms",
+      "required_risk_signal": "모르는 번호가 '수익률 300% 무료 리딩방' 초대 링크(open-room.vip-invest.link/join)를 문자로 보낸다. 원금·고수익 보장 문구 자체가 위험 신호다",
       "forbidden_content": [
         "실존 증권사·투자자문사 실명 사칭",
         "실존 애널리스트 실명",
@@ -19,10 +19,38 @@
       ],
       "options": [
         { "label": "금감원 제도권 등록 여부부터 조회한다", "risk_flag": "safe" },
-        { "label": "구경만 하려고 입장한다", "risk_flag": "caution" },
-        { "label": "무료라니 기대하며 바로 입장한다", "risk_flag": "risky" }
+        { "label": "구경만 하려고 링크를 열어본다", "risk_flag": "caution" },
+        { "label": "무료라니 기대하며 바로 링크를 누른다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
+      "next_node_map": {
+        "safe": "approach-openchat-link",
+        "caution": "approach-openchat-link",
+        "risky": "approach-openchat-link"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "speaker_tone": "confident_expert",
+      "sender_name": "VIP투자연구소"
+    },
+    {
+      "node_id": "approach-openchat-link",
+      "stage": "approach",
+      "app_type": "browser",
+      "required_risk_signal": "문자의 초대 주소를 열면 '무료 VIP 리딩방 입장' 페이지가 뜬다. 공식 금융·증권 앱이 아닌 외부 링크로 오픈채팅방에 유도하는 수법이다",
+      "forbidden_content": [
+        "실존 증권사·투자자문사 실명 사칭",
+        "실존 오픈채팅·메신저 앱 실명",
+        "실제 종목 매수 추천",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "외부 초대 링크라 입장하지 않고 나온다", "risk_flag": "safe" },
+        { "label": "입장만 하고 구경만 한다", "risk_flag": "caution" },
+        { "label": "248명이나 있다며 바로 채팅방에 들어간다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": false,
       "next_node_map": {
         "safe": "trust-profit-proof",
         "caution": "trust-profit-proof",
@@ -38,6 +66,7 @@
       "node_id": "trust-profit-proof",
       "stage": "trust_building",
       "app_type": "chat",
+      "chat_room_kind": "open_group",
       "required_risk_signal": "방 안에 허위 수익 인증(캡처)이 도배되고, '전문가'와 바람잡이 회원들이 신뢰를 연출한다",
       "forbidden_content": [
         "실존 증권사·기관 실명 사칭",
@@ -65,6 +94,7 @@
       "node_id": "trust-manager-assign",
       "stage": "trust_building",
       "app_type": "chat",
+      "chat_room_kind": "open_group",
       "required_risk_signal": "'당신만 특별히' 1:1 전담 매니저를 배정하겠다며 개인 상담으로 끌어낸다. 개별 접촉으로 옮기는 것은 다른 회원 눈을 피해 압박하려는 수법이다",
       "forbidden_content": [
         "실존 증권사·기관 실명 사칭",
@@ -174,6 +204,7 @@
       "node_id": "ending-safe-exit",
       "stage": "ending",
       "app_type": "chat",
+      "chat_room_kind": "open_group",
       "required_risk_signal": "원금 보장 문구·비공식 앱·인출 수수료 요구라는 위험 신호를 식별하고 조기 이탈·신고로 회피했다",
       "forbidden_content": ["실존 기관 실명 사칭", "실제 개인정보 패턴"],
       "options": [],

@@ -9,6 +9,7 @@ import { AppBackButton } from "./shared/AppBackButton";
 import { ChatProfileDetail } from "./shared/ChatProfileDetail";
 import { buildSenderProfileView } from "@/lib/scenario/sender-profile";
 import { filterChatHistoryForAppView } from "@/lib/phone/chat-history-view";
+import { resolveOpenGroupChatHeader } from "@/lib/phone/open-group-chat-view";
 import { useStatusBarOverride } from "@/lib/phone/status-bar-override";
 import { useMessageAttachmentLightbox } from "./shared/use-message-attachment-lightbox";
 import type { PhoneAppSharedProps } from "./shared/phone-app-props";
@@ -39,6 +40,11 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
     [chatHistory, currentNode],
   );
 
+  const openGroupHeaderView = useMemo(
+    () => resolveOpenGroupChatHeader(currentNode.sender_name, currentNode.chat_room_kind),
+    [currentNode.sender_name, currentNode.chat_room_kind],
+  );
+
   const { openAttachmentLightbox, attachmentLightboxOverlay } =
     useMessageAttachmentLightbox();
 
@@ -57,11 +63,18 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
             senderName={currentNode.sender_name}
           />
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-black">
-              {currentNode.sender_name}
-            </h2>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h2 className="truncate text-sm font-semibold text-black">
+                {openGroupHeaderView?.roomTitle ?? currentNode.sender_name}
+              </h2>
+              {openGroupHeaderView && (
+                <span className="shrink-0 rounded bg-black/10 px-1.5 py-0.5 text-[10px] font-semibold text-black/55">
+                  {openGroupHeaderView.memberCountLabel}
+                </span>
+              )}
+            </div>
             <p className="truncate text-[11px] text-black/50">
-              {senderProfileView.statusMessage}
+              {openGroupHeaderView?.subtitleText ?? senderProfileView.statusMessage}
             </p>
           </div>
         </button>
@@ -73,6 +86,7 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
         senderName={currentNode.sender_name}
         isAwaitingResponse={sharedProps.isAwaitingResponse}
         currentElapsedDays={currentNode.elapsed_days}
+        chatRoomKind={currentNode.chat_room_kind}
         onOpenAttachmentLightbox={openAttachmentLightbox}
         bubbleTheme={{
           threadBackgroundClass: "bg-[#bacee0]",
