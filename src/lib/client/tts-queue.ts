@@ -1,6 +1,10 @@
 "use client";
 
 import type { ScenarioId } from "@/lib/scenario/types";
+import {
+  isSpeakableTtsText,
+  prepareSentenceTextForTts,
+} from "@/lib/tts/tts-speech-text";
 
 /**
  * 문장 단위 TTS 재생 큐 (통화(call) 앱 전용).
@@ -27,11 +31,20 @@ export class SentenceTtsQueue {
 
   enqueueSentence(sentenceText: string, previousText: string): void {
     if (this.isDisposed) return;
-    this.pendingSentences.push({ sentenceText, previousText });
+
+    const preparedText = prepareSentenceTextForTts(sentenceText);
+    if (!isSpeakableTtsText(preparedText)) return;
+
+    this.pendingSentences.push({
+      sentenceText: preparedText,
+      previousText: prepareSentenceTextForTts(previousText),
+    });
     void this.drainQueue();
   }
 
-  private async fetchSentenceAudio(pendingItem: PendingSentence): Promise<Blob | null> {
+  private async fetchSentenceAudio(
+    pendingItem: PendingSentence,
+  ): Promise<Blob | null> {
     try {
       const ttsResponse = await fetch("/api/tts/stream", {
         method: "POST",
@@ -54,16 +67,22 @@ export class SentenceTtsQueue {
 
     let prefetchedAudioPromise: Promise<Blob | null> | null = null;
 
-    while ((this.pendingSentences.length > 0 || prefetchedAudioPromise) && !this.isDisposed) {
+    while (
+      (this.pendingSentences.length > 0 || prefetchedAudioPromise) &&
+      !this.isDisposed
+    ) {
       const currentAudioPromise =
-        prefetchedAudioPromise ?? this.fetchSentenceAudio(this.pendingSentences.shift()!);
+        prefetchedAudioPromise ??
+        this.fetchSentenceAudio(this.pendingSentences.shift()!);
       prefetchedAudioPromise = null;
 
       const currentAudioBlob = await currentAudioPromise;
 
       // 현재 문장을 재생하는 동안 다음 문장 오디오를 미리 요청 (동시 요청은 항상 1개)
       if (this.pendingSentences.length > 0) {
-        prefetchedAudioPromise = this.fetchSentenceAudio(this.pendingSentences.shift()!);
+        prefetchedAudioPromise = this.fetchSentenceAudio(
+          this.pendingSentences.shift()!,
+        );
       }
 
       if (!currentAudioBlob) continue;

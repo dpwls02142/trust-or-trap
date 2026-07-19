@@ -5,6 +5,10 @@ import {
   resolveScenarioVoice,
 } from "@/lib/scenario/voice-mapping";
 import { isRateLimited, resolveClientKey } from "@/lib/server/rate-limiter";
+import {
+  isSpeakableTtsText,
+  prepareSentenceTextForTts,
+} from "@/lib/tts/tts-speech-text";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,6 +36,15 @@ export async function POST(request: NextRequest) {
 
   const { scenarioId, sentenceText, previousText } = parsedBody.data;
 
+  const preparedSentenceText = prepareSentenceTextForTts(sentenceText);
+  if (!isSpeakableTtsText(preparedSentenceText)) {
+    return Response.json(
+      { errorMessage: "읽을 수 있는 문장이 없습니다" },
+      { status: 400 },
+    );
+  }
+  const preparedPreviousText = prepareSentenceTextForTts(previousText ?? "");
+
   if (!isVoiceEnabledScenario(scenarioId)) {
     return Response.json(
       { errorMessage: "teen 시나리오는 음성을 지원하지 않습니다" },
@@ -54,12 +67,12 @@ export async function POST(request: NextRequest) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      text: sentenceText,
+      text: preparedSentenceText,
       model: "ssfm-v30",
       voice_id: voicePreset?.voiceId ?? defaultVoiceId,
       prompt: {
         emotion_type: voicePreset?.emotionPreset ?? "smart",
-        previous_text: previousText ?? "",
+        previous_text: preparedPreviousText,
         next_text: "",
       },
       output: { audio_format: "mp3", target_lufs: -14.0 },
