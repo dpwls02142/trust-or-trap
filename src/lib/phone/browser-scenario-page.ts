@@ -11,6 +11,7 @@ export type BrowserPageVariant =
   | "reverse_image_search"
   | "fake_government_portal"
   | "fake_hts_portal"
+  | "open_chat_invite"
   | "generic_fake_site";
 
 /** 가짜 페이지 — 플레이어 주 행동 전·로딩·결과 공개 */
@@ -35,6 +36,18 @@ export interface BrowserPageConfig {
 }
 
 const browserPageConfigMap: Record<string, BrowserPageConfig> = {
+  "approach-openchat-link": {
+    pageVariant: "open_chat_invite",
+    transitionPrompt: "문자로 온 초대 링크를 열어볼까?",
+    entryContextText:
+      "문자에 적힌 '무료 VIP 리딩방' 초대 주소를 눌러 들어왔다.",
+    primaryActionLabel: "채팅방 입장",
+    preRevealHint: "입장 버튼을 누르면 토크 앱 오픈채팅방으로 연결됩니다.",
+    loadingLabel: "채팅방에 연결하는 중...",
+    preRevealActionPanelTitle: "먼저 입장 버튼을 눌러 연결을 확인하세요",
+    actionPanelTitle: "채팅방에 들어간 뒤 다음 행동을 선택하세요",
+    actionPanelHint: "단체방 분위기와 수익 인증이 과장돼 있지 않은지 살펴보세요.",
+  },
   "branch-verify-identity": {
     pageVariant: "reverse_image_search",
     transitionPrompt: "의심이 드는데 프로필 사진을 검색해볼까?",
@@ -120,6 +133,14 @@ export function resolveAppTransitionPrompt(
   }
 
   return fallbackPromptMap[context.appType] ?? defaultPrompt;
+}
+
+/** browser 노드별 주소창 기본 URL */
+export function resolveBrowserDefaultAddress(nodeId: string): string {
+  if (nodeId === "approach-openchat-link") {
+    return "http://open-room.vip-invest.link/join";
+  }
+  return "http://secure-check.info-portal.xyz";
 }
 
 /** browser 노드에서 LLM message를 페이지에 표시할지 여부 */

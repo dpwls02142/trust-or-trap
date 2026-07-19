@@ -76,16 +76,67 @@ export function resolveThinkingConfig(modelName: string): ThinkingConfig {
  */
 const speakerToneGuideMap: Record<SpeakerTone, string> = {
   professional_agent:
-    "실제 금융사 상담원/기관 직원처럼 시종일관 정중한 존댓말. '고객님', '~도와드리겠습니다', '본인 확인 절차입니다' 같은 사무적 표현. 침착하고 또박또박, 급할 때도 예의는 유지. ㅋㅋ·ㅇㅇ·이모지·반말·인터넷 밈 절대 금지. 플레이어가 몇 살이든 말투는 동일하게 유지한다.",
+    "실제 금융사 상담원/기관 직원처럼 시종일관 정중한 존댓말. '고객님', '~도와드리겠습니다', '본인 확인 절차입니다' 같은 사무적 표현. 침착하고 또박또박, 급할 때도 예의는 유지. ㅋㅋ·ㅇㅇ·이모지·반말·인터넷 밈 절대 금지. 종결어미는 '~습니다/~세요/~요'만 — '~해/~야' 반말로 바꾸지 않는다. 플레이어가 몇 살이든 말투는 동일하게 유지한다.",
   confident_expert:
-    "리딩방 '전문가' 톤. 자신감 있고 단정적인 존댓말. '지금 안 들어가시면 후회하십니다', '제 말만 믿으세요'처럼 확신에 찬 부추김. 이모지·반말 금지.",
+    "리딩방 '전문가' 톤. 자신감 있고 단정적인 존댓말. '지금 안 들어가시면 후회하십니다', '제 말만 믿으세요'처럼 확신에 찬 부추김. 이모지·반말 금지. 종결어미는 '~습니다/~세요/~십니다'만 — 반말로 내려가지 않는다.",
   intimate_partner:
-    "다정하고 사근사근한 톤. 부드러운 말투로 친밀감을 표현. 감정에 호소('나 믿지?', '보고 싶었어'). 과한 이모지·선정적 표현 금지.",
+    "다정하고 사근사근한 톤. 부드러운 말투로 친밀감을 표현. 감정에 호소('나 믿지?', '보고 싶었어'). 과한 이모지·선정적 표현 금지. 친밀한 반말('~해/~야')로 통일 — 존댓말과 반말을 섞지 않는다.",
   community_peer:
-    "게임 커뮤니티 또래 반말. ㅋㅋ, ㅇㅇ, ㄹㅇ, 짧게 밀어붙임. 욕설·혐오·성적 비하 금지.",
+    "게임 커뮤니티 또래 반말. ㅋㅋ, ㅇㅇ, ㄹㅇ, 짧게 밀어붙임. 욕설·혐오·성적 비하 금지. 반말만 — 존댓말('~요/~습니다')로 바꾸지 않는다.",
   family_casual:
-    "가족끼리 주고받는 일상 문자 톤. '엄마 나야', '아빠 잠깐만'처럼 짧고 급하게. 이모지 0~1개.",
+    "가족끼리 주고받는 일상 문자 톤. '엄마 나야', '아빠 잠깐만'처럼 짧고 급하게. 이모지 0~1개. 반말·해체로 통일 — 존댓말과 섞지 않는다.",
 };
+
+type ScammerSpeechLevel = "formal" | "informal";
+
+const formalEndingPattern = /(?:습니다|세요|십니다|요|니다)(?:[.?!…]|$)/;
+const informalEndingPattern = /(?:[가-힣]+(?:야|해|지|니|거든|잖아)|[가-힣]{1,3})(?:[.?!…]|$)/;
+
+/** 화자 말투 프리셋별 고정 존댓말/반말 — 대화 내내 바꾸면 안 되는 수준 */
+const fixedSpeechLevelByTone: Partial<Record<SpeakerTone, ScammerSpeechLevel>> = {
+  professional_agent: "formal",
+  confident_expert: "formal",
+  intimate_partner: "informal",
+  community_peer: "informal",
+  family_casual: "informal",
+};
+
+const speechLevelGuideMap: Record<ScammerSpeechLevel, string> = {
+  formal:
+    "존댓말 고정: '~습니다/~세요/~요' 종결만. 반말('~해/~야')·해체로 내려가지 않는다.",
+  informal:
+    "반말 고정: '~해/~야/~지' 종결만. 존댓말('~요/~습니다')로 올리지 않는다.",
+};
+
+function inferScammerSpeechLevel(
+  chatHistory: ChatHistoryEntry[],
+): ScammerSpeechLevel | null {
+  for (const entryItem of chatHistory) {
+    if (entryItem.speaker !== "scammer") continue;
+    const trimmedText = entryItem.messageText.trim();
+    if (!trimmedText) continue;
+    if (formalEndingPattern.test(trimmedText)) return "formal";
+    if (informalEndingPattern.test(trimmedText)) return "informal";
+  }
+  return null;
+}
+
+function buildSpeechLevelConsistencyRule(
+  currentNode: ScenarioNode,
+  chatHistory: ChatHistoryEntry[],
+): string {
+  const presetSpeechLevel = currentNode.speaker_tone
+    ? fixedSpeechLevelByTone[currentNode.speaker_tone]
+    : null;
+  const historySpeechLevel = inferScammerSpeechLevel(chatHistory);
+  const lockedSpeechLevel = historySpeechLevel ?? presetSpeechLevel;
+
+  if (!lockedSpeechLevel) {
+    return "- 존댓말/반말 수준은 대화 내내 고정. 한 번 정해진 종결어미를 노드·응답마다 바꾸지 않는다.";
+  }
+
+  return `- ${speechLevelGuideMap[lockedSpeechLevel]} 이전 말풍선과 존댓말/반말 수준이 달라지면 안 된다.`;
+}
 
 /**
  * 앱·페르소나별 단답형 말투 가이드.
@@ -97,12 +148,17 @@ function buildDialogueStyleGuide(currentNode: ScenarioNode, userProfile: UserPro
     sms: "문자 메시지. 10~35자. 딱딱하거나 급한 톤. 한 줄.",
     insta: "인스타 DM/댓글 톤. 10~40자. 가볍고 짧게. 이모지 0~1개만(과다 금지).",
     call: "통화 자막. 구어체 단편 10~45자. '어 그게', '지금요?'처럼 끊어 말함.",
-    bank: "은행/송금 앱 알림·상담. 15~45자. 짧은 안내·재촉. 공문체 장문 금지.",
+    bank: "은행/송금 앱 알림·상담. 15~45자. 송금·입금 재촉만 짧게. 통화 대사처럼 쓰지 않는다.",
     browser: "가짜 웹페이지 본문·팝업·배너 문구. 대화체·말풍선·'~님이' 형태 금지. 20~50자. 사이트 UI에 들어갈 짧은 유도·경고 문구.",
   };
 
   const appType = currentNode.app_type === "home" ? "chat" : currentNode.app_type;
-  const channelLine = appChannelGuide[appType];
+  const openGroupChatLine =
+    "메시지앱 오픈채팅(단톡). 방장·전문가가 방 전체에게 말하는 공지/대화. '회원님들', '방 안', '248명' 등 단체 맥락. 15~50자.";
+  const channelLine =
+    appType === "chat" && currentNode.chat_room_kind === "open_group"
+      ? openGroupChatLine
+      : appChannelGuide[appType];
 
   let toneLine: string;
   if (currentNode.speaker_tone) {
@@ -129,6 +185,7 @@ function buildDialogueStyleGuide(currentNode: ScenarioNode, userProfile: UserPro
     "- 한 메시지에 문장 2개 이상, 쉼표로 이어 붙인 장문, '안녕하세요 저는 ~' 같은 인사+설명 패턴 금지.",
     "- 위험 신호는 짧은 말 안에 자연스럽게 녹인다. 뜬금없는 장문 해설 금지.",
     "- options[].label도 카톡에서 탭할 법한 짧은 문장(8~25자). 긴 설명형 선택지 금지.",
+    buildSpeechLevelConsistencyRule(currentNode, []),
   ].join("\n");
 }
 
@@ -168,7 +225,8 @@ export function buildAdvanceSystemPrompt(
         "- 플레이어가 거절/의심/따지면: 화내지 말고 회유·안심·서운함·부드러운 압박으로 되받으며 설득한다.",
         "- 플레이어가 적극적/호의적이면: 신뢰를 확인하듯 한 발 더 밀어붙인다.",
         "- 플레이어가 미온적/짧게 답하면: 관심을 끌어 자연스럽게 대화를 잇는다.",
-        "- 같은 노드라도 플레이어 말에 따라 **표현·말투는 매번 달라져야** 한다. 스크립트를 읽듯 똑같이 말하지 않는다.",
+        "- 같은 노드라도 플레이어 말에 따라 **표현·어휘·감정 반응은 매번 달라져야** 한다. 스크립트를 읽듯 똑같이 말하지 않는다.",
+        "- 단, 존댓말/반말 수준(종결어미)은 절대 바꾸지 않는다. 존댓말 화자가 반말로, 반말 화자가 존댓말로 섞어 쓰지 않는다.",
         "- 단, 반응이 달라져도 위 위험 신호(사건 자체)는 반드시 드러낸다 — 전개 순서는 바뀌지 않는다.",
       ];
 
@@ -261,11 +319,31 @@ export function buildAdvanceUserPrompt(
       ? `맥락: ${resolveBrowserPageConfig(currentNode.node_id).entryContextText}`
       : null;
 
+  const inviteSmsNote =
+    currentNode.node_id === "approach-invite-sms"
+      ? "초대 문자: message 본문에 'open-room.vip-invest.link/join' URL을 반드시 포함한다."
+      : null;
+
+  const openGroupChatNote =
+    currentNode.chat_room_kind === "open_group"
+      ? "오픈채팅(단톡) 맥락: 1:1이 아니라 방 전체에게 말한다. 방장·전문가 톤으로 단체 공지처럼 쓴다."
+      : null;
+
+  const bankChatPressureNote =
+    currentNode.app_type === "bank"
+      ? "은행 앱 맥락: 플레이어는 송금 화면에 있다. 같은 재촉은 토크(오픈채팅) 알림으로도 전달된다. 통화 중이 아니므로 전화 통화 대사처럼 쓰지 않는다."
+      : null;
+
   return [
     `사용자: ${userProfile.displayName}, ${userProfile.userAge}, ${userProfile.gender}`,
     `앱: ${currentNode.app_type}, 상대: ${currentNode.sender_name}`,
     ...(emailContactNote ? [emailContactNote] : []),
+    ...(inviteSmsNote ? [inviteSmsNote] : []),
+    ...(openGroupChatNote ? [openGroupChatNote] : []),
+    ...(bankChatPressureNote ? [bankChatPressureNote] : []),
     ...(browserEntryNote ? [browserEntryNote] : []),
+    "",
+    buildSpeechLevelConsistencyRule(currentNode, chatHistory),
     "",
     "지금까지 대화:",
     historyText,

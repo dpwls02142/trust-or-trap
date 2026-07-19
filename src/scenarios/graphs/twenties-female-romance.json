@@ -78,9 +78,9 @@
       ],
       "allow_free_input": true,
       "next_node_map": {
-        "safe": "trust-move-private",
-        "caution": "trust-move-private",
-        "risky": "trust-move-private"
+        "safe": "trust-exclusive-push",
+        "caution": "trust-exclusive-push",
+        "risky": "trust-exclusive-push"
       },
       "voice_enabled": true,
       "is_ending": false,
@@ -89,19 +89,19 @@
       "sender_name": "도현"
     },
     {
-      "node_id": "trust-move-private",
+      "node_id": "trust-exclusive-push",
       "stage": "trust_building",
       "app_type": "chat",
-      "required_risk_signal": "'우리 여기서 말고 개인 메시지앱으로 얘기하자'며 데이팅앱 밖으로 대화를 옮긴다. 플랫폼의 안전장치·신고 기능을 벗어나게 만드는 수법이다",
+      "required_risk_signal": "만난 적 없는데 '나만 믿어' '다른 사람한테는 말하지 마'며 독점적 관계를 요구한다. 감정적 고립·통제의 전조다",
       "forbidden_content": [
         "실존 메시지앱·데이팅앱 실명",
         "실제 개인정보 패턴",
         "노골적 성적 표현"
       ],
       "options": [
-        { "label": "굳이 앱 밖으로 나가자는 게 이상해 거절한다", "risk_flag": "safe" },
-        { "label": "연락처는 안 주고 앱 안에서만 대화한다", "risk_flag": "caution" },
-        { "label": "더 가까워지고 싶어 개인 연락처를 알려준다", "risk_flag": "risky" }
+        { "label": "독점을 요구하는 게 이상해서 거리를 둔다", "risk_flag": "safe" },
+        { "label": "부담스럽지만 특별한 관계라 생각한다", "risk_flag": "caution" },
+        { "label": "나도 이 사람만 믿고 주변에 말하지 않는다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
       "next_node_map": {

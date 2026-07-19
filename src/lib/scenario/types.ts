@@ -60,6 +60,9 @@ export type SpeakerTone =
   | "community_peer"
   | "family_casual";
 
+/** chat 앱 연출 — 1:1 vs 오픈채팅(단톡) */
+export type ChatRoomKind = "direct" | "open_group";
+
 /**
  * 엔딩 결과 (glossary §3.2) — "경고문"이 아니라 행동→결과를 구체적으로 보여준다.
  * 경각심을 만드는 것이 목적이므로 무슨 일이 벌어졌는지 사실적으로 제시한다.
@@ -108,6 +111,8 @@ export interface ScenarioNode {
    * SMS 노드: LLM 대사에 포함할 상담 번호. call 노드: 연결 전 검증 대상.
    */
   outbound_dial_number?: string;
+  /** chat 앱 전용 — 오픈채팅(단톡) 연출. 미지정 시 1:1 */
+  chat_room_kind?: ChatRoomKind;
 }
 
 /** 시나리오 그래프 (그래프 메타 필드, glossary §3.5) */

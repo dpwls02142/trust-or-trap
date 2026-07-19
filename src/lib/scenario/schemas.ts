@@ -47,6 +47,8 @@ export const crimeCategorySchema = z.enum([
   "authority_voicephishing",
 ]);
 
+export const chatRoomKindSchema = z.enum(["direct", "open_group"]);
+
 export const speakerToneSchema = z.enum([
   "professional_agent",
   "confident_expert",
@@ -92,6 +94,7 @@ export const scenarioNodeSchema = z.object({
     .string()
     .regex(/^[\d-]+$/, "outbound_dial_number는 숫자와 하이픈만 허용")
     .optional(),
+  chat_room_kind: chatRoomKindSchema.optional(),
 });
 
 export const scenarioGraphSchema = z

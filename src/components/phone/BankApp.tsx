@@ -79,8 +79,8 @@ export function BankApp(sharedProps: PhoneAppSharedProps) {
     [decisionOptionList],
   );
 
-  const showCallSubtitle =
-    !!bankPressureLineText && (isCallSessionActive || !!streamingMessage);
+  /** 통화 중 송금(로맨스·보이스피싱)일 때만 자막 — 리딩방 등 채팅 압박은 토크 알림으로 분리 */
+  const showCallSubtitle = isCallSessionActive && !!bankPressureLineText;
 
   const canAttemptTransfer =
     parseTransferAmountWon(transferAmountText) > 0 && !isDecisionLocked;
