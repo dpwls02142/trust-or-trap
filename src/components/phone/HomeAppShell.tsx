@@ -10,6 +10,11 @@ import { findPhotogramHomePost, photogramHomeFeed } from "@/lib/phone/photogram-
 import { playDialKeyTone } from "@/lib/client/dial-key-tone";
 import { dialNumbersMatch, formatDialDisplayNumber, resolveDialDigitLimit } from "@/lib/phone/dial-number";
 import { resolveAppLabel } from "@/lib/phone/app-display";
+import {
+  defaultBankAccountBalanceLabel,
+  defaultBankAccountNumberLabel,
+  defaultBankBrandName,
+} from "@/lib/phone/bank-app-view";
 import { buildScenarioMessageThread } from "@/lib/phone/message-thread-summary";
 import type { AppType, ChatHistoryEntry } from "@/lib/scenario/types";
 
@@ -668,15 +673,50 @@ function CallDialKeypadView({
 }
 
 function BankShellContent() {
+  const quickMenuList = [
+    { label: "송금", icon: "↗" },
+    { label: "계좌조회", icon: "◎" },
+    { label: "대출", icon: "₩" },
+    { label: "MY", icon: "☺" },
+  ];
+
   return (
-    <div className="bg-neutral-50">
-      <div className="bg-blue-700 px-4 py-6 text-white">
-        <p className="text-xs text-white/70">내 계좌 잔액</p>
-        <p className="mt-1 text-2xl font-bold">3,481,200원</p>
+    <div className="bg-neutral-100 pb-6">
+      <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800 px-4 pb-12 pt-2 text-white">
+        <p className="text-[11px] font-medium text-white/60">{defaultBankBrandName}</p>
+        <p className="mt-4 text-xs text-white/70">안녕하세요</p>
       </div>
-      <ul className="mt-2 divide-y divide-black/5 bg-white">
-        {["이체", "계좌조회", "대출상담", "고객센터"].map((menuLabel) => (
-          <li key={menuLabel} className="px-4 py-3.5 text-sm text-black">
+
+      <div className="relative z-10 -mt-8 px-4">
+        <div className="rounded-2xl bg-white p-4 shadow-md shadow-blue-900/10 ring-1 ring-black/5">
+          <p className="text-[11px] text-black/45">입출금통장</p>
+          <p className="mt-0.5 font-mono text-[11px] text-black/45">
+            {defaultBankAccountNumberLabel}
+          </p>
+          <p className="mt-3 text-xs text-black/45">잔액</p>
+          <p className="mt-0.5 text-2xl font-bold tracking-tight text-black">
+            {defaultBankAccountBalanceLabel}
+          </p>
+        </div>
+      </div>
+
+      <div className="mx-4 mt-4 grid grid-cols-4 gap-2">
+        {quickMenuList.map((menuItem) => (
+          <div
+            key={menuItem.label}
+            className="flex flex-col items-center gap-1.5 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-black/5"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-sm text-blue-700">
+              {menuItem.icon}
+            </span>
+            <span className="text-[11px] font-medium text-black/70">{menuItem.label}</span>
+          </div>
+        ))}
+      </div>
+
+      <ul className="mx-4 mt-4 divide-y divide-black/5 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+        {["최근 거래내역", "이체한도 변경", "고객센터"].map((menuLabel) => (
+          <li key={menuLabel} className="px-4 py-3.5 text-sm text-black/80">
             {menuLabel}
           </li>
         ))}

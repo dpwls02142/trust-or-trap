@@ -141,8 +141,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "confident_expert",
-      "sender_name": "VIP투자연구소",
-      "timer_seconds": 45
+      "sender_name": "VIP투자연구소"
     },
     {
       "node_id": "branch-withdraw-fee",
@@ -169,8 +168,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "confident_expert",
-      "sender_name": "VIP투자연구소",
-      "timer_seconds": 30
+      "sender_name": "VIP투자연구소"
     },
     {
       "node_id": "ending-safe-exit",

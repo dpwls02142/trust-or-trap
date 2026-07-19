@@ -1,91 +1,118 @@
 "use client";
 
-import { motion } from "framer-motion";
-import type { NodeOption } from "@/lib/scenario/types";
+import {
+  formatTransferAmountInputValue,
+  formatTransferAmountWon,
+  parseTransferAmountWon,
+  sanitizeTransferAmountInput,
+  transferAmountUnitList,
+} from "@/lib/phone/bank-app-view";
 
 interface BankTransferPanelProps {
   recipientName: string;
+  initialTransferAmountHint: string;
+  isDecisionLocked: boolean;
+  transferAmountText: string;
   transferMemoText: string;
-  isAwaitingResponse: boolean;
-  availableOptions: NodeOption[];
-  isAwaitingOptionChoice: boolean;
-  onSelectTransferAction: (optionLabel: string) => void;
+  onTransferAmountChange: (nextValue: string) => void;
+  onTransferMemoChange: (nextValue: string) => void;
+  onAddAmountUnit: (unitWonValue: number) => void;
 }
 
-function buildFakeAccountNumber(recipientName: string): string {
-  let seedValue = 0;
-  for (let charIndex = 0; charIndex < recipientName.length; charIndex += 1) {
-    seedValue = (seedValue * 31 + recipientName.charCodeAt(charIndex)) >>> 0;
-  }
-  const accountSuffix = String(1000000000 + (seedValue % 900000000)).slice(1);
-  return `110-***-${accountSuffix.slice(0, 4)}-${accountSuffix.slice(4)}`;
-}
-
-/**
- * bank 앱 전용 송금 화면 — 채팅 말풍선 없이 이체 폼과 행동 버튼만 제공한다.
- * 상대 요청 문구는 적요 필드에 자동 입력되는 형태로만 노출한다.
- */
+/** bank 앱 송금 폼 본문 — 하단 이체·자막은 BankApp footer에서 렌더 */
 export function BankTransferPanel({
   recipientName,
-  availableOptions,
-  isAwaitingOptionChoice,
-  onSelectTransferAction,
+  initialTransferAmountHint,
+  isDecisionLocked,
+  transferAmountText,
+  transferMemoText,
+  onTransferAmountChange,
+  onTransferMemoChange,
+  onAddAmountUnit,
 }: BankTransferPanelProps) {
-  const fakeAccountNumber = buildFakeAccountNumber(recipientName);
+  const transferAmountWon = parseTransferAmountWon(transferAmountText);
 
   return (
-    <div className="phone-scroll flex-1 overflow-y-auto bg-neutral-100">
-      <div className="border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-[11px] leading-relaxed text-amber-900">
-        최근 전화·메시지로 송금을 요청받은 상황입니다. 은행 앱에서 직접 이체
-        여부를 결정하세요.
+    <div className="phone-scroll flex-1 overflow-y-auto pb-4">
+      <div className="mx-4 mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+        <p className="text-xs font-semibold text-black/45">받는 분</p>
+
+        <div className="flex items-center justify-between gap-3 py-3">
+          <span className="text-sm text-black/45">예금주</span>
+          <span className="text-sm font-semibold text-black">
+            {recipientName}
+          </span>
+        </div>
       </div>
 
-      <div className="mx-4 mt-4 rounded-2xl bg-white p-4 shadow-sm">
-        <p className="text-xs font-semibold text-black/45">받는 분</p>
-        <p className="mt-1 text-base font-bold text-black">{recipientName}</p>
-        <p className="mt-3 text-xs font-semibold text-black/45">계좌번호</p>
-        <p className="mt-1 font-mono text-sm text-black">{fakeAccountNumber}</p>
-
+      <div className="mx-4 mt-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
         <label
-          className="mt-4 block text-xs font-semibold text-black/45"
+          className="block text-xs font-semibold text-black/45"
           htmlFor="transfer-amount"
         >
-          이체 금액
+          보낼 금액
         </label>
-        <input
-          id="transfer-amount"
-          readOnly
-          value=""
-          placeholder="상대방이 안내한 금액"
-          className="mt-1 w-full rounded-xl border border-black/10 bg-neutral-50 px-3 py-2.5 text-sm text-black/70 outline-none"
-        />
-      </div>
+        <div className="mt-2 flex items-baseline gap-1 border-b-2 border-blue-600 pb-2">
+          <input
+            id="transfer-amount"
+            inputMode="numeric"
+            value={transferAmountText}
+            onChange={(changeEvent) =>
+              onTransferAmountChange(
+                sanitizeTransferAmountInput(changeEvent.target.value),
+              )
+            }
+            placeholder={
+              initialTransferAmountHint
+                ? formatTransferAmountInputValue(initialTransferAmountHint)
+                : "0"
+            }
+            disabled={isDecisionLocked}
+            aria-label="보낼 금액"
+            className="min-w-0 flex-1 bg-transparent text-3xl font-bold tracking-tight text-black outline-none placeholder:text-black/20 disabled:opacity-50"
+          />
+          <span className="text-lg font-semibold text-black/70">원</span>
+        </div>
 
-      {availableOptions.length > 0 && (
-        <div className="mx-4 mt-5 space-y-2.5 pb-6">
-          <p className="text-xs font-semibold text-black/45">이체 결정</p>
-          {availableOptions.map((optionItem, optionIndex) => (
-            <motion.button
-              key={`${optionItem.label}-${optionIndex}`}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {transferAmountUnitList.map((unitItem) => (
+            <button
+              key={unitItem.unitLabel}
               type="button"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: optionIndex * 0.06 }}
-              disabled={isAwaitingOptionChoice}
-              onClick={() => onSelectTransferAction(optionItem.label)}
-              className={`w-full rounded-2xl px-4 py-3.5 text-left text-sm font-medium transition disabled:opacity-40 ${
-                optionItem.risk_flag === "safe"
-                  ? "border border-emerald-200 bg-emerald-50 text-emerald-900"
-                  : optionItem.risk_flag === "risky"
-                    ? "border border-red-200 bg-red-50 text-red-900"
-                    : "border border-black/10 bg-white text-black"
-              }`}
+              disabled={isDecisionLocked}
+              onClick={() => onAddAmountUnit(unitItem.unitWonValue)}
+              className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-40"
             >
-              {optionItem.label}
-            </motion.button>
+              +{unitItem.unitLabel}
+            </button>
           ))}
         </div>
-      )}
+
+        {transferAmountWon > 0 && (
+          <p className="mt-2 text-[11px] text-black/45">
+            {formatTransferAmountWon(transferAmountWon)}원 이체 예정
+          </p>
+        )}
+      </div>
+
+      <div className="mx-4 mt-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
+        <label
+          className="block text-xs font-semibold text-black/45"
+          htmlFor="transfer-memo"
+        >
+          받는 분에게 표시
+        </label>
+        <input
+          id="transfer-memo"
+          value={transferMemoText}
+          onChange={(changeEvent) =>
+            onTransferMemoChange(changeEvent.target.value)
+          }
+          disabled={isDecisionLocked}
+          aria-label="받는 분에게 표시할 적요"
+          className="mt-2 w-full rounded-xl border border-black/10 bg-neutral-50 px-3 py-2.5 text-sm text-black outline-none placeholder:text-black/30 disabled:opacity-50"
+        />
+      </div>
     </div>
   );
 }

@@ -48,7 +48,7 @@ const phoneAppDisplayConfigMap: Record<PlayableAppType, PhoneAppDisplayConfig> =
       appLabel: "한빛은행",
       tileColor: "bg-blue-600",
       notificationPreview: () => "한빛은행 — 새 알림이 도착했습니다",
-      statusBarContentStyle: "dark-content",
+      statusBarContentStyle: "light-content",
     },
     browser: {
       appLabel: "브라우저",

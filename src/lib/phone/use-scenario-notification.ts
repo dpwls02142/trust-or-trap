@@ -70,6 +70,7 @@ export function useScenarioNotification({
 
   const shouldDisplayNotification =
     isNotificationRevealed &&
+    notificationAppType !== "browser" &&
     !(notificationAppType === "call" && suppressIncomingCallAlert);
 
   const isNotificationBannerVisible =

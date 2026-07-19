@@ -24,8 +24,8 @@ export function resolveIsCallSessionActive({
     gamePhase !== "ending" &&
     activeScenarioId != null &&
     currentNode != null &&
-    currentNode.app_type === "call" &&
     !currentNode.is_ending &&
-    isCallConnected
+    isCallConnected &&
+    (currentNode.app_type === "call" || currentNode.app_type === "bank")
   );
 }

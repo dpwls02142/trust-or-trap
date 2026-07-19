@@ -148,7 +148,7 @@ export function GameController() {
       const useTtsForNode =
         scenarioVoiceEnabled &&
         targetNode.voice_enabled &&
-        targetNode.app_type === "call";
+        (targetNode.app_type === "call" || targetNode.app_type === "bank");
       // 생성 중에는 대기 인디케이터가 떠 있으므로 Typecast를 호출하지 않고,
       // 문장을 모아뒀다가 생성 완료(payload) 후 한 번에 큐로 넘긴다 (429 버스트 방지)
       const collectedSentences: {
@@ -195,6 +195,27 @@ export function GameController() {
               elapsedDays: targetNode.elapsed_days ?? undefined,
               appType: targetNode.app_type,
             });
+
+            if (targetNode.app_type === "bank" && !useGameStore.getState().isCallConnected) {
+              const priorMessageChannel = resolvePriorMessageChannel(
+                lastMessageContactRef.current,
+                useGameStore.getState().chatHistory,
+                targetNode.sender_name,
+              );
+              if (priorMessageChannel) {
+                appendChatEntry({
+                  speaker: "scammer",
+                  messageText: finalPayload.message,
+                  nodeId: priorMessageChannel.nodeId,
+                  elapsedDays: targetNode.elapsed_days ?? undefined,
+                  appType: priorMessageChannel.appType,
+                });
+                setHomeNotificationOverride({
+                  appType: priorMessageChannel.appType,
+                  senderName: priorMessageChannel.senderName,
+                });
+              }
+            }
             setStreamingMessage("");
             setPayloadOptionsEntry({
               nodeId: targetNode.node_id,
@@ -223,7 +244,7 @@ export function GameController() {
         },
       );
     },
-    [activeScenarioId, userProfile, scenarioVoiceEnabled, appendChatEntry],
+    [activeScenarioId, userProfile, scenarioVoiceEnabled, appendChatEntry, setHomeNotificationOverride],
   );
 
   // 현재 노드의 대사가 이미 생성돼 있는지 (새로고침 복원 시 재생성 방지)
@@ -456,6 +477,10 @@ export function GameController() {
         advanceToNode(nextNode, judgeData.riskFlag);
         setHasCompletedOutboundDial(!nextNode.outbound_dial_number);
 
+        if (nextNode.is_ending && useGameStore.getState().isCallConnected) {
+          stopActiveCall();
+        }
+
         if (isMessageAppType(previousAppType)) {
           lastMessageContactRef.current = {
             appType: previousAppType,
@@ -468,8 +493,11 @@ export function GameController() {
           !nextNode.is_ending && nextNodeRequiresOutboundDial(nextNode);
 
         if (previousAppType === "call") {
+          const keepsCallDuringBankTransfer =
+            nextNode.app_type === "bank" && !nextNode.is_ending;
           const leavingCallApp =
-            nextNode.is_ending || nextNode.app_type !== "call";
+            nextNode.is_ending ||
+            (nextNode.app_type !== "call" && !keepsCallDuringBankTransfer);
           if (leavingCallApp || nextRequiresOutboundDial) {
             stopActiveCall();
           }
@@ -481,6 +509,20 @@ export function GameController() {
         }
 
         if (!nextNode.is_ending && nextNode.app_type !== previousAppType) {
+          if (nextNode.app_type === "bank" && !useGameStore.getState().isCallConnected) {
+            const priorMessageChannel = resolvePriorMessageChannel(
+              lastMessageContactRef.current,
+              useGameStore.getState().chatHistory,
+              nextNode.sender_name,
+            );
+            if (priorMessageChannel) {
+              setHomeNotificationOverride({
+                appType: priorMessageChannel.appType,
+                senderName: priorMessageChannel.senderName,
+              });
+            }
+          }
+
           setPendingAppTransition({
             targetAppType: nextNode.app_type,
             promptText: resolveAppTransitionPrompt(
@@ -554,6 +596,8 @@ export function GameController() {
 
   // 타이머 만료 → 머뭇거린 것으로 간주 (caution 선택지를 자동 선택, 없으면 첫 선택지)
   const handleTimerExpire = useCallback(() => {
+    if (currentNode?.app_type === "bank") return;
+
     const expireOptions =
       availableOptions.length > 0
         ? availableOptions
@@ -835,7 +879,8 @@ export function GameController() {
             onAppOpen={handleAppOpen}
             shouldShowUnreadBadge={shouldDisplayNotification}
           />
-          {pendingAppTransition && !isCallConnected && (
+          {pendingAppTransition &&
+            (!isCallConnected || pendingAppTransition.targetAppType === "bank") && (
             <AppTransitionConfirm
               targetAppType={pendingAppTransition.targetAppType}
               promptText={pendingAppTransition.promptText}

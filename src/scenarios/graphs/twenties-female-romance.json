@@ -118,8 +118,8 @@
     {
       "node_id": "risk-crisis-story",
       "stage": "risk_signal",
-      "app_type": "call",
-      "required_risk_signal": "'세관에 짐이 묶였다·환전 수수료가 필요하다'는 갑작스러운 위기 서사를 꺼내며 '사랑하니까 도와달라'는 감정 프레이밍을 시작한다",
+      "app_type": "chat",
+      "required_risk_signal": "'세관에 짐이 묶였다·환전 수수료가 필요하다'는 갑작스러운 위기 서사를 토크로 꺼내며 '사랑하니까 도와달라'는 감정 프레이밍을 시작한다",
       "forbidden_content": [
         "실존 세관·기관 실명 사칭",
         "실제 개인정보 패턴",
@@ -134,7 +134,7 @@
       "next_node_map": {
         "safe": "branch-verify-identity",
         "caution": "branch-verify-identity",
-        "risky": "demand-money-transfer"
+        "risky": "demand-stay-on-call"
       },
       "voice_enabled": true,
       "is_ending": false,
@@ -156,6 +156,34 @@
         { "label": "역이미지 검색 결과(도용 사진)를 확인하고 관계를 끊는다", "risk_flag": "safe" },
         { "label": "검색 결과가 애매해 조금 더 지켜본다", "risk_flag": "caution" },
         { "label": "의심한 게 미안해져 검증을 그만둔다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-block",
+        "caution": "demand-stay-on-call",
+        "risky": "demand-stay-on-call"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "speaker_tone": "intimate_partner",
+      "sender_name": "도현"
+    },
+    {
+      "node_id": "demand-stay-on-call",
+      "stage": "demand",
+      "app_type": "call",
+      "required_risk_signal": "은행 앱에서 이체하는 동안 전화를 끊지 말라며 실시간으로 재촉한다. 통화를 유지한 채 송금을 요구하는 것은 로맨스 스캠의 전형적 수법이다",
+      "forbidden_content": [
+        "실존 은행 실명",
+        "실제 계좌번호 패턴",
+        "실제 개인정보 패턴",
+        "노골적 성적 표현"
+      ],
+      "options": [
+        { "label": "전화를 끊고 송금 요구를 거절한다", "risk_flag": "safe" },
+        { "label": "통화를 유지한 채 상황을 더 물어본다", "risk_flag": "caution" },
+        { "label": "끊지 말라는 말에 바로 은행 앱을 연다", "risk_flag": "risky" }
       ],
       "allow_free_input": true,
       "next_node_map": {
@@ -194,8 +222,7 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "도현",
-      "timer_seconds": 45
+      "sender_name": "도현"
     },
     {
       "node_id": "ending-safe-block",
