@@ -1,6 +1,5 @@
 const HAS_PROTOCOL_PATTERN = /^https?:\/\//i;
-const DOMAIN_LIKE_PATTERN =
-  /^([\da-z-]+\.)+[a-z]{2,}(:\d+)?(\/[^\s]*)?$/i;
+const DOMAIN_LIKE_PATTERN = /^([\da-z-]+\.)+[a-z]{2,}(:\d+)?(\/[^\s]*)?$/i;
 const IPV4_PATTERN = /^\d{1,3}(\.\d{1,3}){3}(:\d+)?(\/[^\s]*)?$/;
 
 /** 시나리오 browser 노드 기본 가짜 피싱 URL */
@@ -88,7 +87,7 @@ export function getScenarioSiteSecurityWarning(url: string): string | null {
   const isOfficialDomain = /\.go\.kr(\/|$|:)/i.test(url);
 
   if (httpWarning && !isOfficialDomain) {
-    return `${httpWarning}며 공식 도메인(go.kr)이 아닙니다`;
+    return `${httpWarning}, 공식 도메인(go.kr)이 아닙니다`;
   }
 
   if (httpWarning) {
@@ -96,7 +95,7 @@ export function getScenarioSiteSecurityWarning(url: string): string | null {
   }
 
   if (!isOfficialDomain && /secure-check|info-portal/i.test(url)) {
-    return "이 사이트는 보안 연결(HTTPS)이 아니며 공식 도메인(go.kr)이 아닙니다";
+    return "공식 도메인(go.kr)이 아닙니다";
   }
 
   return null;
