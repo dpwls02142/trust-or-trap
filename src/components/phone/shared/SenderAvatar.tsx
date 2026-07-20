@@ -1,3 +1,4 @@
+import { RiUserFill } from "@remixicon/react";
 import { resolveSenderAvatarPath } from "@/lib/scenario/sender-avatar";
 import type { ScenarioId } from "@/lib/scenario/types";
 
@@ -23,7 +24,7 @@ export function SenderAvatar({
         className={`flex ${sizeClass} items-center justify-center rounded-full ${fallbackSurfaceClass}`}
         aria-hidden
       >
-        👤
+        <RiUserFill size={20} className="opacity-60" aria-hidden />
       </span>
     );
   }

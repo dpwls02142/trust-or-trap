@@ -1,5 +1,7 @@
 "use client";
 
+import { RiArrowLeftSLine } from "@remixicon/react";
+
 interface AppBackButtonProps {
   onBack: () => void;
   /** 헤더 배경이 어두우면 dark, 밝으면 light */
@@ -28,18 +30,7 @@ export function AppBackButton({
       aria-label={ariaLabel}
       className={`flex shrink-0 items-center gap-0.5 rounded-lg px-1 py-1 transition-colors ${toneClassName}`}
     >
-      <svg
-        aria-hidden
-        viewBox="0 0 24 24"
-        className="h-5 w-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2.2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M15 18l-6-6 6-6" />
-      </svg>
+      <RiArrowLeftSLine size={20} aria-hidden />
     </button>
   );
 }

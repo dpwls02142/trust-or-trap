@@ -1,7 +1,20 @@
 "use client";
 
+import type { ComponentType } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence } from "framer-motion";
+import {
+  RiAccountCircleLine,
+  RiArrowRightUpLine,
+  RiChat3Fill,
+  RiCoinLine,
+  RiDeleteBack2Line,
+  RiGridFill,
+  RiHeartFill,
+  RiMailFill,
+  RiPhoneFill,
+  RiSearchEyeLine,
+} from "@remixicon/react";
 import { BrowserHomeView } from "./BrowserHomeView";
 import { AppBackButton } from "./shared/AppBackButton";
 import { InstaPostDetail } from "./shared/InstaPostDetail";
@@ -167,8 +180,8 @@ function ChatShellContent({
             onClick={() => onOpenThread(scenarioThread.senderName)}
             className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-neutral-50"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-300 text-xl">
-              💬
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-300 text-yellow-900">
+              <RiChat3Fill size={24} aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-black">
@@ -186,8 +199,8 @@ function ChatShellContent({
           key={rowItem.name}
           className="flex items-center gap-3 px-4 py-3 opacity-60"
         >
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-300 text-xl">
-            💬
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-300 text-yellow-900">
+            <RiChat3Fill size={24} aria-hidden />
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline justify-between gap-2">
@@ -219,8 +232,8 @@ function SmsShellContent({
             onClick={() => onOpenThread(scenarioThread.senderName)}
             className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-neutral-50"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-lg">
-              ✉️
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-700">
+              <RiMailFill size={20} aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-black">
@@ -238,8 +251,8 @@ function SmsShellContent({
           key={senderLabel}
           className="flex items-center gap-3 px-4 py-3 opacity-60"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-lg">
-            ✉️
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-700">
+            <RiMailFill size={20} aria-hidden />
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-black">{senderLabel}</p>
@@ -297,8 +310,9 @@ function InstaShellContent({
               alt=""
               className="absolute inset-0 block h-full w-full max-w-none object-cover object-center transition group-hover:scale-105"
             />
-            <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent px-1.5 py-1 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
-              ♥ {postItem.likeCount}
+            <span className="absolute inset-x-0 bottom-0 flex items-center gap-0.5 bg-gradient-to-t from-black/50 to-transparent px-1.5 py-1 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
+              <RiHeartFill size={10} aria-hidden />
+              {postItem.likeCount}
             </span>
           </button>
         ))}
@@ -449,13 +463,9 @@ function CallShellTabButton({
         aria-hidden
       >
         {tabId === "recents" ? (
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-            <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V21a1 1 0 01-1 1C10.07 22 2 13.93 2 3a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
-          </svg>
+          <RiPhoneFill size={16} aria-hidden />
         ) : (
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-            <path d="M4 5h3l2 5-2.5 1.5a11 11 0 005 5L13 14l5 2v3a1 1 0 01-1 1A15 15 0 014 5a1 1 0 011-1z" />
-          </svg>
+          <RiGridFill size={16} aria-hidden />
         )}
       </span>
       {label}
@@ -473,8 +483,8 @@ function CallRecentsView() {
     <ul className="divide-y divide-black/5">
       {callRows.map((rowItem) => (
         <li key={rowItem.name} className="flex items-center gap-3 px-4 py-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-lg">
-            📞
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+            <RiPhoneFill size={20} aria-hidden />
           </span>
           <div className="flex-1">
             <p className="text-sm font-semibold text-black">{rowItem.name}</p>
@@ -571,19 +581,7 @@ function DialDeleteButton({
       aria-label="한 글자 지우기. 길게 누르면 전체 삭제"
       className="flex h-14 w-14 select-none items-center justify-center rounded-full text-black/70 transition-colors hover:bg-neutral-100 active:bg-neutral-200 disabled:invisible touch-none"
     >
-      <svg
-        viewBox="0 0 24 24"
-        className="h-6 w-6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d="M21 4H8L1 12l7 8h13a2 2 0 002-2V6a2 2 0 00-2-2z" />
-        <path d="M18 9l-6 6M12 9l6 6" />
-      </svg>
+      <RiDeleteBack2Line size={24} aria-hidden />
     </button>
   );
 }
@@ -652,14 +650,7 @@ function CallDialKeypadView({
           aria-label="전화 걸기"
           className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white transition-colors hover:bg-emerald-600 active:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-neutral-400"
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-7 w-7"
-            fill="currentColor"
-            aria-hidden
-          >
-            <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V21a1 1 0 01-1 1C10.07 22 2 13.93 2 2a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" />
-          </svg>
+          <RiPhoneFill size={28} aria-hidden />
         </button>
 
         <DialDeleteButton
@@ -673,11 +664,14 @@ function CallDialKeypadView({
 }
 
 function BankShellContent() {
-  const quickMenuList = [
-    { label: "송금", icon: "↗" },
-    { label: "계좌조회", icon: "◎" },
-    { label: "대출", icon: "₩" },
-    { label: "MY", icon: "☺" },
+  const quickMenuList: Array<{
+    label: string;
+    MenuIcon: ComponentType<{ size?: number | string; className?: string }>;
+  }> = [
+    { label: "송금", MenuIcon: RiArrowRightUpLine },
+    { label: "계좌조회", MenuIcon: RiSearchEyeLine },
+    { label: "대출", MenuIcon: RiCoinLine },
+    { label: "MY", MenuIcon: RiAccountCircleLine },
   ];
 
   return (
@@ -706,8 +700,8 @@ function BankShellContent() {
             key={menuItem.label}
             className="flex flex-col items-center gap-1.5 rounded-2xl bg-white py-3 shadow-sm ring-1 ring-black/5"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-sm text-blue-700">
-              {menuItem.icon}
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+              <menuItem.MenuIcon size={18} aria-hidden />
             </span>
             <span className="text-[11px] font-medium text-black/70">{menuItem.label}</span>
           </div>

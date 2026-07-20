@@ -1,5 +1,6 @@
 "use client";
 
+import { RiGlobalFill } from "@remixicon/react";
 import { openExternalBrowserPage } from "@/lib/phone/browser-navigation";
 
 interface BrowserExternalPagePanelProps {
@@ -11,8 +12,8 @@ export function BrowserExternalPagePanel({
 }: BrowserExternalPagePanelProps) {
   return (
     <div className="phone-scroll flex min-h-0 flex-1 flex-col items-center justify-center gap-4 overflow-y-auto bg-neutral-50 px-6 py-8">
-      <span className="text-3xl" aria-hidden>
-        🌐
+      <span className="text-sky-600" aria-hidden>
+        <RiGlobalFill size={36} />
       </span>
       <div className="w-full max-w-xs text-center">
         <p className="text-sm font-semibold text-black">

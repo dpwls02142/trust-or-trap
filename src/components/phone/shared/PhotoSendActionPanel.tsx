@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { RiCameraFill } from "@remixicon/react";
 import { motion } from "framer-motion";
 import type { PhotoSendActionConfig } from "@/lib/phone/messaging-scenario-action";
 
@@ -56,7 +57,10 @@ export function PhotoSendActionPanel({
       aria-labelledby="photo-send-prompt"
     >
       <div className="px-4 py-3.5 text-center">
-        <p className="text-xs font-medium text-black/45">📷 사진</p>
+        <p className="flex items-center justify-center gap-1 text-xs font-medium text-black/45">
+          <RiCameraFill size={14} aria-hidden />
+          사진
+        </p>
         <p
           id="photo-send-prompt"
           className="mt-1.5 text-sm font-semibold leading-snug text-black"

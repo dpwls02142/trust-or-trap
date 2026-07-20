@@ -1,6 +1,12 @@
 "use client";
 
+import type { ComponentType } from "react";
 import { motion } from "framer-motion";
+import {
+  RiAlarmWarningFill,
+  RiAlertFill,
+  RiCheckboxCircleFill,
+} from "@remixicon/react";
 import type { EndingConsequence, EndingType, RiskSignalRecord } from "@/lib/scenario/types";
 
 interface EndingReportProps {
@@ -13,23 +19,28 @@ interface EndingReportProps {
 
 const endingPresentationMap: Record<
   EndingType,
-  { endingEmoji: string; endingTitle: string; endingDescription: string; accentClass: string }
+  {
+    EndingIcon: ComponentType<{ size?: number | string; className?: string }>;
+    endingTitle: string;
+    endingDescription: string;
+    accentClass: string;
+  }
 > = {
   safe: {
-    endingEmoji: "✅",
+    EndingIcon: RiCheckboxCircleFill,
     endingTitle: "안전하게 빠져나왔습니다",
     endingDescription: "위험 신호를 식별하고 회피/신고까지 해냈어요. 실제 상황에서도 이 감각을 기억하세요.",
     accentClass: "text-emerald-400",
   },
   warning: {
-    endingEmoji: "⚠️",
+    EndingIcon: RiAlertFill,
     endingTitle: "피해를 인지하고 멈췄습니다",
     endingDescription:
       "일부 피해가 있었지만 늦지 않게 알아챘어요. 실제라면 지금이 지급정지·신고의 골든타임입니다. (경찰 112 / 금융감독원 1332)",
     accentClass: "text-amber-400",
   },
   harm: {
-    endingEmoji: "🚨",
+    EndingIcon: RiAlarmWarningFill,
     endingTitle: "피해가 깊어졌습니다",
     endingDescription:
       "요구에 응할수록 피해가 커지는 구조를 체험했어요. 피해자는 잘못이 없으며, 실제 상황에서는 즉시 112·1332로 도움을 요청하세요.",
@@ -74,6 +85,7 @@ export function EndingReport({
 }: EndingReportProps) {
   const endingPresentation = endingPresentationMap[endingType];
   const consequenceTheme = consequenceThemeMap[endingType];
+  const EndingIconComponent = endingPresentation.EndingIcon;
 
   return (
     <motion.div
@@ -82,7 +94,11 @@ export function EndingReport({
       className="phone-scroll flex h-full flex-col gap-5 overflow-y-auto bg-[#0a0a0f] px-5 pb-8 pt-14 text-white"
     >
       <div className="text-center">
-        <span className="text-4xl">{endingPresentation.endingEmoji}</span>
+        <EndingIconComponent
+          size={40}
+          className={endingPresentation.accentClass}
+          aria-hidden
+        />
         <h2 className={`mt-2 text-xl font-bold ${endingPresentation.accentClass}`}>
           {endingPresentation.endingTitle}
         </h2>

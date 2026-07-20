@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { RiMicFill, RiSendPlaneFill } from "@remixicon/react";
 import { motion } from "framer-motion";
 import type { NodeOption } from "@/lib/scenario/types";
 import {
@@ -174,15 +175,15 @@ export function ResponseComposer({
               onClick={handleMicToggle}
               disabled={isAwaitingResponse}
               aria-label={isListening ? "음성 입력 중지" : "음성으로 답하기"}
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg transition disabled:opacity-40 ${
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition disabled:opacity-40 ${
                 isListening
                   ? "animate-pulse bg-red-500 text-white"
                   : isDarkTheme
-                    ? "bg-white/10"
-                    : "bg-neutral-100"
+                    ? "bg-white/10 text-white"
+                    : "bg-neutral-100 text-black"
               }`}
             >
-              🎤
+              <RiMicFill size={20} aria-hidden />
             </button>
           )}
           <button
@@ -191,7 +192,7 @@ export function ResponseComposer({
             aria-label="보내기"
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white transition disabled:opacity-40"
           >
-            ➤
+            <RiSendPlaneFill size={18} aria-hidden />
           </button>
         </div>
       )}
