@@ -101,6 +101,8 @@
 | `contactName` | string? | 프롤로그·과거 대화 연출용 연락처 이름. `nodeId: scenario-prologue`와 함께 사용 |
 | `nodeId: scenario-prologue` | string | LLM advance/judge 대상이 아닌 정적 프롤로그 메시지 마커 |
 
+프롤로그·잠금화면 템플릿 치환(`player-honorifics.ts`): `{displayName}`, `{displayNameCasual}`, `{peerHonorific}`, `{peerHonorificExclaim}`, `{parentHonorific}`, `{parentSelfReference}` — 온보딩 `gender` 기준.
+
 ## 4. 사건 단계 (`stage`)
 
 모든 시나리오가 공유하는 공통 골격.

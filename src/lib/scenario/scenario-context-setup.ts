@@ -1,4 +1,8 @@
-import type { AppType, ChatHistoryEntry, ScenarioId } from "./types";
+import type { AppType, ChatHistoryEntry, GenderValue, ScenarioId } from "./types";
+import {
+  applyPlayerProfileTemplate,
+  resolvePlayerHonorifics,
+} from "./player-honorifics";
 
 /** 프롤로그·과거 대화 연출용 고정 nodeId — LLM advance/judge 대상 아님 */
 export const scenarioPrologueNodeId = "scenario-prologue";
@@ -99,7 +103,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
       },
       {
         speaker: "scammer",
-        messageText: "형 여기서 거래 많이 해. 레전드템 있는데 관심 있어?",
+        messageText: "{peerHonorific} 여기서 거래 많이 해. 레전드템 있는데 관심 있어?",
       },
       {
         speaker: "player",
@@ -174,7 +178,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
     prologueMessages: [
       {
         speaker: "scammer",
-        messageText: "{displayName}야 대출 갚기 빡세지 ㅠㅠ 괜찮아?",
+        messageText: "{displayNameCasual} 대출 갚기 빡세지 ㅠㅠ 괜찮아?",
       },
       {
         speaker: "player",
@@ -189,7 +193,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
       {
         appType: "chat",
         senderName: "김민수",
-        previewText: "형 진짜 이 방 수익 미쳤어 ㄷㄷ 한번만 봐봐",
+        previewText: "{peerHonorific} 진짜 이 방 수익 미쳤어 ㄷㄷ 한번만 봐봐",
         relativeTimeLabel: "10분 전",
       },
       {
@@ -203,7 +207,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
     prologueMessages: [
       {
         speaker: "scammer",
-        messageText: "형! 요즘 주식 안 해? 친구가 VIP 리딩방 알려줬는데 대박이야",
+        messageText: "{peerHonorificExclaim} 요즘 주식 안 해? 친구가 VIP 리딩방 알려줬는데 대박이야",
       },
       {
         speaker: "player",
@@ -234,11 +238,11 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
     prologueMessages: [
       {
         speaker: "scammer",
-        messageText: "아빠 이번 달 이자 부담 너무 크지 않아요? 걱정돼요",
+        messageText: "{parentHonorific} 이번 달 이자 부담 너무 크지 않아요? 걱정돼요",
       },
       {
         speaker: "player",
-        messageText: "괜찮아. 아빠가 알아서 할게.",
+        messageText: "괜찮아. {parentSelfReference} 알아서 할게.",
       },
       {
         speaker: "scammer",
@@ -253,7 +257,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
       {
         appType: "sms",
         senderName: "딸",
-        previewText: "아빠 오늘 병원 예약 확인했어요. 저녁에 전화할게요",
+        previewText: "{parentHonorific} 오늘 병원 예약 확인했어요. 저녁에 전화할게요",
         relativeTimeLabel: "20분 전",
       },
       {
@@ -267,7 +271,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
     prologueMessages: [
       {
         speaker: "scammer",
-        messageText: "아빠 오늘 병원 예약 확인했어요. 저녁에 전화할게요",
+        messageText: "{parentHonorific} 오늘 병원 예약 확인했어요. 저녁에 전화할게요",
       },
       {
         speaker: "player",
@@ -277,31 +281,38 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
   },
 };
 
-function applyDisplayNameTemplate(
-  templateText: string,
-  displayName: string,
-): string {
-  return templateText.replaceAll("{displayName}", displayName);
-}
-
 export function resolveScenarioContextSetup(
   scenarioId: ScenarioId,
 ): ScenarioContextSetupEntry {
   return scenarioContextSetupMap[scenarioId];
 }
 
+function personalizeContextText(
+  templateText: string,
+  displayName: string,
+  genderValue: GenderValue,
+): string {
+  return applyPlayerProfileTemplate(
+    templateText,
+    displayName,
+    resolvePlayerHonorifics(genderValue),
+  );
+}
+
 export function buildScenarioPrologueEntries(
   scenarioId: ScenarioId,
   displayName: string,
+  genderValue: GenderValue,
 ): ChatHistoryEntry[] {
   const contextSetup = resolveScenarioContextSetup(scenarioId);
   const { prologueThread, prologueMessages } = contextSetup;
 
   return prologueMessages.map((messageTemplate) => ({
     speaker: messageTemplate.speaker,
-    messageText: applyDisplayNameTemplate(
+    messageText: personalizeContextText(
       messageTemplate.messageText,
       displayName,
+      genderValue,
     ),
     nodeId: scenarioPrologueNodeId,
     elapsedDays: messageTemplate.elapsedDays,
@@ -318,8 +329,19 @@ export function resolvePrologueThreadSpec(
 
 export function resolveLockScreenNotifications(
   scenarioId: ScenarioId,
+  displayName: string,
+  genderValue: GenderValue,
 ): LockScreenNotificationSpec[] {
-  return resolveScenarioContextSetup(scenarioId).lockScreenNotifications;
+  return resolveScenarioContextSetup(scenarioId).lockScreenNotifications.map(
+    (notificationItem) => ({
+      ...notificationItem,
+      previewText: personalizeContextText(
+        notificationItem.previewText,
+        displayName,
+        genderValue,
+      ),
+    }),
+  );
 }
 
 export function resolveSimulationIntroLine(scenarioId: ScenarioId): string {

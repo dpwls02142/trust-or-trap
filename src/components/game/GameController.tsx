@@ -457,6 +457,7 @@ export function GameController() {
           prologueChatHistory: buildScenarioPrologueEntries(
             selectedScenarioId,
             userProfile?.displayName ?? "플레이어",
+            userProfile?.gender ?? "male",
           ),
         });
       } catch {
@@ -477,9 +478,13 @@ export function GameController() {
   }, [beginDelayedNotificationReveal]);
 
   const lockScreenNotifications = useMemo(() => {
-    if (!activeScenarioId) return [];
-    return resolveLockScreenNotifications(activeScenarioId);
-  }, [activeScenarioId]);
+    if (!activeScenarioId || !userProfile) return [];
+    return resolveLockScreenNotifications(
+      activeScenarioId,
+      userProfile.displayName,
+      userProfile.gender,
+    );
+  }, [activeScenarioId, userProfile]);
 
   const prologueThreadSpec = useMemo(() => {
     if (!activeScenarioId) return null;
