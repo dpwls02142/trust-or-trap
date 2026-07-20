@@ -143,7 +143,7 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
 
       {isPageRevealed && (
         <ScenarioActionPanel
-          composerResetKey={currentNode.node_id}
+          key={currentNode.node_id}
           panelTitle={browserPageConfig.actionPanelTitle}
           panelHint={browserPageConfig.actionPanelHint}
           availableOptions={sharedProps.availableOptions}

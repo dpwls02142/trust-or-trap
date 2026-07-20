@@ -21,8 +21,6 @@ interface ResponseComposerProps {
   inputTutorialMode?: InputTutorialMode | null;
   isInputTutorialVisible?: boolean;
   onDismissInputTutorial?: () => void;
-  /** 노드 전환 시 입력창 초기화용 키 (call→call 등 동일 앱 유지 시 잔존 방지) */
-  composerResetKey?: string;
 }
 
 /** 브라우저 SpeechRecognition 최소 타입 (표준 타입 미제공 브라우저 대응) */
@@ -72,7 +70,6 @@ export function ResponseComposer({
   inputTutorialMode = null,
   isInputTutorialVisible = false,
   onDismissInputTutorial,
-  composerResetKey,
 }: ResponseComposerProps) {
   const [freeInputText, setFreeInputText] = useState("");
   const [isListening, setIsListening] = useState(false);
@@ -100,13 +97,6 @@ export function ResponseComposer({
   const dismissTutorialIfNeeded = useCallback(() => {
     if (showTutorialBanner) onDismissInputTutorial?.();
   }, [showTutorialBanner, onDismissInputTutorial]);
-
-  useEffect(() => {
-    if (composerResetKey === undefined) return;
-    setFreeInputText("");
-    setIsListening(false);
-    recognitionRef.current?.stop();
-  }, [composerResetKey]);
 
   const handleMicToggle = useCallback(() => {
     dismissTutorialIfNeeded();

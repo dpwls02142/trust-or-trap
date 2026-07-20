@@ -112,7 +112,7 @@ export function CallScreen(sharedProps: PhoneAppSharedProps) {
         </div>
 
         <ResponseComposer
-          composerResetKey={currentNode.node_id}
+          key={currentNode.node_id}
           availableOptions={sharedProps.availableOptions}
           allowFreeInput={currentNode.allow_free_input}
           voiceEnabled={currentNode.voice_enabled}

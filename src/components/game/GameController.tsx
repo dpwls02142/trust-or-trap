@@ -124,6 +124,7 @@ export function GameController() {
     contextText?: string;
   } | null>(null);
   const [pendingMessageLinkConfirm, setPendingMessageLinkConfirm] = useState<{
+    nodeId: string;
     promptText: string;
     actionVariant: MessageLinkActionVariant;
     submitResponseText?: string;
@@ -352,6 +353,17 @@ export function GameController() {
     !streamingMessage &&
     inputTutorialMode !== null;
 
+  const activeMessageLinkConfirm = useMemo(() => {
+    if (
+      !pendingMessageLinkConfirm ||
+      !currentNode ||
+      pendingMessageLinkConfirm.nodeId !== currentNode.node_id
+    ) {
+      return null;
+    }
+    return pendingMessageLinkConfirm;
+  }, [pendingMessageLinkConfirm, currentNode]);
+
   // 플레이 중 새 노드 진입 시 대사 생성 (마이크로태스크로 미뤄 렌더 사이클과 분리)
   useEffect(() => {
     if (
@@ -379,10 +391,6 @@ export function GameController() {
     isNodeMessageGenerated,
     runAdvanceForNode,
   ]);
-
-  useEffect(() => {
-    setPendingMessageLinkConfirm(null);
-  }, [currentNode?.node_id]);
 
   // TTS 큐 — 홈↔앱 왕복 중에도 진행 중인 통화 대사가 끊기지 않도록 home 단계에서 유지
   useEffect(() => {
@@ -625,13 +633,14 @@ export function GameController() {
   );
 
   const handleMessageLinkClick = useCallback(
-    (_linkUrl: string) => {
+    () => {
       if (!currentNode || isAwaitingResponse || streamingMessage) return;
 
       const linkActionConfig = resolveMessageLinkActionConfig(currentNode.node_id);
       if (!linkActionConfig) return;
 
       setPendingMessageLinkConfirm({
+        nodeId: currentNode.node_id,
         promptText: linkActionConfig.transitionPrompt,
         actionVariant: linkActionConfig.actionVariant,
         submitResponseText: linkActionConfig.submitResponseText,
@@ -645,13 +654,13 @@ export function GameController() {
   }, []);
 
   const handleConfirmMessageLink = useCallback(async () => {
-    if (!pendingMessageLinkConfirm?.submitResponseText) return;
+    if (!activeMessageLinkConfirm?.submitResponseText) return;
 
-    const { submitResponseText } = pendingMessageLinkConfirm;
+    const { submitResponseText } = activeMessageLinkConfirm;
     setPendingMessageLinkConfirm(null);
     shouldEnterNextAppDirectlyRef.current = true;
     await submitScenarioResponse(submitResponseText);
-  }, [pendingMessageLinkConfirm, submitScenarioResponse]);
+  }, [activeMessageLinkConfirm, submitScenarioResponse]);
 
   const handleUserResponse = useCallback(
     async (responseText: string) => {
@@ -1009,14 +1018,14 @@ export function GameController() {
               onHangUpCall={handleHangUpCall}
               onTimerExpire={handleTimerExpire}
             />
-            {pendingMessageLinkConfirm && (
+            {activeMessageLinkConfirm && (
               <AppTransitionConfirm
                 targetAppType={
-                  pendingMessageLinkConfirm.actionVariant === "open_chat_invite"
+                  activeMessageLinkConfirm.actionVariant === "open_chat_invite"
                     ? "chat"
                     : "browser"
                 }
-                promptText={pendingMessageLinkConfirm.promptText}
+                promptText={activeMessageLinkConfirm.promptText}
                 onConfirmOpen={() => void handleConfirmMessageLink()}
                 onDismiss={handleDismissMessageLinkConfirm}
               />

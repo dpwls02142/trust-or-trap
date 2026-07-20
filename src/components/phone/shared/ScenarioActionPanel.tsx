@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { NodeOption } from "@/lib/scenario/types";
 
@@ -13,7 +13,6 @@ interface ScenarioActionPanelProps {
   isAwaitingResponse: boolean;
   onSelectOption: (optionLabel: string) => void;
   onSubmitFreeInput: (inputText: string) => void;
-  composerResetKey?: string;
 }
 
 /**
@@ -29,14 +28,8 @@ export function ScenarioActionPanel({
   isAwaitingResponse,
   onSelectOption,
   onSubmitFreeInput,
-  composerResetKey,
 }: ScenarioActionPanelProps) {
   const [freeInputText, setFreeInputText] = useState("");
-
-  useEffect(() => {
-    if (composerResetKey === undefined) return;
-    setFreeInputText("");
-  }, [composerResetKey]);
 
   const submitFreeInput = () => {
     const trimmedInput = freeInputText.trim();
