@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { findBankToBankProgressionIssues } from "./bank-transfer-graph-rules";
 
 /**
  * Zod 스키마 — 외부에서 들어오는 모든 데이터의 검증 레이어.
@@ -161,6 +162,13 @@ export const scenarioGraphSchema = z
           }
         }
       }
+    }
+
+    for (const issueMessage of findBankToBankProgressionIssues(graphValue.nodes)) {
+      refineContext.addIssue({
+        code: "custom",
+        message: issueMessage,
+      });
     }
   });
 
