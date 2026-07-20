@@ -54,6 +54,7 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
         isAwaitingResponse={sharedProps.isAwaitingResponse}
         currentElapsedDays={currentNode.elapsed_days}
         onOpenAttachmentLightbox={openAttachmentLightbox}
+        shouldSplitLinkBubbles
         bubbleTheme={{
           threadBackgroundClass: "bg-white",
           incomingBubbleClass: "bg-neutral-200 text-black",

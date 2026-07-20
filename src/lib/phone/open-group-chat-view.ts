@@ -22,11 +22,9 @@ export function resolveOpenGroupChatHeader(
   };
 }
 
-/**
- * 단톡방 플레이어 말풍선 읽음 수 — 카카오톡처럼 99·87 등으로 표시.
- * entryIndex 기반 결정적 값(O(1)).
- */
-export function resolveGroupChatReadCount(entryIndex: number): number {
-  const readCountPool = [99, 87, 64, 41, 28, 15, 9, 4, 2, 1];
-  return readCountPool[entryIndex % readCountPool.length] ?? 1;
+/** 오픈채팅 말풍선 오른쪽 읽음 수 — 카카오톡 단톡 연출 */
+export const OPEN_GROUP_CHAT_READ_COUNT = 99;
+
+export function resolveGroupChatReadCount(): number {
+  return OPEN_GROUP_CHAT_READ_COUNT;
 }
