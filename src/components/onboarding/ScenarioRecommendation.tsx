@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { AppBackButton } from "@/components/phone/shared/AppBackButton";
 import { matchPersonaScenario } from "@/lib/scenario/persona-matching";
 import { scenarioCatalog } from "@/lib/scenario/scenario-catalog";
+import { resolveSimulationIntroLine } from "@/lib/scenario/scenario-context-setup";
 import type { ScenarioId, UserProfile } from "@/lib/scenario/types";
 import { OnboardingCopyright } from "@/components/onboarding/OnboardingCopyright";
 
@@ -28,6 +29,9 @@ export function ScenarioRecommendation({
     [userProfile],
   );
   const primaryEntry = scenarioCatalog[matchResult.primaryScenarioId];
+  const primaryIntroLine = resolveSimulationIntroLine(
+    matchResult.primaryScenarioId,
+  );
 
   return (
     <motion.div
@@ -57,17 +61,21 @@ export function ScenarioRecommendation({
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <h3 className="text-lg font-semibold">
-              {primaryEntry.scenarioTitle}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-white/70">
-              {primaryEntry.scenarioSynopsis}
+            <p className="text-xs font-medium uppercase tracking-wide text-sky-300/80">
+              시뮬레이션 미리보기
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-white/80">
+              {primaryIntroLine}
             </p>
             {!primaryEntry.voiceEnabled && (
               <p className="mt-3 text-xs text-emerald-300/80">
                 이 시나리오는 텍스트/이미지 채팅으로만 진행됩니다 (음성 미사용).
               </p>
             )}
+            <p className="mt-3 text-xs text-white/45">
+              시작하면 폰 잠금화면·과거 대화·알림을 통해 상황을 직접 확인하게
+              됩니다.
+            </p>
           </div>
 
           <button
@@ -75,7 +83,7 @@ export function ScenarioRecommendation({
             disabled={isStarting}
             className="rounded-xl bg-sky-500 py-3.5 text-base font-semibold transition hover:bg-sky-400 disabled:opacity-50"
           >
-            {isStarting ? "준비 중..." : "이 이야기로 바로 시작"}
+            {isStarting ? "준비 중..." : "시뮬레이션 시작"}
           </button>
 
           <button
@@ -107,6 +115,9 @@ export function ScenarioRecommendation({
                       </span>
                       <span className="mt-1 block text-xs text-white/60">
                         {alternativeEntry.crimeLabel}
+                      </span>
+                      <span className="mt-2 block text-xs leading-relaxed text-white/45">
+                        {resolveSimulationIntroLine(alternativeId)}
                       </span>
                     </button>
                   </li>
