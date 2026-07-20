@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import type { PhotoSendActionConfig } from "@/lib/phone/messaging-scenario-action";
 
@@ -22,14 +22,11 @@ export function PhotoSendActionPanel({
   onDismissPrompt,
   onPhotoSendSubmit,
 }: PhotoSendActionPanelProps) {
-  const [isPromptHidden, setIsPromptHidden] = useState(false);
-
-  useEffect(() => {
-    setIsPromptHidden(false);
-  }, [composerResetKey]);
+  const [hiddenPromptKey, setHiddenPromptKey] = useState<string | null>(null);
+  const isPromptHidden = hiddenPromptKey === composerResetKey;
 
   const handleConfirmSend = useCallback(() => {
-    setIsPromptHidden(true);
+    setHiddenPromptKey(composerResetKey);
     onPhotoSendSubmit(
       actionConfig.attachmentImagePath,
       actionConfig.sendOptionLabel,
@@ -37,13 +34,14 @@ export function PhotoSendActionPanel({
   }, [
     actionConfig.attachmentImagePath,
     actionConfig.sendOptionLabel,
+    composerResetKey,
     onPhotoSendSubmit,
   ]);
 
   const handleDismiss = useCallback(() => {
-    setIsPromptHidden(true);
+    setHiddenPromptKey(composerResetKey);
     onDismissPrompt();
-  }, [onDismissPrompt]);
+  }, [composerResetKey, onDismissPrompt]);
 
   if (!isInteractionEnabled || isPromptHidden) {
     return null;

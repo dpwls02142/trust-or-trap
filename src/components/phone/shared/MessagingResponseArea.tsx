@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ResponseComposer } from "./ResponseComposer";
 import { PhotoSendActionPanel } from "./PhotoSendActionPanel";
 import { resolvePhotoSendActionConfig } from "@/lib/phone/messaging-scenario-action";
@@ -61,11 +61,10 @@ export function MessagingResponseArea({
     [chatHistory, nodeId],
   );
 
-  const [isPhotoPromptDismissed, setIsPhotoPromptDismissed] = useState(false);
-
-  useEffect(() => {
-    setIsPhotoPromptDismissed(false);
-  }, [nodeId]);
+  const [dismissedPhotoPromptNodeId, setDismissedPhotoPromptNodeId] = useState<
+    string | null
+  >(null);
+  const isPhotoPromptDismissed = dismissedPhotoPromptNodeId === nodeId;
 
   const isPhotoActionReady =
     !!photoSendActionConfig &&
@@ -82,14 +81,14 @@ export function MessagingResponseArea({
           actionConfig={photoSendActionConfig}
           composerResetKey={nodeId}
           isInteractionEnabled={isPhotoActionReady}
-          onDismissPrompt={() => setIsPhotoPromptDismissed(true)}
+          onDismissPrompt={() => setDismissedPhotoPromptNodeId(nodeId)}
           onPhotoSendSubmit={onPhotoSendSubmit}
         />
       )}
 
       <div className={composerBackgroundClass}>
         <ResponseComposer
-        composerResetKey={nodeId}
+        key={nodeId}
         availableOptions={availableOptions}
         allowFreeInput={allowFreeInput}
         voiceEnabled={voiceEnabled}

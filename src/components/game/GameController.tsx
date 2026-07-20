@@ -39,6 +39,8 @@ import {
   type PriorMessageChannel,
 } from "@/lib/phone/call-hang-up-follow-up";
 import { isAwaitingOutboundDial, nextNodeRequiresOutboundDial } from "@/lib/phone/dial-number";
+import { resolveMessageLinkActionConfig } from "@/lib/phone/messaging-scenario-action";
+import type { MessageLinkActionVariant } from "@/lib/phone/messaging-scenario-action";
 import { resolveStatusBarContentStyle } from "@/lib/phone/app-display";
 import { useScenarioNotification } from "@/lib/phone/use-scenario-notification";
 import { StatusBarOverrideProvider } from "@/lib/phone/status-bar-override";
@@ -121,6 +123,12 @@ export function GameController() {
     promptText: string;
     contextText?: string;
   } | null>(null);
+  const [pendingMessageLinkConfirm, setPendingMessageLinkConfirm] = useState<{
+    nodeId: string;
+    promptText: string;
+    actionVariant: MessageLinkActionVariant;
+    submitResponseText?: string;
+  } | null>(null);
   const [hasCompletedOutboundDial, setHasCompletedOutboundDial] =
     useState(true);
   const [homeNotificationOverride, setHomeNotificationOverride] = useState<{
@@ -132,6 +140,7 @@ export function GameController() {
   const lastMessageContactRef = useRef<PriorMessageChannel | null>(null);
   const ttsQueueRef = useRef<SentenceTtsQueue | null>(null);
   const scenarioSelectGenerationRef = useRef(0);
+  const shouldEnterNextAppDirectlyRef = useRef(false);
 
   // SSR/hydration 안전 가드 — persist 복원 전 첫 렌더 불일치 방지
   // (서버 스냅샷 false, 클라이언트 true → effect 없이 하이드레이션 여부 구독)
@@ -344,6 +353,17 @@ export function GameController() {
     !streamingMessage &&
     inputTutorialMode !== null;
 
+  const activeMessageLinkConfirm = useMemo(() => {
+    if (
+      !pendingMessageLinkConfirm ||
+      !currentNode ||
+      pendingMessageLinkConfirm.nodeId !== currentNode.node_id
+    ) {
+      return null;
+    }
+    return pendingMessageLinkConfirm;
+  }, [pendingMessageLinkConfirm, currentNode]);
+
   // 플레이 중 새 노드 진입 시 대사 생성 (마이크로태스크로 미뤄 렌더 사이클과 분리)
   useEffect(() => {
     if (
@@ -546,6 +566,17 @@ export function GameController() {
             }
           }
 
+          if (shouldEnterNextAppDirectlyRef.current) {
+            shouldEnterNextAppDirectlyRef.current = false;
+            setPendingAppTransition(null);
+            setHasOpenedCurrentApp(true);
+            setAppPlayMode("scenario");
+            setShellAppType(null);
+            revealNotificationImmediately();
+            resetScenarioNotification();
+            return;
+          }
+
           setPendingAppTransition({
             targetAppType: nextNode.app_type,
             promptText: resolveAppTransitionPrompt(
@@ -597,8 +628,39 @@ export function GameController() {
       stopActiveCall,
       beginOutboundDialPrompt,
       revealNotificationImmediately,
+      resetScenarioNotification,
     ],
   );
+
+  const handleMessageLinkClick = useCallback(
+    () => {
+      if (!currentNode || isAwaitingResponse || streamingMessage) return;
+
+      const linkActionConfig = resolveMessageLinkActionConfig(currentNode.node_id);
+      if (!linkActionConfig) return;
+
+      setPendingMessageLinkConfirm({
+        nodeId: currentNode.node_id,
+        promptText: linkActionConfig.transitionPrompt,
+        actionVariant: linkActionConfig.actionVariant,
+        submitResponseText: linkActionConfig.submitResponseText,
+      });
+    },
+    [currentNode, isAwaitingResponse, streamingMessage],
+  );
+
+  const handleDismissMessageLinkConfirm = useCallback(() => {
+    setPendingMessageLinkConfirm(null);
+  }, []);
+
+  const handleConfirmMessageLink = useCallback(async () => {
+    if (!activeMessageLinkConfirm?.submitResponseText) return;
+
+    const { submitResponseText } = activeMessageLinkConfirm;
+    setPendingMessageLinkConfirm(null);
+    shouldEnterNextAppDirectlyRef.current = true;
+    await submitScenarioResponse(submitResponseText);
+  }, [activeMessageLinkConfirm, submitScenarioResponse]);
 
   const handleUserResponse = useCallback(
     async (responseText: string) => {
@@ -937,7 +999,7 @@ export function GameController() {
       {gamePhase === "playing" &&
         appPlayMode === "scenario" &&
         currentNode && (
-          <div className="h-full">
+          <div className="relative h-full">
             <ScenarioAppRenderer
               activeScenarioId={activeScenarioId}
               currentNode={currentNode}
@@ -951,10 +1013,23 @@ export function GameController() {
               onSelectOption={handleUserResponse}
               onSubmitFreeInput={handleUserResponse}
               onPhotoSendSubmit={handlePhotoSendSubmit}
+              onMessageLinkClick={handleMessageLinkClick}
               onExitToHome={handleExitToHome}
               onHangUpCall={handleHangUpCall}
               onTimerExpire={handleTimerExpire}
             />
+            {activeMessageLinkConfirm && (
+              <AppTransitionConfirm
+                targetAppType={
+                  activeMessageLinkConfirm.actionVariant === "open_chat_invite"
+                    ? "chat"
+                    : "browser"
+                }
+                promptText={activeMessageLinkConfirm.promptText}
+                onConfirmOpen={() => void handleConfirmMessageLink()}
+                onDismiss={handleDismissMessageLinkConfirm}
+              />
+            )}
           </div>
         )}
 

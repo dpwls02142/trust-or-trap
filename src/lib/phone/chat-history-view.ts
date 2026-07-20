@@ -53,7 +53,13 @@ export function filterChatHistoryByAppType(
   const hasTypedEntries = chatHistory.some((entryItem) => entryItem.appType);
 
   return chatHistory.filter((entryItem) => {
-    if (entryItem.speaker === "system") return false;
+    if (entryItem.speaker === "system") {
+      // 오픈채팅 입장·타 회원 연출은 chat 스레드 과거 내역에 포함
+      if (appType === "chat" && entryItem.appType === "chat") {
+        return true;
+      }
+      return false;
+    }
     if (entryItem.appType) return entryItem.appType === appType;
     if (!hasTypedEntries) return true;
     return false;

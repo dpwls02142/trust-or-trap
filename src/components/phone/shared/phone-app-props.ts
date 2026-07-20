@@ -27,4 +27,6 @@ export interface PhoneAppSharedProps {
   onExitToHome: () => void;
   /** 통화 종료 — 연결을 끊고 홈으로 */
   onHangUpCall: () => void;
+  /** 수신 링크 말풍선 탭 — 노드별 특수 인터랙션(초대 링크 등) */
+  onMessageLinkClick?: (linkUrl: string) => void;
 }
