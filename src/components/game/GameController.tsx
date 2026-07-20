@@ -29,7 +29,6 @@ import {
 } from "@/lib/scenario/open-group-chat-preamble";
 import {
   resolveAppTransitionPrompt,
-  resolveBrowserPageConfig,
 } from "@/lib/phone/browser-scenario-page";
 import {
   buildHangUpFollowUpMessage,
@@ -589,12 +588,6 @@ export function GameController() {
               appTransitionPromptMap,
               defaultAppTransitionPrompt,
             ),
-            ...(nextNode.app_type === "browser"
-              ? {
-                  contextText: resolveBrowserPageConfig(nextNode.node_id)
-                    .entryContextText,
-                }
-              : {}),
           });
           setHasOpenedCurrentApp(false);
           setAppPlayMode("scenario");

@@ -9,9 +9,7 @@ import { TypingIndicator } from "./TypingIndicator";
 
 interface BrowserScenarioPagePanelProps {
   pageVariant: BrowserPageVariant;
-  entryContextText: string;
   primaryActionLabel: string;
-  preRevealHint: string;
   loadingLabel: string;
   reverseImageProfilePath: string | null;
   reverseImageProfileName: string;
@@ -29,9 +27,7 @@ interface BrowserScenarioPagePanelProps {
  */
 export function BrowserScenarioPagePanel({
   pageVariant,
-  entryContextText,
   primaryActionLabel,
-  preRevealHint,
   loadingLabel,
   reverseImageProfilePath,
   reverseImageProfileName,
@@ -48,7 +44,6 @@ export function BrowserScenarioPagePanel({
 
   const sharedPageProps: InteractivePageProps = {
     primaryActionLabel,
-    preRevealHint,
     loadingLabel,
     pageNoticeText,
     showPagePending,
@@ -60,12 +55,6 @@ export function BrowserScenarioPagePanel({
 
   return (
     <div className="phone-scroll flex-1 overflow-y-auto bg-white">
-      <div className="border-b border-sky-100 bg-sky-50 px-4 py-3">
-        <p className="text-[11px] leading-relaxed text-sky-900">
-          {entryContextText}
-        </p>
-      </div>
-
       <div className="px-4 py-5">
         {pageVariant === "reverse_image_search" && (
           <ReverseImageSearchPage
@@ -93,7 +82,6 @@ export function BrowserScenarioPagePanel({
 
 interface InteractivePageProps {
   primaryActionLabel: string;
-  preRevealHint: string;
   loadingLabel: string;
   pageNoticeText: string;
   showPagePending: boolean;
@@ -105,7 +93,6 @@ interface InteractivePageProps {
 
 function ReverseImageSearchPage({
   primaryActionLabel,
-  preRevealHint,
   loadingLabel,
   reverseImageProfilePath,
   reverseImageProfileName,
@@ -125,12 +112,6 @@ function ReverseImageSearchPage({
       <h3 className="mt-1 text-sm font-bold text-black">
         {isPageRevealed ? "프로필 사진 일치 결과" : "프로필 사진 검색"}
       </h3>
-
-      {!isPageRevealed && (
-        <p className="mt-2 text-[11px] leading-relaxed text-black/45">
-          {preRevealHint}
-        </p>
-      )}
 
       <div className="mt-4 flex gap-3">
         <ReverseImageProfileThumbnail
@@ -154,7 +135,7 @@ function ReverseImageSearchPage({
               animate={{ opacity: 1, y: 0 }}
               className="min-w-0 flex-1 text-xs leading-relaxed text-black/70"
             >
-              <p className="font-semibold text-amber-700">
+              <p className="font-semibold text-black/80">
                 유사 이미지 다수 발견
               </p>
               <p className="mt-1">· 커뮤니티 게시글에 동일 사진</p>
@@ -187,10 +168,9 @@ function ReverseImageSearchPage({
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-relaxed text-amber-900"
+            className="mt-4 rounded-xl border border-black/10 bg-neutral-50 p-3 text-xs leading-relaxed text-black/70"
           >
-            동일한 사진이 여러 계정·게시글에서 발견되었습니다. 본인 사진이 아닐
-            가능성이 높습니다.
+            동일한 사진이 여러 계정·게시글에서 발견되었습니다.
           </motion.div>
         )}
       </AnimatePresence>
@@ -200,7 +180,6 @@ function ReverseImageSearchPage({
 
 function FakeGovernmentPortalPage({
   primaryActionLabel,
-  preRevealHint,
   loadingLabel,
   pageNoticeText,
   showPagePending,
@@ -220,12 +199,6 @@ function FakeGovernmentPortalPage({
       </div>
 
       <div className="relative space-y-3 bg-white p-4">
-        {!isPageRevealed && (
-          <p className="text-[11px] leading-relaxed text-black/45">
-            {preRevealHint}
-          </p>
-        )}
-
         {showPageNotice && (pageNoticeText || showPagePending) && (
           <PageNoticeBlock
             pageNoticeText={pageNoticeText}
@@ -240,11 +213,7 @@ function FakeGovernmentPortalPage({
             성명
           </label>
           <div
-            className={`rounded-lg border px-3 py-2 text-sm ${
-              isPageRevealed
-                ? "border-red-200 bg-red-50 text-black/55"
-                : "border-black/15 bg-neutral-50 text-black/30"
-            }`}
+            className="rounded-lg border border-black/15 bg-neutral-50 px-3 py-2 text-sm text-black/55"
           >
             {isPageRevealed ? "홍길동 (예시)" : "이름을 입력하세요"}
           </div>
@@ -254,11 +223,7 @@ function FakeGovernmentPortalPage({
             주민등록번호
           </label>
           <div
-            className={`rounded-lg border px-3 py-2 text-sm ${
-              isPageRevealed
-                ? "border-red-200 bg-red-50 text-black/55"
-                : "border-black/15 bg-neutral-50 text-black/30"
-            }`}
+            className="rounded-lg border border-black/15 bg-neutral-50 px-3 py-2 text-sm text-black/55"
           >
             {isPageRevealed ? "000000 - *******" : "앞 6자리 - 뒤 7자리"}
           </div>
@@ -282,17 +247,12 @@ function FakeGovernmentPortalPage({
           />
         )}
       </div>
-
-      <p className="border-t border-black/5 bg-neutral-50 px-4 py-2 text-center text-[10px] text-black/35">
-        이 페이지는 공식 정부 사이트가 아닙니다
-      </p>
     </div>
   );
 }
 
 function FakeHtsPortalPage({
   primaryActionLabel,
-  preRevealHint,
   loadingLabel,
   pageNoticeText,
   showPagePending,
@@ -312,12 +272,6 @@ function FakeHtsPortalPage({
       </div>
 
       <div className="space-y-3 bg-white p-4">
-        {!isPageRevealed && (
-          <p className="text-[11px] leading-relaxed text-black/45">
-            {preRevealHint}
-          </p>
-        )}
-
         {showPageNotice && (pageNoticeText || showPagePending) && (
           <PageNoticeBlock
             pageNoticeText={pageNoticeText}
@@ -342,15 +296,15 @@ function FakeHtsPortalPage({
               key="profit"
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="rounded-xl border border-emerald-100 bg-emerald-50 p-3"
+              className="rounded-xl border border-black/10 bg-neutral-50 p-3"
             >
-              <p className="text-[11px] text-emerald-800">
-                체험 계좌 수익 (가짜 화면)
+              <p className="text-[11px] text-black/55">
+                체험 계좌 수익
               </p>
-              <p className="mt-1 text-xl font-bold text-emerald-700">
+              <p className="mt-1 text-xl font-bold text-black">
                 +847,200원
               </p>
-              <p className="mt-0.5 text-[10px] text-emerald-600/70">
+              <p className="mt-0.5 text-[10px] text-black/45">
                 소액 입금 후 30분
               </p>
             </motion.div>
@@ -378,14 +332,9 @@ function FakeHtsPortalPage({
         </AnimatePresence>
 
         {isPageRevealed && (
-          <>
-            <div className="rounded-lg bg-indigo-600 py-2.5 text-center text-sm font-semibold text-white">
-              전용 앱 설치하기
-            </div>
-            <p className="text-center text-[10px] text-black/40">
-              공식 앱스토어가 아닌 링크입니다
-            </p>
-          </>
+          <div className="rounded-lg bg-indigo-600 py-2.5 text-center text-sm font-semibold text-white">
+            전용 앱 설치하기
+          </div>
         )}
       </div>
     </div>
@@ -394,7 +343,6 @@ function FakeHtsPortalPage({
 
 function OpenChatInvitePage({
   primaryActionLabel,
-  preRevealHint,
   loadingLabel,
   pageRevealPhase,
   onPrimaryPageAction,
@@ -410,13 +358,9 @@ function OpenChatInvitePage({
       </div>
 
       <div className="space-y-3 bg-white p-4">
-        {!isPageRevealed && (
-          <p className="text-[11px] leading-relaxed text-black/45">{preRevealHint}</p>
-        )}
-
-        <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-relaxed text-amber-950">
+        <div className="rounded-xl border border-black/10 bg-neutral-50 p-3 text-xs leading-relaxed text-black/80">
           <p className="font-semibold">open-room.vip-invest.link/join</p>
-          <p className="mt-1 text-[11px] text-amber-900/70">
+          <p className="mt-1 text-[11px] text-black/55">
             수익률 300% · 무료 VIP · 248명 참여 중
           </p>
         </div>
@@ -436,7 +380,7 @@ function OpenChatInvitePage({
               key="joined"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-xs leading-relaxed text-emerald-900"
+              className="rounded-xl border border-black/10 bg-neutral-50 p-3 text-xs leading-relaxed text-black/80"
             >
               <p className="font-semibold">채팅방 입장 완료</p>
               <p className="mt-1">토크 앱 오픈채팅방으로 연결되었습니다.</p>
@@ -454,17 +398,12 @@ function OpenChatInvitePage({
           )}
         </AnimatePresence>
       </div>
-
-      <p className="border-t border-black/5 bg-neutral-50 px-4 py-2 text-center text-[10px] text-black/35">
-        공식 증권·금융 앱이 아닌 외부 초대 링크입니다
-      </p>
     </div>
   );
 }
 
 function GenericFakeSitePage({
   primaryActionLabel,
-  preRevealHint,
   loadingLabel,
   pageNoticeText,
   showPagePending,
@@ -484,35 +423,29 @@ function GenericFakeSitePage({
       </h3>
 
       {!isPageRevealed && (
-        <>
-          <p className="mt-3 text-[11px] leading-relaxed text-black/45">
-            {preRevealHint}
-          </p>
-          <div className="mt-4 rounded-xl border border-dashed border-black/15 bg-white p-4 text-center">
-            {isPageLoading ? (
-              <BrowserPageLoadingBlock
-                loadingLabel={loadingLabel}
-                toneClassName="text-black/55"
-                compact
-              />
-            ) : (
-              <BrowserPrimaryActionButton
-                actionLabel={primaryActionLabel}
-                onActionClick={onPrimaryPageAction}
-              />
-            )}
-          </div>
-        </>
+        <div className="mt-4 rounded-xl border border-dashed border-black/15 bg-white p-4 text-center">
+          {isPageLoading ? (
+            <BrowserPageLoadingBlock
+              loadingLabel={loadingLabel}
+              toneClassName="text-black/55"
+              compact
+            />
+          ) : (
+            <BrowserPrimaryActionButton
+              actionLabel={primaryActionLabel}
+              onActionClick={onPrimaryPageAction}
+            />
+          )}
+        </div>
       )}
 
       {isPageRevealed && (
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3 text-xs leading-relaxed text-red-900"
+          className="mt-4 space-y-2 rounded-xl border border-black/10 bg-neutral-50 p-3 text-xs leading-relaxed text-black/70"
         >
-          본인 확인을 위해 계좌·카드 정보 입력이 요구됩니다. 공식 채널인지 다시
-          확인하세요.
+          <p>본인 확인을 위해 계좌·카드 정보 입력이 요구됩니다.</p>
         </motion.div>
       )}
 
@@ -526,10 +459,6 @@ function GenericFakeSitePage({
           />
         </div>
       )}
-
-      <p className="mt-6 text-center text-[11px] text-black/35">
-        이 페이지는 공식 사이트가 아닙니다
-      </p>
     </div>
   );
 }
@@ -622,9 +551,9 @@ function PageNoticeBlock({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-amber-100 bg-amber-50 p-3"
+      className="rounded-xl border border-black/10 bg-neutral-50 p-3"
     >
-      <p className="text-[11px] font-semibold text-amber-800">{noticeLabel}</p>
+      <p className="text-[11px] font-semibold text-black/50">{noticeLabel}</p>
       {showPagePending ? (
         <div className="mt-2 flex items-center gap-2 text-xs text-black/50">
           <TypingIndicator />

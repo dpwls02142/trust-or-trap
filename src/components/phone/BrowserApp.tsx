@@ -14,7 +14,6 @@ import {
   type BrowserPageRevealPhase,
 } from "@/lib/phone/browser-scenario-page";
 import {
-  getScenarioSiteSecurityWarning,
   OPEN_CHAT_INVITE_URL,
   resolveBrowserNavigationUrl,
   SCENARIO_FAKE_SITE_URL,
@@ -83,10 +82,6 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
   );
   const isPageRevealed = pageRevealPhase === "revealed";
 
-  const securityWarning = getScenarioSiteSecurityWarning(
-    activeNavigationUrl ?? addressInputValue,
-  );
-
   const handleNavigate = (submittedValue: string) => {
     const resolvedUrl = resolveBrowserNavigationUrl(submittedValue);
     if (!resolvedUrl) {
@@ -115,20 +110,12 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
         onBack={sharedProps.onExitToHome}
       />
 
-      {securityWarning && (
-        <div className="border-b border-black/10 bg-red-50 px-4 py-1.5 text-[11px] text-red-700">
-          {securityWarning}
-        </div>
-      )}
-
       {activeNavigationUrl ? (
         <BrowserPageView pageUrl={activeNavigationUrl} />
       ) : (
         <BrowserScenarioPagePanel
           pageVariant={browserPageConfig.pageVariant}
-          entryContextText={browserPageConfig.entryContextText}
           primaryActionLabel={browserPageConfig.primaryActionLabel}
-          preRevealHint={browserPageConfig.preRevealHint}
           loadingLabel={browserPageConfig.loadingLabel}
           reverseImageProfilePath={reverseImageSearchProfile.profileImagePath}
           reverseImageProfileName={reverseImageSearchProfile.profileDisplayName}
@@ -144,8 +131,6 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
       {isPageRevealed && (
         <ScenarioActionPanel
           key={currentNode.node_id}
-          panelTitle={browserPageConfig.actionPanelTitle}
-          panelHint={browserPageConfig.actionPanelHint}
           availableOptions={sharedProps.availableOptions}
           allowFreeInput={false}
           freeInputPlaceholder="직접 판단을 입력..."
