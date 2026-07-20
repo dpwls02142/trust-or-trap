@@ -164,8 +164,8 @@
       "allow_free_input": true,
       "next_node_map": {
         "safe": "branch-withdraw-fee",
-        "caution": "branch-withdraw-fee",
-        "risky": "branch-withdraw-fee"
+        "caution": "ending-warning-fee-loss",
+        "risky": "ending-harm-total-loss"
       },
       "voice_enabled": true,
       "is_ending": false,
