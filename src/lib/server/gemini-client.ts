@@ -2,6 +2,8 @@ import "server-only";
 
 import { GoogleGenAI, ThinkingLevel, type ThinkingConfig } from "@google/genai";
 import { resolveAgeBand } from "@/lib/scenario/persona-matching";
+import { buildPlayerHonorificGuide, resolvePeerHonorificExample } from "@/lib/scenario/player-honorifics";
+import { scenarioPrologueNodeId } from "@/lib/scenario/scenario-context-setup";
 import {
   resolveBrowserPageConfig,
   shouldShowBrowserPageNotice,
@@ -113,6 +115,7 @@ function inferScammerSpeechLevel(
 ): ScammerSpeechLevel | null {
   for (const entryItem of chatHistory) {
     if (entryItem.speaker !== "scammer") continue;
+    if (entryItem.nodeId === scenarioPrologueNodeId) continue;
     const trimmedText = entryItem.messageText.trim();
     if (!trimmedText) continue;
     if (formalEndingPattern.test(trimmedText)) return "formal";
@@ -129,7 +132,7 @@ function buildSpeechLevelConsistencyRule(
     ? fixedSpeechLevelByTone[currentNode.speaker_tone]
     : null;
   const historySpeechLevel = inferScammerSpeechLevel(chatHistory);
-  const lockedSpeechLevel = historySpeechLevel ?? presetSpeechLevel;
+  const lockedSpeechLevel = presetSpeechLevel ?? historySpeechLevel;
 
   if (!lockedSpeechLevel) {
     return "- 존댓말/반말 수준은 대화 내내 고정. 한 번 정해진 종결어미를 노드·응답마다 바꾸지 않는다.";
@@ -240,6 +243,8 @@ export function buildAdvanceSystemPrompt(
     "",
     buildDialogueStyleGuide(currentNode, userProfile),
     "",
+    buildPlayerHonorificGuide(userProfile.displayName, userProfile.gender),
+    "",
     "## 절대 규칙",
     "1. 노드 스펙 범위를 벗어난 새로운 사건 전개를 만들지 않는다.",
     `2. 이 노드에서 반드시 드러나야 하는 위험 신호: "${currentNode.required_risk_signal}"`,
@@ -265,9 +270,8 @@ export function buildAdvanceSystemPrompt(
         ]
       : []),
     "## 좋은 message 예시 (이 정도 길이)",
-    '- "야 ㅋㅋ 지금 통장 확인 가능?"',
+    `- "${resolvePeerHonorificExample(userProfile.gender)}"`,
     '- "진짜?? ㅠㅠ 나 급한데 도와줄 수 있어?"',
-    '- "형 잠깐만 전화 받아봐"',
     "",
     "## 나쁜 message 예시 (절대 금지)",
     '- "안녕하세요. 저는 ○○은행 직원입니다. 고객님의 계좌에서 이상 거래가 감지되어 확인이 필요합니다. 아래 링크를..."',
@@ -348,6 +352,8 @@ export function buildAdvanceUserPrompt(
     ...(openGroupChatNote ? [openGroupChatNote] : []),
     ...(bankChatPressureNote ? [bankChatPressureNote] : []),
     ...(browserEntryNote ? [browserEntryNote] : []),
+    "",
+    buildPlayerHonorificGuide(userProfile.displayName, userProfile.gender),
     "",
     buildSpeechLevelConsistencyRule(currentNode, chatHistory),
     "",

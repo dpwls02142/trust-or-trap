@@ -28,7 +28,7 @@ import {
   defaultBankAccountNumberLabel,
   defaultBankBrandName,
 } from "@/lib/phone/bank-app-view";
-import { buildScenarioMessageThread } from "@/lib/phone/message-thread-summary";
+import { buildPrologueMessageThread, buildScenarioMessageThread } from "@/lib/phone/message-thread-summary";
 import type { AppType, ChatHistoryEntry } from "@/lib/scenario/types";
 
 interface HomeAppShellProps {
@@ -36,6 +36,8 @@ interface HomeAppShellProps {
   onExitToHome: () => void;
   chatHistory?: ChatHistoryEntry[];
   scenarioSenderName?: string | null;
+  /** 홈 탐색 중 프롤로그 연락처 스레드만 표시 */
+  shouldUsePrologueThreadOnly?: boolean;
   /** 시나리오에서 키패드로 직접 걸어야 하는 가상 번호 */
   pendingOutboundDialNumber?: string | null;
   onOutboundDialConnect?: () => void;
@@ -54,6 +56,7 @@ export function HomeAppShell({
   onExitToHome,
   chatHistory = [],
   scenarioSenderName = null,
+  shouldUsePrologueThreadOnly = false,
   pendingOutboundDialNumber = null,
   onOutboundDialConnect,
   outboundDialDraft = "",
@@ -74,8 +77,15 @@ export function HomeAppShell({
     if (!scenarioSenderName) return null;
     if (appType !== "chat" && appType !== "sms" && appType !== "insta")
       return null;
+    if (shouldUsePrologueThreadOnly) {
+      return buildPrologueMessageThread(
+        chatHistory,
+        appType,
+        scenarioSenderName,
+      );
+    }
     return buildScenarioMessageThread(chatHistory, appType, scenarioSenderName);
-  }, [chatHistory, appType, scenarioSenderName]);
+  }, [chatHistory, appType, scenarioSenderName, shouldUsePrologueThreadOnly]);
 
   const openThreadSummary =
     openThreadSender && scenarioThread?.senderName === openThreadSender

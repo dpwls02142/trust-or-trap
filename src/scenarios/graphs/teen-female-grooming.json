@@ -10,7 +10,7 @@
       "node_id": "approach-dm",
       "stage": "approach",
       "app_type": "insta",
-      "required_risk_signal": "모르는 사람이 SNS DM으로 과도한 관심과 칭찬을내며 접근한다",
+      "required_risk_signal": "2주 넘게 DM으로 친해진 상대가 오늘 더 깊은 관심과 칭찬을 쏟으며 관계를 빠르게 가깝게 밀어붙인다",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",
         "신체 관련 구체적 언급",
@@ -32,7 +32,8 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "hyun_98"
+      "sender_name": "hyun_98",
+      "elapsed_days": 15
     },
     {
       "node_id": "trust-light-chat",

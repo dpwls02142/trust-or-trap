@@ -194,6 +194,7 @@ export const chatHistoryEntrySchema = z.object({
   nodeId: z.string().max(100),
   elapsedDays: z.number().int().nonnegative().optional(),
   appType: appTypeSchema.optional(),
+  contactName: z.string().max(40).optional(),
 });
 
 export const userProfileSchema = z.object({

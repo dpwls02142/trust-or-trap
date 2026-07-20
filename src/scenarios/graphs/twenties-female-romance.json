@@ -10,7 +10,7 @@
       "node_id": "approach-dating-match",
       "stage": "approach",
       "app_type": "chat",
-      "required_risk_signal": "지나치게 완벽한 프로필(해외 근무 전문직·모델급 사진)의 상대가 매칭 직후 과도한 호감을 표현한다",
+      "required_risk_signal": "2주 가까이 연락해 온 상대가 오늘 갑자기 더 깊은 호감·운명 프레임을 강화하며 만난 적 없는데도 관계를 급진전시키려 한다",
       "forbidden_content": [
         "실존 인물 사진·실명 사칭",
         "실제 데이팅앱 서비스 실명",
@@ -32,7 +32,8 @@
       "is_ending": false,
       "ending_type": null,
       "speaker_tone": "intimate_partner",
-      "sender_name": "도현"
+      "sender_name": "도현",
+      "elapsed_days": 15
     },
     {
       "node_id": "trust-quick-affection",

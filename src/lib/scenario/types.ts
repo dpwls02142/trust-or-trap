@@ -149,6 +149,8 @@ export interface ChatHistoryEntry {
   elapsedDays?: number;
   /** 메시지가 생성된 앱 — 앱 전환 시 스레드 분리용 */
   appType?: AppType;
+  /** 프롤로그·과거 대화 연출용 연락처 이름 — 쉘 대화 목록·스레드 분리 */
+  contactName?: string;
   /** 플레이어가 보낸 사진 첨부 (시뮬레이션 갤러리 경로) */
   attachmentImagePath?: string;
 }

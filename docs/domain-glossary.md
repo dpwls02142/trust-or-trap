@@ -92,6 +92,17 @@
 | `entry_node_id` | string | 스토리 시작 노드 ID |
 | `nodes` | Node[] | 노드 목록 (§3) |
 
+> **프롤로그·잠금화면 연출**은 그래프 JSON이 아니라 `src/lib/scenario/scenario-context-setup.ts`에서 시나리오별로 관리한다 (온보딩 몰입용 정적 데이터).
+
+## 3.6 대화 히스토리 (`ChatHistoryEntry`) 보조 필드
+
+| 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| `contactName` | string? | 프롤로그·과거 대화 연출용 연락처 이름. `nodeId: scenario-prologue`와 함께 사용 |
+| `nodeId: scenario-prologue` | string | LLM advance/judge 대상이 아닌 정적 프롤로그 메시지 마커 |
+
+프롤로그·잠금화면 템플릿 치환(`player-honorifics.ts`): `{displayName}`, `{displayNameCasual}`, `{peerHonorific}`, `{peerHonorificExclaim}`, `{parentHonorific}`, `{parentSelfReference}` — 온보딩 `gender` 기준.
+
 ## 4. 사건 단계 (`stage`)
 
 모든 시나리오가 공유하는 공통 골격.

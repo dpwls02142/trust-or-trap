@@ -41,6 +41,7 @@ interface GameStoreState {
     scenarioTitle: string;
     voiceEnabled: boolean;
     entryNode: PublicNodeView;
+    prologueChatHistory?: ChatHistoryEntry[];
   }) => void;
   enterCurrentApp: () => void;
   exitToHome: () => void;
@@ -68,14 +69,20 @@ export const useGameStore = create<GameStoreState>()(
 
       setUserProfile: (profileValue) => setState({ userProfile: profileValue }),
 
-      startScenario: ({ scenarioId, scenarioTitle, voiceEnabled, entryNode }) =>
+      startScenario: ({
+        scenarioId,
+        scenarioTitle,
+        voiceEnabled,
+        entryNode,
+        prologueChatHistory = [],
+      }) =>
         setState({
           gamePhase: "home",
           activeScenarioId: scenarioId,
           scenarioTitle,
           scenarioVoiceEnabled: voiceEnabled,
           currentNode: entryNode,
-          chatHistory: [],
+          chatHistory: prologueChatHistory,
           riskSignalRecords: [],
           endingType: null,
           isCallConnected: false,

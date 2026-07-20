@@ -12,7 +12,7 @@ interface UseScenarioNotificationResult {
   shouldDisplayNotification: boolean;
   isNotificationBannerVisible: boolean;
   dismissNotificationBanner: () => void;
-  beginDelayedNotificationReveal: () => void;
+  beginDelayedNotificationReveal: (delayMs?: number) => void;
   revealNotificationImmediately: () => void;
   resetScenarioNotification: () => void;
 }
@@ -46,15 +46,18 @@ export function useScenarioNotification({
     setIsNotificationBannerDismissed(false);
   }, [stopNotificationRevealTimer]);
 
-  const beginDelayedNotificationReveal = useCallback(() => {
-    stopNotificationRevealTimer();
-    setIsNotificationRevealed(false);
-    setIsNotificationBannerDismissed(false);
-    notificationRevealTimerRef.current = setTimeout(() => {
-      setIsNotificationRevealed(true);
-      notificationRevealTimerRef.current = null;
-    }, notificationRevealDelayMs);
-  }, [stopNotificationRevealTimer]);
+  const beginDelayedNotificationReveal = useCallback(
+    (delayMs: number = notificationRevealDelayMs) => {
+      stopNotificationRevealTimer();
+      setIsNotificationRevealed(false);
+      setIsNotificationBannerDismissed(false);
+      notificationRevealTimerRef.current = setTimeout(() => {
+        setIsNotificationRevealed(true);
+        notificationRevealTimerRef.current = null;
+      }, delayMs);
+    },
+    [stopNotificationRevealTimer],
+  );
 
   const revealNotificationImmediately = useCallback(() => {
     stopNotificationRevealTimer();

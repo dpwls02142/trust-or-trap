@@ -1,3 +1,4 @@
+import { shouldShowPrologueInScenarioView } from "@/lib/scenario/scenario-context-setup";
 import type { AppType, ChatHistoryEntry } from "@/lib/scenario/types";
 
 const isolatedAppTypeList: AppType[] = ["call", "browser", "bank"];
@@ -5,6 +6,7 @@ const isolatedAppTypeList: AppType[] = ["call", "browser", "bank"];
 interface NodeContextSlice {
   node_id: string;
   app_type: AppType;
+  sender_name?: string;
 }
 
 /**
@@ -25,6 +27,16 @@ export function filterChatHistoryForAppView(
   const hasTypedEntries = chatHistory.some((entryItem) => entryItem.appType);
 
   return chatHistory.filter((entryItem) => {
+    if (
+      !shouldShowPrologueInScenarioView(
+        entryItem,
+        currentNode.sender_name ?? "",
+        currentNode.app_type,
+      )
+    ) {
+      return false;
+    }
+
     if (entryItem.appType) {
       return entryItem.appType === currentNode.app_type;
     }

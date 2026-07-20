@@ -13,6 +13,7 @@ import { ScenarioRecommendation } from "@/components/onboarding/ScenarioRecommen
 import { PhoneFrameShell } from "@/components/phone/PhoneFrameShell";
 import { HomeScreen } from "@/components/phone/HomeScreen";
 import { PhoneNotificationOverlay } from "@/components/phone/PhoneNotificationOverlay";
+import { PhoneLockScreen } from "@/components/phone/PhoneLockScreen";
 import { ScenarioAppRenderer } from "@/components/phone/ScenarioAppRenderer";
 import { HomeAppShell } from "@/components/phone/HomeAppShell";
 import { EndingReport } from "@/components/game/EndingReport";
@@ -47,6 +48,12 @@ import { useGameStore } from "@/lib/stores/game-store";
 import { consumeAdvanceStream } from "@/lib/client/advance-stream";
 import { SentenceTtsQueue } from "@/lib/client/tts-queue";
 import { resolveInputTutorialMode } from "@/lib/scenario/input-tutorial";
+import {
+  buildScenarioPrologueEntries,
+  homeExplorationDelayMs,
+  resolveLockScreenNotifications,
+  resolvePrologueThreadSpec,
+} from "@/lib/scenario/scenario-context-setup";
 import type { PublicNodeView } from "@/lib/scenario/public-node";
 import type {
   AppType,
@@ -134,6 +141,7 @@ export function GameController() {
     appType: AppType;
     senderName: string;
   } | null>(null);
+  const [isPhoneLocked, setIsPhoneLocked] = useState(false);
 
   const lastAdvancedNodeIdRef = useRef<string | null>(null);
   const lastMessageContactRef = useRef<PriorMessageChannel | null>(null);
@@ -443,8 +451,15 @@ export function GameController() {
         setHomeNotificationOverride(null);
         setAppPlayMode("scenario");
         setShellAppType(null);
-        startScenario(entryData);
-        beginDelayedNotificationReveal();
+        setIsPhoneLocked(true);
+        startScenario({
+          ...entryData,
+          prologueChatHistory: buildScenarioPrologueEntries(
+            selectedScenarioId,
+            userProfile?.displayName ?? "플레이어",
+            userProfile?.gender ?? "male",
+          ),
+        });
       } catch {
         if (selectGeneration !== scenarioSelectGenerationRef.current) return;
         setIsStartingScenario(false);
@@ -454,8 +469,46 @@ export function GameController() {
         setIsStartingScenario(false);
       }
     },
-    [startScenario, beginDelayedNotificationReveal],
+    [startScenario, userProfile],
   );
+
+  const handlePhoneUnlock = useCallback(() => {
+    setIsPhoneLocked(false);
+    beginDelayedNotificationReveal(homeExplorationDelayMs);
+  }, [beginDelayedNotificationReveal]);
+
+  const lockScreenNotifications = useMemo(() => {
+    if (!activeScenarioId || !userProfile) return [];
+    return resolveLockScreenNotifications(
+      activeScenarioId,
+      userProfile.displayName,
+      userProfile.gender,
+    );
+  }, [activeScenarioId, userProfile]);
+
+  const prologueThreadSpec = useMemo(() => {
+    if (!activeScenarioId) return null;
+    return resolvePrologueThreadSpec(activeScenarioId);
+  }, [activeScenarioId]);
+
+  const shellThreadSenderName = useMemo(() => {
+    if (
+      !hasOpenedCurrentApp &&
+      prologueThreadSpec &&
+      shellAppType === prologueThreadSpec.appType
+    ) {
+      return prologueThreadSpec.contactName;
+    }
+    return (
+      homeNotificationOverride?.senderName ?? currentNode?.sender_name ?? null
+    );
+  }, [
+    hasOpenedCurrentApp,
+    prologueThreadSpec,
+    shellAppType,
+    homeNotificationOverride?.senderName,
+    currentNode?.sender_name,
+  ]);
 
   const stopActiveCall = useCallback(() => {
     ttsQueueRef.current?.dispose();
@@ -705,6 +758,17 @@ export function GameController() {
         homeNotificationOverride?.appType ?? currentNode?.app_type;
 
       if (
+        !hasOpenedCurrentApp &&
+        !shouldDisplayNotification &&
+        selectedAppType === currentNode?.app_type
+      ) {
+        setAppPlayMode("shell");
+        setShellAppType(selectedAppType);
+        enterCurrentApp();
+        return;
+      }
+
+      if (
         notificationTargetAppType &&
         selectedAppType === notificationTargetAppType
       ) {
@@ -748,11 +812,13 @@ export function GameController() {
     [
       currentNode,
       hasCompletedOutboundDial,
+      hasOpenedCurrentApp,
       homeNotificationOverride?.appType,
       isCallConnected,
       openOutboundDialShell,
       resetScenarioNotification,
       setCallConnected,
+      shouldDisplayNotification,
       enterCurrentApp,
     ],
   );
@@ -889,6 +955,7 @@ export function GameController() {
     setAppPlayMode("scenario");
     setShellAppType(null);
     setIsEditingOnboardingProfile(false);
+    setIsPhoneLocked(false);
     resetGame();
   }, [resetGame, resetScenarioNotification]);
 
@@ -950,6 +1017,12 @@ export function GameController() {
     <StatusBarOverrideProvider>
       <PhoneFrameShell statusBarContentStyle={statusBarContentStyle}>
       <div className="relative h-full">
+      {isPhoneLocked && lockScreenNotifications.length > 0 && (
+        <PhoneLockScreen
+          lockNotifications={lockScreenNotifications}
+          onUnlock={handlePhoneUnlock}
+        />
+      )}
       {gamePhase === "home" && currentNode && (
         <div className="relative h-full">
           <HomeScreen
@@ -976,10 +1049,11 @@ export function GameController() {
             appType={shellAppType}
             onExitToHome={handleExitToHome}
             chatHistory={chatHistory}
-            scenarioSenderName={
-              homeNotificationOverride?.senderName ??
-              currentNode?.sender_name ??
-              null
+            scenarioSenderName={shellThreadSenderName}
+            shouldUsePrologueThreadOnly={
+              !hasOpenedCurrentApp &&
+              !!prologueThreadSpec &&
+              shellAppType === prologueThreadSpec.appType
             }
             pendingOutboundDialNumber={pendingOutboundDialNumber}
             onOutboundDialConnect={handleOutboundDialConnect}
