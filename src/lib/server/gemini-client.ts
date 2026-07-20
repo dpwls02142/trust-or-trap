@@ -2,6 +2,7 @@ import "server-only";
 
 import { GoogleGenAI, ThinkingLevel, type ThinkingConfig } from "@google/genai";
 import { resolveAgeBand } from "@/lib/scenario/persona-matching";
+import { scenarioPrologueNodeId } from "@/lib/scenario/scenario-context-setup";
 import {
   resolveBrowserPageConfig,
   shouldShowBrowserPageNotice,
@@ -113,6 +114,7 @@ function inferScammerSpeechLevel(
 ): ScammerSpeechLevel | null {
   for (const entryItem of chatHistory) {
     if (entryItem.speaker !== "scammer") continue;
+    if (entryItem.nodeId === scenarioPrologueNodeId) continue;
     const trimmedText = entryItem.messageText.trim();
     if (!trimmedText) continue;
     if (formalEndingPattern.test(trimmedText)) return "formal";
@@ -129,7 +131,7 @@ function buildSpeechLevelConsistencyRule(
     ? fixedSpeechLevelByTone[currentNode.speaker_tone]
     : null;
   const historySpeechLevel = inferScammerSpeechLevel(chatHistory);
-  const lockedSpeechLevel = historySpeechLevel ?? presetSpeechLevel;
+  const lockedSpeechLevel = presetSpeechLevel ?? historySpeechLevel;
 
   if (!lockedSpeechLevel) {
     return "- 존댓말/반말 수준은 대화 내내 고정. 한 번 정해진 종결어미를 노드·응답마다 바꾸지 않는다.";

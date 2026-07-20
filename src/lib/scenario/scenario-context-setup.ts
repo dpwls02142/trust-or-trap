@@ -127,28 +127,28 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
     prologueMessages: [
       {
         speaker: "scammer",
-        messageText: "매칭됐네요! 프로필 보니까 되게 따뜻해 보이셔서 먼저 인사드려요",
-        elapsedDays: 14,
-      },
-      {
-        speaker: "player",
-        messageText: "안녕하세요~ 저도 프로필 보고 좋았어요",
-        elapsedDays: 14,
-      },
-      {
-        speaker: "scammer",
-        messageText: "요즘 일이 바빠서 연락 못한 날도 있었는데 이해해줘서 고마워",
-        elapsedDays: 7,
-      },
-      {
-        speaker: "player",
-        messageText: "괜찮아요 ㅎㅎ 바쁘면 바쁜 거죠",
-        elapsedDays: 7,
-      },
-      {
-        speaker: "scammer",
-        messageText: "맨날 밤에 {displayName}님 얘기만 하다 자요 ㅎㅎ",
+        messageText: "매칭됐다! 프로필 되게 따뜻해 보여서 먼저 인사할게",
         elapsedDays: 1,
+      },
+      {
+        speaker: "player",
+        messageText: "안녕~ 나도 프로필 보고 좋았어",
+        elapsedDays: 1,
+      },
+      {
+        speaker: "scammer",
+        messageText: "요즘 일 바빠서 연락 못 한 날도 있는데 이해해줘서 고마워",
+        elapsedDays: 7,
+      },
+      {
+        speaker: "player",
+        messageText: "괜찮아 ㅎㅎ 바쁘면 바쁜 거지",
+        elapsedDays: 7,
+      },
+      {
+        speaker: "scammer",
+        messageText: "맨날 밤에 {displayName} 얘기만 하다 자 ㅎㅎ",
+        elapsedDays: 14,
       },
     ],
   },
