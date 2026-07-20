@@ -27,6 +27,10 @@ interface MessageThreadProps {
   chatRoomKind?: ChatRoomKind | null;
   /** SMS 등 — URL이 포함된 수신 메시지를 대사·링크 말풍선으로 분리 */
   shouldSplitLinkBubbles?: boolean;
+  /** 링크 말풍선 탭 — 시나리오 노드별 인터랙션 */
+  onMessageLinkClick?: (linkUrl: string) => void;
+  /** 링크 탭 가능 여부 (응답 대기 중·과거 열람 시 false) */
+  isMessageLinkClickEnabled?: boolean;
 }
 
 type ThreadRenderItem =
@@ -86,6 +90,8 @@ interface MessageBubbleProps {
   linkUrl?: string | null;
   attachmentImagePath?: string;
   onOpenAttachmentLightbox?: (imagePath: string) => void;
+  onLinkClick?: (linkUrl: string) => void;
+  isLinkClickEnabled?: boolean;
 }
 
 function MessageBubble({
@@ -94,8 +100,15 @@ function MessageBubble({
   linkUrl,
   attachmentImagePath,
   onOpenAttachmentLightbox,
+  onLinkClick,
+  isLinkClickEnabled = false,
 }: MessageBubbleProps) {
   const isLinkOnlyBubble = !!linkUrl && !messageText && !attachmentImagePath;
+  const canClickLink = isLinkClickEnabled && !!linkUrl && !!onLinkClick;
+
+  const linkContent = linkUrl ? (
+    <p className="whitespace-pre-wrap break-all text-sm leading-relaxed">{linkUrl}</p>
+  ) : null;
 
   return (
     <div
@@ -128,9 +141,18 @@ function MessageBubble({
           {messageText}
         </p>
       )}
-      {linkUrl && (
-        <p className="whitespace-pre-wrap break-all text-sm leading-relaxed">{linkUrl}</p>
-      )}
+      {linkUrl &&
+        (canClickLink ? (
+          <button
+            type="button"
+            onClick={() => onLinkClick?.(linkUrl)}
+            className="block w-full text-left transition active:opacity-80"
+          >
+            {linkContent}
+          </button>
+        ) : (
+          linkContent
+        ))}
     </div>
   );
 }
@@ -150,6 +172,8 @@ export function MessageThread({
   chatRoomKind,
   shouldSplitLinkBubbles = false,
   onOpenAttachmentLightbox,
+  onMessageLinkClick,
+  isMessageLinkClickEnabled = false,
 }: MessageThreadProps) {
   const isOpenGroupChat = chatRoomKind === "open_group";
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
@@ -233,6 +257,10 @@ export function MessageThread({
                   linkUrl={bubbleBlock.linkUrl}
                   attachmentImagePath={bubbleBlock.attachmentImagePath}
                   onOpenAttachmentLightbox={onOpenAttachmentLightbox}
+                  onLinkClick={onMessageLinkClick}
+                  isLinkClickEnabled={
+                    isMessageLinkClickEnabled && isIncoming && entryItem.speaker === "scammer"
+                  }
                 />
                 {isOpenGroupChat && <OpenGroupReadCount />}
               </div>

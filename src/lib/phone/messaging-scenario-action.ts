@@ -1,5 +1,5 @@
 /**
- * 메시징 앱(chat/sms/insta) 노드별 특수 인터랙션 — 사진 요구 등.
+ * 메시징 앱(chat/sms/insta) 노드별 특수 인터랙션 — 사진 요구·링크 탭 등.
  * browser-scenario-page.ts와 동일하게 node_id 기준으로 연출을 매핑한다.
  */
 
@@ -14,6 +14,14 @@ export interface PhotoSendActionConfig {
   sendOptionLabel: string;
 }
 
+export interface MessageLinkActionConfig {
+  actionVariant: "open_chat_invite";
+  /** 링크 탭 시 주인공 1인칭 컨펌 */
+  transitionPrompt: string;
+  /** judge API에 넘길 플레이어 응답 (그래프 options와 의미 일치) */
+  submitResponseText: string;
+}
+
 const photoSendActionConfigMap: Record<string, PhotoSendActionConfig> = {
   "demand-photo": {
     actionVariant: "photo_send_prompt",
@@ -24,8 +32,22 @@ const photoSendActionConfigMap: Record<string, PhotoSendActionConfig> = {
   },
 };
 
+const messageLinkActionConfigMap: Record<string, MessageLinkActionConfig> = {
+  "approach-invite-sms": {
+    actionVariant: "open_chat_invite",
+    transitionPrompt: "채팅방에 접속할까?",
+    submitResponseText: "무료라니 기대하며 바로 링크를 누른다",
+  },
+};
+
 export function resolvePhotoSendActionConfig(
   nodeId: string,
 ): PhotoSendActionConfig | null {
   return photoSendActionConfigMap[nodeId] ?? null;
+}
+
+export function resolveMessageLinkActionConfig(
+  nodeId: string,
+): MessageLinkActionConfig | null {
+  return messageLinkActionConfigMap[nodeId] ?? null;
 }

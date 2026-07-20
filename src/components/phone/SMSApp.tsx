@@ -55,6 +55,12 @@ export function SMSApp(sharedProps: PhoneAppSharedProps) {
         currentElapsedDays={currentNode.elapsed_days}
         onOpenAttachmentLightbox={openAttachmentLightbox}
         shouldSplitLinkBubbles
+        onMessageLinkClick={sharedProps.onMessageLinkClick}
+        isMessageLinkClickEnabled={
+          !sharedProps.isAwaitingResponse &&
+          !streamingMessage &&
+          sharedProps.availableOptions.length > 0
+        }
         bubbleTheme={{
           threadBackgroundClass: "bg-white",
           incomingBubbleClass: "bg-neutral-200 text-black",

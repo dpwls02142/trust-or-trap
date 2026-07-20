@@ -88,6 +88,7 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
         currentElapsedDays={currentNode.elapsed_days}
         chatRoomKind={currentNode.chat_room_kind}
         onOpenAttachmentLightbox={openAttachmentLightbox}
+        shouldSplitLinkBubbles
         bubbleTheme={{
           threadBackgroundClass: "bg-[#bacee0]",
           incomingBubbleClass: "bg-white text-black",
