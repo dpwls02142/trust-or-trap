@@ -10,7 +10,7 @@
       "node_id": "approach-item-offer",
       "stage": "approach",
       "app_type": "chat",
-      "required_risk_signal": "처음 보는 상대가 시세보다 훨씬 싼 가격을 제시하며 개인 거래(선입금)를 유도한다",
+      "required_risk_signal": "이미 대화 중인 상대가 시세보다 훨씬 싼 가격을 제시하며 개인 거래(선입금)를 유도한다",
       "forbidden_content": [
         "성적 콘텐츠 또는 노골적 묘사",
         "실존 게임사·거래 플랫폼 실명 사칭",

@@ -9,6 +9,7 @@ export const homeExplorationDelayMs = 8000;
 export interface LockScreenNotificationSpec {
   appType: Exclude<AppType, "home">;
   senderName: string;
+  /** 메시지·통화 내용 미리보기 — '새 메시지' 같은 메타 문구 없이 대사만 */
   previewText: string;
   relativeTimeLabel?: string;
 }
@@ -46,7 +47,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
       {
         appType: "insta",
         senderName: "hyun_98",
-        previewText: "새 DM — 요즘 고민 있으면 언제든 말해요",
+        previewText: "요즘 고민 있으면 언제든 말해",
         relativeTimeLabel: "방금",
       },
     ],
@@ -54,27 +55,27 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
     prologueMessages: [
       {
         speaker: "scammer",
-        messageText: "우연히 프로필 봤는데 그림 잘 그리시네요!",
+        messageText: "우연히 프로필 봤는데 그림 잘 그리네!",
         elapsedDays: 3,
       },
       {
         speaker: "player",
-        messageText: "아 감사해요 ㅎㅎ",
+        messageText: "고마워 ㅎㅎ",
         elapsedDays: 3,
       },
       {
         speaker: "scammer",
-        messageText: "요즘 학교 생활은 좀 어때요? 힘들면 말해도 돼요",
+        messageText: "요즘 학교 생활 어때? 힘들면 말해도 돼",
         elapsedDays: 8,
       },
       {
         speaker: "player",
-        messageText: "그냥 그래요... 시험 기간이라 좀 지치네요",
+        messageText: "그냥 그래... 시험 기간이라 좀 지쳐",
         elapsedDays: 8,
       },
       {
         speaker: "scammer",
-        messageText: "많이 힘들겠다. 나한테는 편하게 말해도 괜찮아요",
+        messageText: "많이 힘들겠다. 나한테는 편하게 말해도 돼",
         elapsedDays: 14,
       },
     ],
@@ -98,7 +99,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
       },
       {
         speaker: "scammer",
-        messageText: "형 여기서 거래 많이 해요. 레전드템 갖고 있는데 관심 있어요?",
+        messageText: "형 여기서 거래 많이 해. 레전드템 있는데 관심 있어?",
       },
       {
         speaker: "player",
@@ -119,7 +120,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
       {
         appType: "chat",
         senderName: "도현",
-        previewText: "새 메시지 — 갑자기 연락해서 미안한데...",
+        previewText: "갑자기 연락해서 미안한데, 오늘 네 생각 많이 났어",
         relativeTimeLabel: "방금",
       },
     ],
@@ -258,7 +259,7 @@ const scenarioContextSetupMap: Record<ScenarioId, ScenarioContextSetupEntry> = {
       {
         appType: "call",
         senderName: "김수사관",
-        previewText: "수신 전화 — 검찰청 수사관",
+        previewText: "지금 전화 꼭 받으셔야 합니다. 계좌 조사 관련 긴급 안내입니다",
         relativeTimeLabel: "방금",
       },
     ],
