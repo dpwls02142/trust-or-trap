@@ -11,7 +11,7 @@ export function OnboardingCopyright() {
       <button
         type="button"
         onClick={() => setIsCreditPopupOpen(true)}
-        className="text-xs text-white/40 underline underline-offset-2 transition hover:text-white/60"
+        className="text-xs text-white/40"
       >
         © 효과음 · BGM 출처
       </button>
