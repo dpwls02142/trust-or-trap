@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { RiCameraFill, RiHeartFill, RiUserFill } from "@remixicon/react";
 import type { SenderProfileView } from "@/lib/scenario/sender-profile";
 import { findPhotogramPostById } from "@/lib/phone/photogram-post";
 import { AppBackButton } from "./AppBackButton";
@@ -51,8 +52,8 @@ export function InstaProfileFeed({
               className="h-20 w-20 rounded-full object-cover"
             />
           ) : (
-            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-200 text-3xl">
-              👤
+            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-neutral-200 text-black/30">
+              <RiUserFill size={36} aria-hidden />
             </span>
           )}
           <div className="grid flex-1 grid-cols-3 text-center text-sm">
@@ -106,12 +107,13 @@ export function InstaProfileFeed({
                   className="absolute inset-0 block h-full w-full max-w-none object-cover object-center transition group-hover:scale-105"
                 />
               ) : (
-                <span className="flex h-full w-full items-center justify-center text-2xl text-black/30">
-                  📷
+                <span className="flex h-full w-full items-center justify-center text-black/30">
+                  <RiCameraFill size={28} aria-hidden />
                 </span>
               )}
-              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent px-1.5 py-1 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
-                ♥ {postItem.likeCount}
+              <span className="absolute inset-x-0 bottom-0 flex items-center gap-0.5 bg-gradient-to-t from-black/50 to-transparent px-1.5 py-1 text-[10px] text-white opacity-0 transition group-hover:opacity-100">
+                <RiHeartFill size={10} aria-hidden />
+                {postItem.likeCount}
               </span>
             </button>
           ))}

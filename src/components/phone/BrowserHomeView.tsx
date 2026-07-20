@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { RiGlobalFill } from "@remixicon/react";
 import { BrowserAddressBar } from "./shared/BrowserAddressBar";
 import { BrowserPageView } from "./shared/BrowserPageView";
 import {
@@ -58,8 +59,8 @@ export function BrowserHomeView({ onExitToHome }: BrowserHomeViewProps) {
                 key={shortcutLabel}
                 className="flex flex-col items-center gap-1"
               >
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-lg">
-                  🌐
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-600">
+                  <RiGlobalFill size={22} aria-hidden />
                 </span>
                 {shortcutLabel}
               </div>

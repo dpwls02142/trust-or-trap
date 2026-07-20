@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { RiImageLine } from "@remixicon/react";
 import type {
   BrowserPageRevealPhase,
   BrowserPageVariant,
@@ -481,8 +482,8 @@ function ReverseImageProfileThumbnail({
           />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center border border-dashed border-black/15">
-            <span className="text-2xl" aria-hidden>
-              🖼️
+            <span className="text-black/30" aria-hidden>
+              <RiImageLine size={28} />
             </span>
           </div>
         )}

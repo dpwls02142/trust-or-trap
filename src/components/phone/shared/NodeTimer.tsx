@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { RiTimerLine } from "@remixicon/react";
 import { motion } from "framer-motion";
 
 interface NodeTimerProps {
@@ -50,7 +51,8 @@ export function NodeTimer({ timerSeconds, onTimerExpire, isTimerActive }: NodeTi
       role="timer"
       aria-label={`남은 시간 ${remainingSeconds}초`}
     >
-      ⏱ {remainingSeconds}초
+      <RiTimerLine size={14} aria-hidden />
+      {remainingSeconds}초
     </motion.div>
   );
 }

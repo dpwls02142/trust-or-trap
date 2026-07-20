@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { RiUserFill } from "@remixicon/react";
 import type { SenderProfileView } from "@/lib/scenario/sender-profile";
 import { AppBackButton } from "./AppBackButton";
 
@@ -55,8 +56,8 @@ export function ChatProfileDetail({
                 className="h-24 w-24 shrink-0 rounded-full object-cover"
               />
             ) : (
-              <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-neutral-800 text-4xl">
-                👤
+              <span className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-neutral-800 text-white/70">
+                <RiUserFill size={40} aria-hidden />
               </span>
             )}
             <div className="min-w-0 w-full">

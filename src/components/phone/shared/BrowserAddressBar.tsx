@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, type KeyboardEvent } from "react";
+import { RiLockFill, RiLockUnlockFill } from "@remixicon/react";
 import { AppBackButton } from "./AppBackButton";
 import { isSecureBrowserUrl } from "@/lib/phone/browser-navigation";
 
@@ -43,7 +44,13 @@ export function BrowserAddressBar({
       onSubmit={handleFormSubmit}
     >
       <AppBackButton onBack={onBack} />
-      <span aria-hidden>{isSecureConnection ? "🔒" : "🔓"}</span>
+      <span aria-hidden>
+        {isSecureConnection ? (
+          <RiLockFill size={14} className="text-emerald-600" />
+        ) : (
+          <RiLockUnlockFill size={14} className="text-black/45" />
+        )}
+      </span>
       <input
         type="text"
         inputMode="url"
