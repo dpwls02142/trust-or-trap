@@ -63,11 +63,6 @@ export function PhotoSendActionPanel({
         >
           {actionConfig.transitionPrompt}
         </p>
-        {actionConfig.contextHint && (
-          <p className="mt-1.5 text-[11px] leading-relaxed text-black/45">
-            {actionConfig.contextHint}
-          </p>
-        )}
       </div>
       <div className="flex border-t border-black/10">
         <button
