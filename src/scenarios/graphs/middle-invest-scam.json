@@ -95,7 +95,34 @@
       "stage": "risk_signal",
       "app_type": "chat",
       "chat_room_kind": "open_group",
-      "required_risk_signal": "단톡방에서 정식 앱스토어가 아닌 링크로 전용 HTS 앱 설치를 유도한다. 소액 입금 시 수익이 난 것처럼 보이는 가짜 화면으로 성공 체험을 심는다",
+      "required_risk_signal": "단톡방에서 정식 앱스토어가 아닌 링크로 전용 HTS 앱 설치를 유도한다",
+      "forbidden_content": [
+        "실존 HTS·증권사 앱 실명",
+        "실제 설치 파일 배포 방법",
+        "실제 개인정보 패턴"
+      ],
+      "options": [
+        { "label": "공식 스토어에 없는 앱은 설치하지 않고 나온다", "risk_flag": "safe" },
+        { "label": "보내준 설치 링크를 열어본다", "risk_flag": "caution" },
+        { "label": "수익 난다며 바로 설치 링크를 누른다", "risk_flag": "risky" }
+      ],
+      "allow_free_input": true,
+      "next_node_map": {
+        "safe": "ending-safe-exit",
+        "caution": "risk-fake-hts-browser",
+        "risky": "risk-fake-hts-browser"
+      },
+      "voice_enabled": true,
+      "is_ending": false,
+      "ending_type": null,
+      "speaker_tone": "confident_expert",
+      "sender_name": "VIP투자연구소"
+    },
+    {
+      "node_id": "risk-fake-hts-browser",
+      "stage": "risk_signal",
+      "app_type": "browser",
+      "required_risk_signal": "정식 앱스토어가 아닌 링크로 전용 HTS 앱 설치를 유도한다. 소액 입금 시 수익이 난 것처럼 보이는 가짜 화면으로 성공 체험을 심는다",
       "forbidden_content": [
         "실존 HTS·증권사 앱 실명",
         "실제 설치 파일 배포 방법",

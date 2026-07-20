@@ -326,7 +326,7 @@ export function buildAdvanceUserPrompt(
 
   const fakeHtsChatNote =
     currentNode.node_id === "risk-fake-hts"
-      ? "단톡방 맥락: message 본문에 공식 앱스토어가 아닌 가짜 HTS 설치 URL(secure-check.info-portal.xyz 등)을 반드시 포함한다. 브라우저가 아니라 채팅 링크 말풍선으로 유도한다."
+      ? "단톡방 맥락: message 본문에 공식 앱스토어가 아닌 가짜 HTS 설치 URL(secure-check.info-portal.xyz 등)을 반드시 포함한다. 링크를 누르면 브라우저 설치 페이지로 연결된다."
       : null;
 
   const openGroupChatNote =

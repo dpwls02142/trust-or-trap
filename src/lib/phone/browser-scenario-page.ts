@@ -72,11 +72,11 @@ const browserPageConfigMap: Record<string, BrowserPageConfig> = {
     actionPanelTitle: "사이트를 확인하고 다음 행동을 선택하세요",
     actionPanelHint: "주소창 도메인과 요구하는 개인정보를 꼼꼼히 살펴보세요.",
   },
-  "risk-fake-hts": {
+  "risk-fake-hts-browser": {
     pageVariant: "fake_hts_portal",
     transitionPrompt: "보내준 전용 앱 설치 링크를 열어볼까?",
     entryContextText:
-      "상담 채팅에서 받은 '전용 HTS' 설치 링크를 눌러 들어왔다.",
+      "토크방에서 받은 '전용 HTS' 설치 링크를 눌러 들어왔다.",
     primaryActionLabel: "체험 화면 불러오기",
     preRevealHint: "설치·수익 안내가 어떻게 보이는지 직접 열어보세요.",
     loadingLabel: "체험 계좌 정보를 불러오는 중...",

@@ -89,6 +89,12 @@ export function ChatApp(sharedProps: PhoneAppSharedProps) {
         chatRoomKind={currentNode.chat_room_kind}
         onOpenAttachmentLightbox={openAttachmentLightbox}
         shouldSplitLinkBubbles
+        onMessageLinkClick={sharedProps.onMessageLinkClick}
+        isMessageLinkClickEnabled={
+          !sharedProps.isAwaitingResponse &&
+          !streamingMessage &&
+          sharedProps.availableOptions.length > 0
+        }
         bubbleTheme={{
           threadBackgroundClass: "bg-[#bacee0]",
           incomingBubbleClass: "bg-white text-black",

@@ -40,6 +40,7 @@ import {
 } from "@/lib/phone/call-hang-up-follow-up";
 import { isAwaitingOutboundDial, nextNodeRequiresOutboundDial } from "@/lib/phone/dial-number";
 import { resolveMessageLinkActionConfig } from "@/lib/phone/messaging-scenario-action";
+import type { MessageLinkActionVariant } from "@/lib/phone/messaging-scenario-action";
 import { resolveStatusBarContentStyle } from "@/lib/phone/app-display";
 import { useScenarioNotification } from "@/lib/phone/use-scenario-notification";
 import { StatusBarOverrideProvider } from "@/lib/phone/status-bar-override";
@@ -124,7 +125,8 @@ export function GameController() {
   } | null>(null);
   const [pendingMessageLinkConfirm, setPendingMessageLinkConfirm] = useState<{
     promptText: string;
-    submitResponseText: string;
+    actionVariant: MessageLinkActionVariant;
+    submitResponseText?: string;
   } | null>(null);
   const [hasCompletedOutboundDial, setHasCompletedOutboundDial] =
     useState(true);
@@ -378,6 +380,10 @@ export function GameController() {
     runAdvanceForNode,
   ]);
 
+  useEffect(() => {
+    setPendingMessageLinkConfirm(null);
+  }, [currentNode?.node_id]);
+
   // TTS 큐 — 홈↔앱 왕복 중에도 진행 중인 통화 대사가 끊기지 않도록 home 단계에서 유지
   useEffect(() => {
     const isScenarioActive =
@@ -627,6 +633,7 @@ export function GameController() {
 
       setPendingMessageLinkConfirm({
         promptText: linkActionConfig.transitionPrompt,
+        actionVariant: linkActionConfig.actionVariant,
         submitResponseText: linkActionConfig.submitResponseText,
       });
     },
@@ -638,7 +645,7 @@ export function GameController() {
   }, []);
 
   const handleConfirmMessageLink = useCallback(async () => {
-    if (!pendingMessageLinkConfirm) return;
+    if (!pendingMessageLinkConfirm?.submitResponseText) return;
 
     const { submitResponseText } = pendingMessageLinkConfirm;
     setPendingMessageLinkConfirm(null);
@@ -1004,7 +1011,11 @@ export function GameController() {
             />
             {pendingMessageLinkConfirm && (
               <AppTransitionConfirm
-                targetAppType="chat"
+                targetAppType={
+                  pendingMessageLinkConfirm.actionVariant === "open_chat_invite"
+                    ? "chat"
+                    : "browser"
+                }
                 promptText={pendingMessageLinkConfirm.promptText}
                 onConfirmOpen={() => void handleConfirmMessageLink()}
                 onDismiss={handleDismissMessageLinkConfirm}
