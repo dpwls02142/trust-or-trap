@@ -50,7 +50,6 @@ import { SentenceTtsQueue } from "@/lib/client/tts-queue";
 import { resolveInputTutorialMode } from "@/lib/scenario/input-tutorial";
 import {
   buildScenarioPrologueEntries,
-  homeExplorationDelayMs,
   resolveLockScreenNotifications,
   resolvePrologueThreadSpec,
 } from "@/lib/scenario/scenario-context-setup";
@@ -343,7 +342,6 @@ export function GameController() {
     shouldDisplayNotification,
     isNotificationBannerVisible,
     dismissNotificationBanner,
-    beginDelayedNotificationReveal,
     revealNotificationImmediately,
     resetScenarioNotification,
   } = useScenarioNotification({
@@ -371,20 +369,25 @@ export function GameController() {
     return pendingMessageLinkConfirm;
   }, [pendingMessageLinkConfirm, currentNode]);
 
-  // 플레이 중 새 노드 진입 시 대사 생성 (마이크로태스크로 미뤄 렌더 사이클과 분리)
+  // 새 노드 진입 시 대사 생성 — 잠금화면·홈 단계에서도 미리 시작해 앱 진입 시 즉시 표시
   useEffect(() => {
+    const isAdvanceEligiblePhase =
+      gamePhase === "home" || gamePhase === "playing";
     if (
-      gamePhase !== "playing" ||
-      appPlayMode !== "scenario" ||
+      !isAdvanceEligiblePhase ||
       !currentNode ||
       currentNode.is_ending
     ) {
       return;
     }
+    if (isNodeMessageGenerated) {
+      lastAdvancedNodeIdRef.current = currentNode.node_id;
+      return;
+    }
+    if (isAwaitingResponse) return;
     if (lastAdvancedNodeIdRef.current === currentNode.node_id) return;
 
     lastAdvancedNodeIdRef.current = currentNode.node_id;
-    if (isNodeMessageGenerated) return;
 
     const advanceTimerId = setTimeout(
       () => void runAdvanceForNode(currentNode),
@@ -393,9 +396,9 @@ export function GameController() {
     return () => clearTimeout(advanceTimerId);
   }, [
     gamePhase,
-    appPlayMode,
     currentNode,
     isNodeMessageGenerated,
+    isAwaitingResponse,
     runAdvanceForNode,
   ]);
 
@@ -474,8 +477,8 @@ export function GameController() {
 
   const handlePhoneUnlock = useCallback(() => {
     setIsPhoneLocked(false);
-    beginDelayedNotificationReveal(homeExplorationDelayMs);
-  }, [beginDelayedNotificationReveal]);
+    revealNotificationImmediately();
+  }, [revealNotificationImmediately]);
 
   const lockScreenNotifications = useMemo(() => {
     if (!activeScenarioId || !userProfile) return [];

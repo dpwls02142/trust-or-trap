@@ -7,9 +7,6 @@ import {
 /** 프롤로그·과거 대화 연출용 고정 nodeId — LLM advance/judge 대상 아님 */
 export const scenarioPrologueNodeId = "scenario-prologue";
 
-/** 잠금 해제 후 홈 탐색 시간(ms) — 이후 메인 알림·배지 표시 */
-export const homeExplorationDelayMs = 8000;
-
 export interface LockScreenNotificationSpec {
   appType: Exclude<AppType, "home">;
   senderName: string;
