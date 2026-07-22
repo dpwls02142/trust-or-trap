@@ -102,7 +102,7 @@ function BrowserAppBody({ sharedProps }: { sharedProps: PhoneAppSharedProps }) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white pt-10">
+    <div className="flex h-full min-h-0 flex-col bg-white pt-10">
       <BrowserAddressBar
         addressValue={addressInputValue}
         onAddressChange={setAddressInputValue}
