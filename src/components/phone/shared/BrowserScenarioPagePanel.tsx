@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RiImageLine } from "@remixicon/react";
 import type {
@@ -189,8 +190,11 @@ function FakeGovernmentPortalPage({
   pageRevealPhase,
   onPrimaryPageAction,
 }: InteractivePageProps) {
+  const [citizenNameInput, setCitizenNameInput] = useState("");
+  const [residentIdInput, setResidentIdInput] = useState("");
   const isPageRevealed = pageRevealPhase === "revealed";
   const isPageLoading = pageRevealPhase === "loading";
+  const isFormLocked = isPageRevealed || isPageLoading;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-black/10">
@@ -210,24 +214,41 @@ function FakeGovernmentPortalPage({
         )}
 
         <div className="space-y-2">
-          <label className="block text-[11px] font-medium text-black/50">
+          <label
+            htmlFor="fake-portal-citizen-name"
+            className="block text-[11px] font-medium text-black/50"
+          >
             성명
           </label>
-          <div
-            className="rounded-lg border border-black/15 bg-neutral-50 px-3 py-2 text-sm text-black/55"
-          >
-            {isPageRevealed ? "홍길동 (예시)" : "이름을 입력하세요"}
-          </div>
+          <input
+            id="fake-portal-citizen-name"
+            type="text"
+            value={isPageRevealed ? "홍길동 (예시)" : citizenNameInput}
+            onChange={(changeEvent) => setCitizenNameInput(changeEvent.target.value)}
+            placeholder="이름을 입력하세요"
+            readOnly={isFormLocked}
+            autoComplete="off"
+            className="w-full rounded-lg border border-black/15 bg-neutral-50 px-3 py-2 text-sm text-black outline-none read-only:text-black/55 placeholder:text-black/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 read-only:focus:border-black/15 read-only:focus:ring-0"
+          />
         </div>
         <div className="space-y-2">
-          <label className="block text-[11px] font-medium text-black/50">
+          <label
+            htmlFor="fake-portal-resident-id"
+            className="block text-[11px] font-medium text-black/50"
+          >
             주민등록번호
           </label>
-          <div
-            className="rounded-lg border border-black/15 bg-neutral-50 px-3 py-2 text-sm text-black/55"
-          >
-            {isPageRevealed ? "000000 - *******" : "앞 6자리 - 뒤 7자리"}
-          </div>
+          <input
+            id="fake-portal-resident-id"
+            type="text"
+            inputMode="numeric"
+            value={isPageRevealed ? "000000 - *******" : residentIdInput}
+            onChange={(changeEvent) => setResidentIdInput(changeEvent.target.value)}
+            placeholder="앞 6자리 - 뒤 7자리"
+            readOnly={isFormLocked}
+            autoComplete="off"
+            className="w-full rounded-lg border border-black/15 bg-neutral-50 px-3 py-2 text-sm text-black outline-none read-only:text-black/55 placeholder:text-black/40 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 read-only:focus:border-black/15 read-only:focus:ring-0"
+          />
         </div>
 
         {isPageLoading ? (

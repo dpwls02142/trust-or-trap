@@ -35,7 +35,7 @@ export function ScenarioActionPanel({
   };
 
   return (
-    <div className="flex flex-col gap-3 border-t border-black/10 bg-neutral-50 p-4">
+    <div className="flex max-h-[45vh] shrink-0 flex-col gap-3 overflow-y-auto border-t border-black/10 bg-neutral-50 p-4">
       {availableOptions.length > 0 && (
         <div className="flex flex-col gap-2">
           {availableOptions.map((optionItem, optionIndex) => (
@@ -47,7 +47,7 @@ export function ScenarioActionPanel({
               transition={{ delay: optionIndex * 0.06 }}
               disabled={isAwaitingResponse}
               onClick={() => onSelectOption(optionItem.label)}
-              className="rounded-2xl border border-black/10 bg-white px-4 py-3 text-left text-sm font-medium text-black transition disabled:opacity-40"
+              className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-left text-sm font-medium leading-snug break-words whitespace-normal text-black transition disabled:opacity-40"
             >
               {optionItem.label}
             </motion.button>
